@@ -1,0 +1,194 @@
+================================================================
+   TALENTPROOF — PLATEFORME PANAFRICAINE DE VALIDATION DES COMPÉTENCES
+================================================================
+
+VISION
+------
+Permettre à chaque travailleur qualifié d'Afrique de prouver ses
+compétences par la vidéo, sans dépendre de diplômes, d'adresses
+ou de connexions. Un profil TalentProof = une preuve réelle de ce
+que tu sais faire.
+
+
+PROBLÈME ADRESSÉ
+-----------------
+- Des millions de travailleurs qualifiés (maçons, couturiers,
+  mécaniciens, développeurs, cuisiniers, électriciens, etc.)
+  n'ont pas de diplômes reconnus mais possèdent un savoir-faire réel.
+- Les recruteurs locaux et internationaux n'ont aucun moyen fiable
+  de les évaluer à distance.
+- Le chômage des jeunes qualifiés atteint 60%+ dans plusieurs pays
+  africains, faute de visibilité.
+
+
+TYPES DE PROFILS
+-----------------
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │  TALENT SIMPLE  (type Moovijob — accessible à tous)         │
+  └─────────────────────────────────────────────────────────────┘
+
+  Objectif : créer un profil rapidement, AVEC ou SANS preuves,
+  sans aucune complexité.
+
+  1. INFORMATIONS DE BASE  [obligatoire]
+     - Nom, Métier, Ville, Disponibilité
+     - Téléphone / WhatsApp
+
+  2. DESCRIPTION LIBRE  [obligatoire]
+     - Texte court rédigé par le talent
+       Ex : "Je suis maçon avec 3 ans d'expérience"
+     - OU généré automatiquement par IA à partir du métier
+
+  3. DOCUMENTS  [optionnel — amélioration clé]
+     Le talent peut uploader :
+       - Diplôme
+       - Certificat
+       - Attestation de travail
+     → Aucun document requis pour valider le profil
+     → Les documents sont privés par défaut (même sécurité
+       que les profils PRO) — partagés uniquement sur demande
+
+  4. PREUVES MEDIA  [optionnel]
+     - Vidéo de démonstration
+     - Photos du travail réalisé
+
+  5. BADGE AUTOMATIQUE DE CONFIANCE  [généré par le système]
+     Affiché sur le profil selon ce qui a été fourni :
+
+       [📄 Document disponible]   → au moins 1 document uploadé
+       [🎥 Vidéo disponible]      → au moins 1 vidéo uploadée
+       [⚠️  Aucune preuve]         → profil texte uniquement
+
+     → Le badge n'est PAS un jugement de valeur, juste une
+       indication de transparence pour le recruteur.
+
+  ─────────────────────────────────────────────────────────────
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │  TALENT PRO  (profil avancé avec validation)                │
+  └─────────────────────────────────────────────────────────────┘
+
+  Profil complet avec vidéo structurée et validation par pairs :
+
+  1. VIDÉO DE PRÉSENTATION (60–90 sec)
+     - Qui je suis, où je suis, ce que je fais.
+
+  2. VIDÉO DE DÉMONSTRATION (2–5 min)
+     - Le travailleur montre son métier EN ACTION.
+     - Ex : un tailleur coud une tenue, un développeur explique
+       son code, un plombier répare un tuyau.
+
+  3. VIDÉO DE VALIDATION PAR PAIRS
+     - Un autre professionnel du même domaine valide la compétence
+       montrée (système de peer-review).
+
+  4. BADGE NUMÉRIQUE CERTIFIÉ
+     - Chaque compétence validée génère un badge vérifiable
+       (stocké sur blockchain légère ou base certifiée).
+
+
+FONCTIONNALITÉS CLÉS DE LA PLATEFORME
+---------------------------------------
+- Profil public multilingue (français, anglais, swahili, arabe,
+  portugais, haoussa…)
+- Upload vidéo optimisé pour connexions lentes (compression auto)
+- Mode hors ligne : enregistrement local, sync quand réseau dispo
+- Recherche par métier, pays, ville, compétence, langue
+- Messagerie recruteur ↔ travailleur
+- Système de notation et d'avis vérifiés
+- Dashboard recruteur (entreprises, ONG, particuliers)
+- API ouverte pour intégration avec job boards africains
+
+
+SECTEURS PRIORITAIRES (Phase 1)
+---------------------------------
+  - BTP & Artisanat (maçons, électriciens, plombiers, peintres)
+  - Mode & Textile (tailleurs, brodeurs, créateurs)
+  - Tech & Numérique (développeurs, designers, data analysts)
+  - Agro-alimentaire (agriculteurs innovants, transformateurs)
+  - Santé communautaire (aides-soignants, agents de santé)
+  - Transport & Logistique (chauffeurs, livreurs, mécaniciens)
+
+
+MARCHÉS CIBLES — DÉPLOIEMENT PAR PHASE
+-----------------------------------------
+  Phase 1 (Mois 1–6)  : Sénégal, Côte d'Ivoire, Cameroun
+  Phase 2 (Mois 7–12) : Nigeria, Ghana, Kenya, Éthiopie
+  Phase 3 (An 2)      : Maroc, Égypte, Afrique du Sud, RDC
+  Phase 4 (An 3)      : Couverture panafricaine (54 pays)
+
+
+MODÈLE ÉCONOMIQUE
+------------------
+  1. FREEMIUM TRAVAILLEURS
+     - Profil de base gratuit (3 vidéos, badges standards)
+     - Premium : plus de vidéos, mise en avant, analytics
+
+  2. ABONNEMENT RECRUTEURS
+     - Accès illimité aux profils + filtres avancés
+     - Tarification adaptée par région (PME locales vs multinationales)
+
+  3. CERTIFICATION PARTENAIRE
+     - Partenariats avec écoles de formation, syndicats, ONG
+     - Ils émettent des badges certifiés sur la plateforme (payant)
+
+  4. PLACEMENT & COMMISSION
+     - Frais de mise en relation pour recrutements aboutis
+     (optionnel, phase avancée)
+
+
+STRATÉGIE DE CROISSANCE
+-------------------------
+  - Partenariats avec agences pour l'emploi nationales (ANPE, etc.)
+  - Intégration aux programmes de l'UA (Union Africaine) sur l'emploi
+  - Ambassadeurs de compétences : travailleurs influents par pays
+  - Campagnes terrain dans les quartiers artisanaux et marchés
+  - Partenariats universités et centres de formation technique
+
+
+STACK TECHNIQUE ENVISAGÉ
+--------------------------
+  Frontend   : React / Next.js (PWA pour mobile-first)
+  Backend    : Node.js + Express ou Django REST
+  Base de données : PostgreSQL + Redis (cache)
+  Vidéo      : Stockage S3-compatible (Cloudflare R2 ou Wasabi)
+               + transcoding FFmpeg
+  Auth       : JWT + OAuth (Google, numéro de téléphone via OTP)
+  Badges     : Standard Open Badges 3.0 (IMS Global)
+  Déploiement : Serveurs avec présence africaine (AWS Cape Town,
+                Azure Nigeria, ou hébergeurs locaux)
+
+
+INDICATEURS DE SUCCÈS (KPIs)
+------------------------------
+  - Nombre de profils créés et actifs
+  - Taux de complétion des profils vidéo
+  - Nombre de mises en relation réussies
+  - NPS (satisfaction recruteurs et travailleurs)
+  - Couverture géographique (villes et pays)
+  - Taux d'emploi post-inscription (impact réel)
+
+
+DIFFÉRENCIATION vs CONCURRENTS
+--------------------------------
+  LinkedIn        → pas adapté au secteur informel, en anglais,
+                    nécessite CV formel
+  Jumia Jobs / Jobberman → texte uniquement, pas de preuve vidéo
+  TalentProof     → preuve par l'action, multilingue, mobile-first,
+                    conçu pour et par l'Afrique
+
+
+PROCHAINES ÉTAPES IMMÉDIATES
+------------------------------
+  [ ] Valider les besoins terrain (interviews dans 3 villes)
+  [ ] Concevoir les wireframes de l'interface mobile
+  [ ] Définir le MVP (Minimum Viable Product)
+  [ ] Recruter un co-fondateur technique si besoin
+  [ ] Identifier les premiers partenaires pilotes
+  [ ] Déposer le nom de domaine talentproof.africa
+
+
+================================================================
+   "Ce que tu sais faire mérite d'être vu."
+================================================================
