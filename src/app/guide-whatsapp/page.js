@@ -1,287 +1,147 @@
+// app/guide/page.js
 "use client";
-import { useState } from "react";
-import Navbar from "../../components/layout/Navbar";
-import FloatingHelp from "../../components/layout/FloatingHelp";
-import { waTalentProof } from "../../utils/whatsapp";
+import Link from "next/link";
 
-const STEPS = [
+const ETAPES = [
   {
-    num: 1,
-    icon: "📱",
-    title: "Scanne le QR Code",
-    desc: "Ouvre l'appareil photo de ton téléphone et pointe-le vers le QR Code. Tu seras redirigé directement vers notre chat WhatsApp.",
-    tip: "Pas besoin d'application supplémentaire — WhatsApp s'ouvre automatiquement.",
-    color: "#075E54",
-    bg: "#DCFCE7",
-  },
-  {
-    num: 2,
+    num: "01",
     icon: "🎙️",
-    title: "Envoie ton nom et ton métier",
-    desc: "Appuie sur le micro 🎙️ et dis simplement : « Bonjour, je m'appelle [Ton Nom] et je suis [Ton Métier] à [Ta Ville]. » Tu peux aussi l'écrire en texte simple.",
-    tip: "Pas besoin d'écrire parfaitement — notre équipe s'occupe de tout.",
-    color: "#7C3AED",
-    bg: "#EDE9FE",
+    titre: "Enregistre ton message vocal",
+    desc: "Appuie sur le bouton micro sur la page d'accueil. Tu as 60 secondes pour dire : ton prénom, ton métier, ta ville, et ton expérience. Exemple : « Bonjour, je m'appelle Moussa, je suis chauffeur VTC à Dakar depuis 7 ans. »",
+    tips: ["Parle clairement et lentement", "Trouve un endroit calme", "Pas besoin d'être parfait !"],
+    color: "#F0C040",
+    bg: "linear-gradient(135deg,#1A1200,#3D2800)"
   },
   {
-    num: 3,
-    icon: "🔨",
-    title: "Choisis ton métier",
-    desc: "Réponds avec l'icône qui correspond à ton activité :",
-    metiers: [
-      { icon: "🔨", label: "Menuisier" },
-      { icon: "🚗", label: "Chauffeur" },
-      { icon: "🧱", label: "Maçon" },
-      { icon: "👗", label: "Couturière" },
-      { icon: "🔧", label: "Mécanicien" },
-      { icon: "🍳", label: "Cuisinier(e)" },
-      { icon: "💻", label: "Développeur(se)" },
-      { icon: "⚡", label: "Électricien" },
-    ],
-    tip: "Tu ne trouves pas ton métier ? Envoie juste son nom, on s'adapte !",
-    color: "#D97706",
-    bg: "#FFFBEB",
-  },
-  {
-    num: 4,
+    num: "02",
     icon: "📸",
-    title: "Envoie ta preuve visuelle",
-    desc: "Prends une photo ou une courte vidéo (max 60 sec) de ton chantier, atelier, cuisine ou réalisation. Envoie-la directement dans le chat WhatsApp.",
-    tip: "Une seule bonne photo suffit. C'est ta preuve — elle parle pour toi !",
-    color: "#0D9488",
-    bg: "#CCFBF1",
+    titre: "Ajoute une photo de ton travail",
+    desc: "Prends en photo une réalisation concrète : ta voiture, une robe que tu as cousue, une installation électrique, un repas que tu as cuisiné. Cette photo sera ta \"preuve\" visible par les recruteurs.",
+    tips: ["Bonne lumière naturelle", "Photo nette et cadrée", "Montre ton travail fini"],
+    color: "#4A9EFF",
+    bg: "linear-gradient(135deg,#0B1628,#1A3560)"
+  },
+  {
+    num: "03",
+    icon: "📱",
+    titre: "Envoie via WhatsApp (si tu préfères)",
+    desc: "Si tu n'as pas accès à internet facilement, envoie juste un message vocal ou une photo sur notre WhatsApp TalentProof. Notre équipe crée ton profil pour toi — gratuitement, en moins de 24h.",
+    tips: ["Gratuit et sans inscription", "Réponse sous 24h", "Équipe disponible 7j/7"],
+    color: "#25D366",
+    bg: "linear-gradient(135deg,#071F15,#1B6B47)"
+  },
+  {
+    num: "04",
+    icon: "✅",
+    titre: "Ton profil est en ligne !",
+    desc: "Une fois ton profil créé, les recruteurs et particuliers peuvent te trouver sur TalentProof. Ils peuvent voir ta vidéo ou photo, et te contacter directement sur WhatsApp. Ton profil reste visible gratuitement.",
+    tips: ["Profil visible par des milliers de recruteurs", "Contact direct sans intermédiaire", "Tu restes maître de tes infos"],
+    color: "#D06EFF",
+    bg: "linear-gradient(135deg,#1A0018,#3D0038)"
   },
 ];
 
-function StepCard({ step, isActive, onClick }) {
+const FAQ = [
+  { q: "C'est vraiment gratuit ?", r: "Oui, à 100%. Créer ton profil, être visible et recevoir des contacts ne coûte rien." },
+  { q: "Je n'ai pas de diplôme, puis-je m'inscrire ?", r: "Absolument. TalentProof est fait pour toi. Ton expérience et ta preuve (vidéo ou photo) comptent plus que tout diplôme." },
+  { q: "Mes données vocales sont-elles sécurisées ?", r: "Oui. Tes enregistrements sont utilisés uniquement pour créer ton profil. Consulte notre page Confidentialité pour tous les détails." },
+  { q: "Puis-je modifier mon profil ?", r: "Oui. Contacte-nous sur WhatsApp pour toute modification : nouveau métier, nouvelle ville, nouvelle photo." },
+  { q: "Les recruteurs peuvent-ils voir mon numéro de téléphone ?", r: "Non. Ils te contactent via WhatsApp grâce à un lien sécurisé. Tu décides de répondre ou non." },
+];
+
+export default function GuidePage() {
   return (
-    <div
-      onClick={onClick}
-      style={{
-        background: isActive ? step.bg : "var(--surface)",
-        border: `2px solid ${isActive ? step.color + "60" : "var(--border)"}`,
-        borderRadius: "1rem", padding: "1.25rem",
-        cursor: "pointer", transition: "all 0.2s",
-        boxShadow: isActive ? `0 4px 20px ${step.color}22` : "var(--shadow-sm)",
-      }}
-    >
-      <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-        {/* Numéro */}
-        <div style={{
-          width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
-          background: isActive ? step.color : "var(--border)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "white", fontWeight: 900, fontSize: "1.1rem",
-          transition: "background 0.2s",
-        }}>
-          {step.num}
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
-            <span style={{ fontSize: "1.3rem" }}>{step.icon}</span>
-            <span style={{ fontWeight: 800, fontSize: "0.98rem", color: isActive ? step.color : "var(--t1)" }}>
-              {step.title}
-            </span>
-          </div>
-
-          {isActive && (
-            <>
-              <p style={{ color: "var(--t2)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "0.75rem" }}>
-                {step.desc}
-              </p>
-
-              {/* Grille métiers (étape 3) */}
-              {step.metiers && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                  {step.metiers.map(m => (
-                    <span key={m.label} style={{
-                      background: "white", border: `1.5px solid ${step.color}50`,
-                      borderRadius: "0.65rem", padding: "0.5rem 0.85rem",
-                      fontSize: "0.88rem", fontWeight: 700, color: step.color,
-                      display: "flex", alignItems: "center", gap: "0.35rem",
-                    }}>
-                      {m.icon} {m.label}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Astuce */}
-              <div style={{
-                background: "rgba(255,255,255,0.65)", borderRadius: "0.65rem",
-                padding: "0.6rem 0.85rem", fontSize: "0.82rem", color: step.color,
-                fontWeight: 600, display: "flex", gap: "0.4rem",
-              }}>
-                💡 {step.tip}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function GuideWhatsApp() {
-  const [activeStep, setActiveStep] = useState(0);
-
-  return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <Navbar />
-
-      {/* ── Hero ── */}
-      <div style={{
-        background: "linear-gradient(135deg,#075E54 0%,#128C7E 60%,#25D366 100%)",
-        padding: "3rem 1.5rem 2.5rem",
-        position: "relative", overflow: "hidden",
-      }}>
-        <div style={{ position: "absolute", top: -50, right: -50, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }}/>
-        <div style={{ maxWidth: 640, margin: "0 auto", position: "relative", textAlign: "center" }}>
-          <span style={{
-            display: "inline-block", background: "rgba(255,255,255,0.18)",
-            color: "white", fontSize: "0.72rem", fontWeight: 900, letterSpacing: "0.8px",
-            padding: "4px 14px", borderRadius: "99px", marginBottom: "1rem",
-          }}>📱 GUIDE D&apos;INSCRIPTION</span>
-
-          <h1 style={{ color: "white", fontWeight: 900, fontSize: "clamp(1.5rem,4vw,2.2rem)", lineHeight: 1.2, marginBottom: "0.75rem" }}>
-            Inscris-toi sur TalentProof<br/>
-            <span style={{ color: "#DCFCE7" }}>via WhatsApp en 4 étapes</span>
+    <div style={{ minHeight:"100vh", background:"#F0F4F0", fontFamily:"system-ui,sans-serif" }}>
+      {/* Header */}
+      <div style={{ background:"linear-gradient(135deg,#0B1628,#162F52)", padding:"1.5rem 1rem" }}>
+        <div style={{ maxWidth:720, margin:"0 auto" }}>
+          <Link href="/" style={{ color:"rgba(255,255,255,0.6)", fontSize:".82rem", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:".3rem", marginBottom:".75rem" }}>
+            ← Retour
+          </Link>
+          <h1 style={{ fontFamily:"'Sora',sans-serif", color:"#F5F0E8", fontWeight:900, fontSize:"clamp(1.3rem,4vw,1.7rem)", margin:"0 0 .3rem" }}>
+            📖 Guide d'utilisation
           </h1>
-
-          <p style={{ color: "rgba(255,255,255,0.82)", fontSize: "0.95rem", lineHeight: 1.7, marginBottom: "1.75rem", maxWidth: 440, margin: "0 auto 1.75rem" }}>
-            Pas besoin de CV, ni d&apos;ordinateur. Ton téléphone et ta passion suffisent.
+          <p style={{ color:"rgba(210,225,245,.72)", fontSize:".84rem", margin:0 }}>
+            Comment créer ton profil TalentProof en 4 étapes simples
           </p>
-
-          <a
-            href={waTalentProof("je veux m'inscrire avec ma preuve visuelle.")}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "0.65rem",
-              background: "white", color: "#075E54",
-              fontWeight: 900, fontSize: "1rem", padding: "0.9rem 2rem",
-              borderRadius: "99px", textDecoration: "none",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-            }}
-          >
-            <span style={{ fontSize: "1.4rem" }}>💬</span>
-            Commencer maintenant
-          </a>
         </div>
       </div>
 
-      {/* ── QR Code Section ── */}
-      <div style={{ maxWidth: 700, margin: "0 auto", padding: "2rem 1.25rem 0" }}>
-        <div style={{
-          background: "var(--surface)", borderRadius: "1.25rem",
-          boxShadow: "var(--shadow-md)", border: "1px solid var(--border)",
-          padding: "1.5rem", display: "flex", gap: "1.5rem",
-          alignItems: "center", flexWrap: "wrap",
-        }}>
-          {/* QR Code simulé */}
-          <div style={{
-            width: 120, height: 120, flexShrink: 0, borderRadius: "0.85rem",
-            background: "white", border: "2px solid var(--border)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexDirection: "column", gap: "0.3rem",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-          }}>
-            {/* QR Pattern simulé */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7,10px)", gap: "2px" }}>
-              {[1,1,1,0,1,1,1, 1,0,1,0,1,0,1, 1,0,1,0,1,0,1, 0,0,0,1,0,0,0,
-                1,0,1,0,1,0,1, 1,0,1,0,1,0,1, 1,1,1,0,1,1,1].map((v,i) => (
-                <div key={i} style={{
-                  width: 10, height: 10, borderRadius: "1px",
-                  background: v ? "#075E54" : "transparent",
-                }}/>
-              ))}
-            </div>
-            <div style={{ fontSize: "0.6rem", color: "var(--t3)", fontWeight: 600, marginTop: "2px" }}>
-              SCAN ME
-            </div>
-          </div>
+      <div style={{ maxWidth:720, margin:"0 auto", padding:"1.25rem 1rem" }}>
 
-          <div style={{ flex: 1, minWidth: 180 }}>
-            <div style={{ fontWeight: 800, fontSize: "1rem", color: "var(--t1)", marginBottom: "0.35rem" }}>
-              📱 Scanner avec ton téléphone
+        {/* Intro */}
+        <div style={{ background:"white", borderRadius:"18px", padding:"1.25rem", marginBottom:"1.2rem", border:"1.5px solid #D1FAE5", boxShadow:"0 2px 8px rgba(0,0,0,.05)" }}>
+          <div style={{ display:"flex", alignItems:"flex-start", gap:".75rem" }}>
+            <span style={{ fontSize:"1.5rem", flexShrink:0 }}>💡</span>
+            <div>
+              <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:700, fontSize:".92rem", color:"#065F46", marginBottom:".2rem" }}>Pas besoin de diplôme ni d'email</div>
+              <div style={{ color:"#047857", fontSize:".82rem", lineHeight:1.6 }}>
+                TalentProof accepte tout le monde. Chauffeur, aide ménagère, couturière, mécanicien — si tu as de l'expérience, tu as ta place ici. Il suffit de ta voix ou d'une photo.
+              </div>
             </div>
-            <p style={{ color: "var(--t2)", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "0.85rem" }}>
-              Ouvre l&apos;appareil photo et scanne le code. Tu seras dirigé directement vers notre chat WhatsApp.
-            </p>
-            <a
-              href={waTalentProof("je veux m'inscrire avec ma preuve visuelle.")}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                background: "#25D366", color: "white", borderRadius: "99px",
-                padding: "0.55rem 1.1rem", fontWeight: 700, fontSize: "0.85rem",
-                textDecoration: "none",
-              }}
-            >
-              💬 Ouvrir WhatsApp directement
-            </a>
           </div>
+        </div>
+
+        {/* Étapes */}
+        {ETAPES.map((e, i) => (
+          <div key={i} style={{ background:"white", borderRadius:"18px", overflow:"hidden", marginBottom:"1rem", boxShadow:"0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.07)" }}>
+            <div style={{ background:e.bg, padding:"1.1rem 1.1rem .9rem", position:"relative", overflow:"hidden" }}>
+              <div style={{ position:"absolute", top:-30, right:-30, width:100, height:100, borderRadius:"50%", background:`${e.color}15`, pointerEvents:"none" }}/>
+              <div style={{ display:"flex", alignItems:"center", gap:".65rem", position:"relative" }}>
+                <div style={{ width:42, height:42, borderRadius:"50%", background:`${e.color}25`, border:`2px solid ${e.color}55`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.35rem", flexShrink:0 }}>{e.icon}</div>
+                <div>
+                  <div style={{ color:`${e.color}`, fontSize:".68rem", fontWeight:800, letterSpacing:".8px", textTransform:"uppercase" }}>ÉTAPE {e.num}</div>
+                  <div style={{ fontFamily:"'Sora',sans-serif", color:"white", fontWeight:800, fontSize:".95rem", lineHeight:1.25 }}>{e.titre}</div>
+                </div>
+              </div>
+            </div>
+            <div style={{ padding:"1rem 1.1rem" }}>
+              <p style={{ color:"#444", fontSize:".84rem", lineHeight:1.68, margin:"0 0 .75rem" }}>{e.desc}</p>
+              <div style={{ display:"flex", flexDirection:"column", gap:".3rem" }}>
+                {e.tips.map((t, j) => (
+                  <div key={j} style={{ display:"flex", alignItems:"center", gap:".45rem", fontSize:".78rem", color:"#555" }}>
+                    <span style={{ width:6, height:6, borderRadius:"50%", background:e.color, flexShrink:0 }}/>
+                    {t}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* FAQ */}
+        <div style={{ marginTop:"1.5rem", marginBottom:"1.2rem" }}>
+          <h2 style={{ fontFamily:"'Sora',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#111", marginBottom:".85rem" }}>❓ Questions fréquentes</h2>
+          <div style={{ display:"flex", flexDirection:"column", gap:".65rem" }}>
+            {FAQ.map((f, i) => (
+              <div key={i} style={{ background:"white", borderRadius:"14px", padding:".9rem 1rem", boxShadow:"0 1px 4px rgba(0,0,0,.06)" }}>
+                <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:700, fontSize:".86rem", color:"#111", marginBottom:".25rem" }}>
+                  {f.q}
+                </div>
+                <div style={{ color:"#555", fontSize:".81rem", lineHeight:1.6 }}>{f.r}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div style={{ background:"linear-gradient(135deg,#071F15,#1B6B47)", borderRadius:"18px", padding:"1.5rem 1rem", textAlign:"center", marginBottom:"1.5rem" }}>
+          <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:900, color:"white", fontSize:"1.05rem", marginBottom:".4rem" }}>Prêt à créer ton profil ?</div>
+          <p style={{ color:"rgba(255,255,255,.68)", fontSize:".82rem", marginBottom:"1rem" }}>Rejoins 14 000+ talents africains déjà inscrits.</p>
+          <Link href="/" style={{ display:"inline-flex", alignItems:"center", gap:".5rem", background:"linear-gradient(135deg,#C9960F,#F0C040)", color:"#0D3B2E", fontWeight:800, fontSize:".88rem", padding:".7rem 1.6rem", borderRadius:"99px", textDecoration:"none", boxShadow:"0 4px 18px rgba(201,150,15,.42)" }}>
+            🎙️ Commencer maintenant
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <div style={{ textAlign:"center", color:"#AAA", fontSize:".74rem", paddingBottom:"1.5rem" }}>
+          <Link href="/" style={{ color:"#1B6B47", textDecoration:"none", fontWeight:600 }}>← TalentProof</Link>
+          {" · "}
+          <Link href="/mentions-legales" style={{ color:"#888", textDecoration:"none" }}>Mentions légales</Link>
+          {" · "}
+          <Link href="/confidentialite" style={{ color:"#888", textDecoration:"none" }}>Confidentialité</Link>
         </div>
       </div>
-
-      {/* ── Étapes ── */}
-      <div style={{ maxWidth: 700, margin: "0 auto", padding: "1.75rem 1.25rem" }}>
-        <div style={{ fontWeight: 800, fontSize: "1.05rem", color: "var(--t1)", marginBottom: "1rem" }}>
-          📋 Les 4 étapes, en détail
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {STEPS.map((step, i) => (
-            <StepCard
-              key={step.num}
-              step={step}
-              isActive={activeStep === i}
-              onClick={() => setActiveStep(i === activeStep ? -1 : i)}
-            />
-          ))}
-        </div>
-
-        {/* CTA final */}
-        <div style={{
-          marginTop: "2rem", background: "linear-gradient(135deg,#075E54,#128C7E)",
-          borderRadius: "1.25rem", padding: "2rem",
-          textAlign: "center", boxShadow: "0 4px 24px rgba(7,94,84,0.3)",
-        }}>
-          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🚀</div>
-          <div style={{ color: "white", fontWeight: 900, fontSize: "1.1rem", marginBottom: "0.35rem" }}>
-            Prêt(e) à montrer ton talent ?
-          </div>
-          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.88rem", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-            Rejoins des milliers de travailleurs africains qui ont déjà leur profil TalentProof.
-          </p>
-          <a
-            href={waTalentProof("je veux m'inscrire avec ma preuve visuelle.")}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "0.65rem",
-              background: "white", color: "#075E54",
-              fontWeight: 900, fontSize: "1rem", padding: "0.85rem 2rem",
-              borderRadius: "99px", textDecoration: "none",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-            }}
-          >
-            <span style={{ fontSize: "1.4rem" }}>💬</span>
-            Je m&apos;inscris maintenant
-          </a>
-        </div>
-
-        {/* Lien retour */}
-        <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
-          <a href="/" style={{ color: "var(--g700)", fontSize: "0.88rem", fontWeight: 600, textDecoration: "none" }}>
-            ← Retour au fil des talents
-          </a>
-        </div>
-      </div>
-
-      <FloatingHelp />
     </div>
   );
 }

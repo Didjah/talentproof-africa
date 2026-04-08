@@ -1,0 +1,408 @@
+/* ═══════════════════════════════════════════════════════
+   TALENTPROOF - DESIGN TOKENS
+   Variables CSS globales pour cohérence visuelle
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ─────────────────────────────────────────────────────
+     COULEURS PRIMAIRES (Vert forêt - Identité)
+     ───────────────────────────────────────────────────── */
+  --primary-900: #071F15;
+  --primary-800: #0B1628;
+  --primary-700: #1B6B47;
+  --primary-600: #2D9A68;
+  --primary-500: #3DB87E;
+  --primary-400: #5FD4A0;
+
+  /* ─────────────────────────────────────────────────────
+     COULEURS OR (Confiance, Certifications)
+     ───────────────────────────────────────────────────── */
+  --gold-900: #5C3A00;
+  --gold-800: #78450A;
+  --gold-700: #C9960F;
+  --gold-600: #F0C040;
+  --gold-500: #FFD666;
+  --gold-400: #FFE699;
+
+  /* ─────────────────────────────────────────────────────
+     COULEURS NEUTRES
+     ───────────────────────────────────────────────────── */
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+
+  /* ─────────────────────────────────────────────────────
+     COULEURS SÉMANTIQUES
+     ───────────────────────────────────────────────────── */
+  --success: #16A34A;
+  --success-light: #DCFCE7;
+  --warning: #D97706;
+  --warning-light: #FEF3C7;
+  --info: #2563EB;
+  --info-light: #DBEAFE;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+
+  /* ─────────────────────────────────────────────────────
+     TYPOGRAPHIE
+     ───────────────────────────────────────────────────── */
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Tailles de texte */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+
+  /* Poids de police */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+
+  /* ─────────────────────────────────────────────────────
+     ESPACEMENTS
+     ───────────────────────────────────────────────────── */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+
+  /* ─────────────────────────────────────────────────────
+     OMBRES
+     ───────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  
+  /* Ombres spéciales */
+  --shadow-gold: 0 4px 20px rgba(201, 150, 15, 0.45);
+  --shadow-glow: 0 0 20px rgba(240, 192, 64, 0.4);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* ─────────────────────────────────────────────────────
+     BORDURES
+     ───────────────────────────────────────────────────── */
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;    /* 12px */
+  --radius-xl: 1rem;       /* 16px */
+  --radius-2xl: 1.25rem;   /* 20px */
+  --radius-3xl: 1.5rem;    /* 24px */
+  --radius-full: 9999px;   /* Cercle complet */
+
+  /* Alias sémantiques */
+  --radius-card: var(--radius-2xl);
+  --radius-button: var(--radius-full);
+  --radius-input: var(--radius-lg);
+
+  /* ─────────────────────────────────────────────────────
+     TRANSITIONS
+     ───────────────────────────────────────────────────── */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+  --transition-slower: 500ms ease;
+
+  /* Courbes d'animation */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ─────────────────────────────────────────────────────
+     Z-INDEX
+     ───────────────────────────────────────────────────── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
+  --z-tooltip: 1200;
+
+  /* ─────────────────────────────────────────────────────
+     CONTENEURS
+     ───────────────────────────────────────────────────── */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1180px;
+  --container-2xl: 1400px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CLASSES UTILITAIRES
+   ═══════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────
+   BOUTONS
+   ───────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: linear-gradient(135deg, var(--gold-700), var(--gold-600));
+  color: var(--primary-900);
+  font-weight: var(--font-extrabold);
+  font-size: var(--text-sm);
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--radius-button);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-gold);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(201, 150, 15, 0.55);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: linear-gradient(135deg, var(--primary-700), var(--primary-600));
+  color: white;
+  font-weight: var(--font-bold);
+  font-size: var(--text-sm);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-button);
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition-base);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: transparent;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-700);
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-button);
+  cursor: pointer;
+  transition: background var(--transition-base), border-color var(--transition-base);
+}
+
+.btn-ghost:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+/* ─────────────────────────────────────────────────────
+   BADGES
+   ───────────────────────────────────────────────────── */
+.badge-certified {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: linear-gradient(135deg, var(--gold-700), var(--gold-600));
+  color: var(--gold-900);
+  font-weight: var(--font-extrabold);
+  font-size: var(--text-xs);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-video {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: #5D21D3;
+  color: white;
+  font-weight: var(--font-bold);
+  font-size: var(--text-xs);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.badge-simple {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--gray-200);
+  color: var(--gray-600);
+  font-weight: var(--font-semibold);
+  font-size: var(--text-xs);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+/* ─────────────────────────────────────────────────────
+   ANIMATIONS
+   ───────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 8px rgba(240, 192, 64, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 18px rgba(240, 192, 64, 0.07);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Classes d'animation */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s var(--ease-out) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s var(--ease-out) both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s var(--ease-out) both;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Délais d'animation */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* ─────────────────────────────────────────────────────
+   UTILITAIRES DE LAYOUT
+   ───────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.section {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-12);
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   CARTES
+   ───────────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* ─────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  :root {
+    --text-4xl: 1.875rem;  /* 30px au lieu de 36px */
+    --text-3xl: 1.5rem;    /* 24px au lieu de 30px */
+  }
+}

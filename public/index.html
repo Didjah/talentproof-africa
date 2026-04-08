@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TalentProof Africa — Connecter les talents africains</title>
+  <meta name="description" content="La plateforme panafricaine de mise en relation des talents et recruteurs. Trouvez les meilleurs profils africains vérifiés." />
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+
+  <style>
+    /* ============================================================
+       VARIABLES & RESET
+    ============================================================ */
+    :root {
+      --navy: #0f2544;
+      --navy-light: #1a3a6b;
+      --gold: #c8a84b;
+      --gold-light: #e2c97e;
+      --white: #ffffff;
+      --gray-100: #f4f6fb;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f97316;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(15,37,68,0.10);
+      --shadow-lg: 0 8px 40px rgba(15,37,68,0.18);
+      --transition: 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--gray-100);
+      color: var(--navy);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input, textarea, select { font-family: inherit; }
+
+    /* ============================================================
+       SCROLL PROGRESS BAR
+    ============================================================ */
+    #scroll-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      width: 0%; z-index: 9999; transition: width 0.1s;
+    }
+
+    /* ============================================================
+       NAVBAR
+    ============================================================ */
+    nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: var(--navy);
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 16px rgba(15,37,68,0.25);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem; color: var(--white);
+    }
+
+    .nav-logo .logo-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--navy); font-size: 0.85rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.88rem; padding: 6px 14px;
+      border-radius: 8px; transition: var(--transition);
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-nav-login {
+      background: transparent; border: 1.5px solid rgba(200,168,75,0.5);
+      color: var(--gold); padding: 7px 18px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 600; transition: var(--transition);
+    }
+    .btn-nav-login:hover { background: var(--gold); color: var(--navy); }
+
+    .btn-nav-signup {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--navy); padding: 7px 18px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 700; transition: var(--transition);
+    }
+    .btn-nav-signup:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* User avatar in nav when logged in */
+    #nav-user { display: none; align-items: center; gap: 10px; }
+    #nav-user.visible { display: flex; }
+    #nav-user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      display: flex; align-items: center; justify-content: center;
+      color: var(--navy); font-weight: 700; font-size: 0.9rem;
+      overflow: hidden;
+    }
+    #nav-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    #nav-user-name { color: var(--white); font-size: 0.88rem; }
+    #btn-logout {
+      color: rgba(255,255,255,0.6); font-size: 0.8rem; padding: 4px 10px;
+      border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+      transition: var(--transition);
+    }
+    #btn-logout:hover { background: rgba(255,0,0,0.15); color: var(--red); border-color: var(--red); }
+
+    /* Hamburger mobile */
+    .hamburger { display: none; flex-direction: column; gap: 5px; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--white); border-radius: 2px; transition: var(--transition); }
+
+    /* Supabase status badge */
+    #supabase-status {
+      position: fixed; bottom: 20px; left: 20px; z-index: 999;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--white); border-radius: 20px;
+      padding: 6px 14px; box-shadow: var(--shadow);
+      font-size: 0.78rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200);
+    }
+    #supabase-status .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gray-500); transition: background 0.5s;
+    }
+    #supabase-status.connected .dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    #supabase-status.connected { color: var(--green); }
+    #supabase-status.error .dot { background: var(--red); }
+    #supabase-status.error { color: var(--red); }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      padding: 80px 24px 60px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(200,168,75,0.15) 0%, transparent 70%);
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--white); line-height: 1.15;
+      margin-bottom: 20px; position: relative;
+    }
+
+    .hero h1 span { color: var(--gold); }
+
+    .hero p {
+      color: rgba(255,255,255,0.75); font-size: clamp(0.95rem, 2vw, 1.15rem);
+      max-width: 600px; margin: 0 auto 36px; line-height: 1.7;
+      position: relative;
+    }
+
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
+
+    .btn-hero-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--navy); padding: 14px 32px; border-radius: 12px;
+      font-size: 1rem; font-weight: 700; transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(200,168,75,0.4);
+    }
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(200,168,75,0.5); }
+
+    .btn-hero-outline {
+      border: 2px solid rgba(255,255,255,0.3); color: var(--white);
+      padding: 14px 32px; border-radius: 12px; font-size: 1rem;
+      font-weight: 600; transition: var(--transition);
+    }
+    .btn-hero-outline:hover { background: rgba(255,255,255,0.1); border-color: var(--white); }
+
+    /* Stats */
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+      margin-top: 50px; padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem; font-weight: 700; color: var(--gold);
+    }
+    .stat-label { color: rgba(255,255,255,0.6); font-size: 0.82rem; margin-top: 4px; }
+
+    /* Marquee pays */
+    .marquee-wrap {
+      background: var(--navy); padding: 12px 0; overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .marquee-track {
+      display: flex; gap: 32px; white-space: nowrap;
+      animation: marquee 30s linear infinite;
+    }
+    .marquee-item { color: rgba(255,255,255,0.55); font-size: 0.85rem; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* ============================================================
+       FILTRES
+    ============================================================ */
+    .filters-section {
+      background: var(--white); padding: 20px 24px;
+      box-shadow: 0 2px 8px rgba(15,37,68,0.06);
+      position: sticky; top: 64px; z-index: 90;
+    }
+
+    .filters-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    }
+
+    .search-box {
+      flex: 1; min-width: 200px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--gray-100); border-radius: 10px;
+      padding: 0 14px; border: 1.5px solid var(--gray-200);
+      transition: var(--transition);
+    }
+    .search-box:focus-within { border-color: var(--gold); background: var(--white); }
+    .search-box input {
+      flex: 1; border: none; background: transparent;
+      padding: 10px 0; font-size: 0.9rem; outline: none; color: var(--navy);
+    }
+    .search-box input::placeholder { color: var(--gray-500); }
+
+    .filter-select {
+      padding: 10px 14px; border-radius: 10px;
+      border: 1.5px solid var(--gray-200); background: var(--gray-100);
+      font-size: 0.88rem; color: var(--navy); outline: none;
+      cursor: pointer; transition: var(--transition);
+    }
+    .filter-select:focus { border-color: var(--gold); }
+
+    .btn-filter-reset {
+      padding: 10px 16px; border-radius: 10px;
+      border: 1.5px solid var(--gray-200); background: transparent;
+      font-size: 0.85rem; color: var(--gray-500); transition: var(--transition);
+    }
+    .btn-filter-reset:hover { border-color: var(--red); color: var(--red); }
+
+    /* ============================================================
+       MAIN LAYOUT
+    ============================================================ */
+    .main-layout {
+      max-width: 1100px; margin: 32px auto; padding: 0 24px;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem; color: var(--navy); margin-bottom: 6px;
+    }
+    .section-subtitle { color: var(--gray-500); font-size: 0.9rem; margin-bottom: 28px; }
+
+    /* ============================================================
+       FEED / TALENT CARDS
+    ============================================================ */
+    #feed-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .talent-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: var(--transition); border: 1.5px solid var(--gray-200);
+      animation: fadeUp 0.4s ease forwards;
+    }
+    .talent-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-cover {
+      height: 80px;
+      background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    }
+
+    .card-header {
+      padding: 0 20px 16px;
+      display: flex; align-items: flex-end; gap: 14px;
+      margin-top: -28px;
+    }
+
+    .card-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 700; color: var(--navy);
+      border: 3px solid var(--white); flex-shrink: 0;
+      overflow: hidden;
+    }
+    .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .card-info { flex: 1; padding-top: 30px; }
+    .card-name {
+      font-weight: 700; font-size: 1rem; color: var(--navy);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-role { color: var(--gray-500); font-size: 0.82rem; margin-top: 2px; }
+
+    .card-badges { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 20px 12px; }
+
+    .badge {
+      padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-pays { background: var(--gray-100); color: var(--gray-700); }
+    .badge-simple { background: #f1f5f9; color: var(--gray-700); }
+    .badge-standard { background: #dbeafe; color: #1d4ed8; }
+    .badge-pro { background: linear-gradient(135deg,#fef3c7,#fde68a); color: #92400e; }
+    .badge-verified { background: #dcfce7; color: #166534; }
+
+    .card-skills {
+      padding: 0 20px 14px;
+      color: var(--gray-500); font-size: 0.82rem; line-height: 1.5;
+    }
+
+    .card-actions {
+      padding: 12px 20px; border-top: 1px solid var(--gray-200);
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+
+    .btn-contact {
+      flex: 1; min-width: 80px; padding: 8px 10px; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 600; text-align: center;
+      transition: var(--transition);
+    }
+    .btn-wa { background: #dcfce7; color: #166534; }
+    .btn-wa:hover { background: #22c55e; color: var(--white); }
+    .btn-email { background: var(--gray-100); color: var(--navy); }
+    .btn-email:hover { background: var(--navy); color: var(--white); }
+    .btn-li { background: #dbeafe; color: #1d4ed8; }
+    .btn-li:hover { background: #1d4ed8; color: var(--white); }
+
+    /* Skeleton loader */
+    .skeleton {
+      background: var(--white); border-radius: var(--radius);
+      overflow: hidden; border: 1.5px solid var(--gray-200);
+    }
+    .skel-line {
+      background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite; border-radius: 6px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center; padding: 60px 20px;
+      color: var(--gray-500); font-size: 1rem;
+    }
+    .no-results strong { color: var(--navy); }
+
+    /* ============================================================
+       TOAST NOTIFICATIONS
+    ============================================================ */
+    #toast-container {
+      position: fixed; top: 80px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .toast {
+      background: var(--white); border-radius: 12px;
+      padding: 14px 20px; box-shadow: var(--shadow-lg);
+      font-size: 0.88rem; font-weight: 500;
+      display: flex; align-items: center; gap: 10px;
+      max-width: 340px; border-left: 4px solid var(--gray-200);
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: translateX(0); } }
+    .toast.success { border-color: var(--green); }
+    .toast.error { border-color: var(--red); }
+    .toast.info { border-color: var(--gold); }
+
+    /* ============================================================
+       MODALS
+    ============================================================ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,37,68,0.6); backdrop-filter: blur(4px);
+      z-index: 2000; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--white); border-radius: 20px;
+      padding: 36px; width: 100%; max-width: 460px;
+      box-shadow: var(--shadow-lg); position: relative;
+      animation: modalIn 0.3s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes modalIn { from { opacity:0; transform: scale(0.9) translateY(20px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--gray-100); color: var(--gray-700);
+      font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+      transition: var(--transition);
+    }
+    .modal-close:hover { background: var(--red); color: var(--white); }
+
+    .modal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem; color: var(--navy); margin-bottom: 6px;
+    }
+    .modal-subtitle { color: var(--gray-500); font-size: 0.88rem; margin-bottom: 28px; }
+
+    /* Google Button */
+    .btn-google {
+      width: 100%; padding: 13px 20px; border-radius: 12px;
+      border: 2px solid var(--gray-200); background: var(--white);
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 0.95rem; font-weight: 600; color: var(--gray-700);
+      transition: var(--transition); margin-bottom: 20px;
+    }
+    .btn-google:hover { border-color: var(--navy); background: var(--gray-100); transform: translateY(-1px); }
+    .btn-google svg { width: 20px; height: 20px; }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .divider hr { flex: 1; border: none; border-top: 1px solid var(--gray-200); }
+    .divider span { color: var(--gray-500); font-size: 0.82rem; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 0.82rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%; padding: 11px 14px; border-radius: 10px;
+      border: 1.5px solid var(--gray-200); background: var(--gray-100);
+      font-size: 0.9rem; color: var(--navy); outline: none;
+      transition: var(--transition);
+    }
+    .form-group input:focus,
+    .form-group select:focus { border-color: var(--gold); background: var(--white); }
+
+    .btn-submit {
+      width: 100%; padding: 13px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--navy), var(--navy-light));
+      color: var(--white); font-size: 0.95rem; font-weight: 700;
+      transition: var(--transition); margin-top: 8px;
+    }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .modal-switch {
+      text-align: center; margin-top: 16px;
+      color: var(--gray-500); font-size: 0.85rem;
+    }
+    .modal-switch a { color: var(--navy); font-weight: 600; cursor: pointer; }
+    .modal-switch a:hover { color: var(--gold); }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--navy); color: rgba(255,255,255,0.7);
+      padding: 48px 24px 24px; margin-top: 60px;
+    }
+
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px; margin-bottom: 32px;
+    }
+
+    .footer-brand .logo-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem; color: var(--white); margin-bottom: 10px;
+    }
+    .footer-brand p { font-size: 0.85rem; line-height: 1.7; }
+
+    .footer-links h4 { color: var(--white); font-size: 0.9rem; margin-bottom: 12px; }
+    .footer-links a { display: block; font-size: 0.85rem; margin-bottom: 8px; transition: var(--transition); }
+    .footer-links a:hover { color: var(--gold); }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 20px; text-align: center; font-size: 0.8rem;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .nav-actions { gap: 6px; }
+      .btn-nav-login { padding: 6px 12px; font-size: 0.8rem; }
+      .btn-nav-signup { padding: 6px 12px; font-size: 0.8rem; }
+
+      .hero { padding: 50px 20px 40px; }
+      .hero-stats { gap: 24px; }
+      .stat-num { font-size: 1.5rem; }
+
+      .filters-section { top: 56px; }
+      .filters-inner { gap: 8px; }
+
+      #feed-container { grid-template-columns: 1fr; }
+      #supabase-status { bottom: 10px; left: 10px; font-size: 0.72rem; padding: 5px 10px; }
+    }
+
+    @media (max-width: 480px) {
+      .modal { padding: 24px 20px; }
+      .hero h1 { font-size: 1.7rem; }
+    }
+
+    /* ============================================================
+       LOADING OVERLAY
+    ============================================================ */
+    #loading-overlay {
+      position: fixed; inset: 0; background: var(--navy);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9998; transition: opacity 0.5s;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem; color: var(--white); margin-bottom: 20px;
+    }
+    .loading-logo span { color: var(--gold); }
+    .loading-bar-wrap {
+      width: 200px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden;
+    }
+    .loading-bar {
+      height: 100%; background: var(--gold); border-radius: 2px;
+      animation: loadBar 1.2s ease forwards;
+    }
+    @keyframes loadBar { from { width: 0; } to { width: 100%; } }
+  </style>
+</head>
+
+<body>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay">
+    <div class="loading-logo">Talent<span>Proof</span> Africa</div>
+    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  </div>
+
+  <!-- Scroll progress bar -->
+  <div id="scroll-bar"></div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <nav>
+    <div class="nav-logo">
+      <div class="logo-icon">TP</div>
+      TalentProof Africa
+    </div>
+
+    <div class="nav-links">
+      <a href="#feed">Talents</a>
+      <a href="#jobs">Offres</a>
+      <a href="#about">À propos</a>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Affiché quand non connecté -->
+      <div id="nav-auth-buttons">
+        <button class="btn-nav-login" onclick="ouvrirModal('login')">Se connecter</button>
+        <button class="btn-nav-signup" onclick="ouvrirModal('signup')">S'inscrire</button>
+      </div>
+
+      <!-- Affiché quand connecté -->
+      <div id="nav-user">
+        <div id="nav-user-avatar">
+          <span id="nav-user-initials">?</span>
+        </div>
+        <span id="nav-user-name"></span>
+        <button id="btn-logout" onclick="deconnexion()">Déconnexion</button>
+      </div>
+
+      <button class="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section class="hero">
+    <h1>Connecter les <span>Talents Africains</span><br>au monde entier</h1>
+    <p>La plateforme panafricaine de mise en relation entre talents vérifiés et recruteurs. Plus de 2 000 profils dans 55 pays.</p>
+    <div class="hero-actions">
+      <button class="btn-hero-primary" onclick="ouvrirModal('signup')">🚀 Rejoindre gratuitement</button>
+      <a href="#feed" class="btn-hero-outline">Voir les talents →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-talents">2 169</div>
+        <div class="stat-label">Talents inscrits</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">55</div>
+        <div class="stat-label">Pays africains</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-contacts">1 847</div>
+        <div class="stat-label">Contacts établis</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">287</div>
+        <div class="stat-label">Recruteurs actifs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Marquee pays -->
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marquee-track"></div>
+  </div>
+
+  <!-- ============================================================
+       FILTRES
+  ============================================================ -->
+  <div class="filters-section">
+    <div class="filters-inner">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-input" placeholder="Rechercher un talent, compétence..." />
+      </div>
+      <select class="filter-select" id="filter-pays">
+        <option value="">🌍 Tous les pays</option>
+        <option>Sénégal</option><option>Côte d'Ivoire</option><option>Ghana</option>
+        <option>Nigeria</option><option>Cameroun</option><option>Mali</option>
+        <option>Bénin</option><option>Togo</option><option>Burkina Faso</option>
+        <option>Guinée</option><option>Maroc</option><option>Tunisie</option>
+        <option>Égypte</option><option>Kenya</option><option>Éthiopie</option>
+        <option>Tanzania</option><option>Afrique du Sud</option>
+      </select>
+      <select class="filter-select" id="filter-secteur">
+        <option value="">💼 Tous secteurs</option>
+        <option value="tech">🖥️ Tech</option>
+        <option value="design">🎨 Design</option>
+        <option value="business">📊 Business</option>
+        <option value="finance">💰 Finance</option>
+        <option value="sante">🏥 Santé</option>
+        <option value="education">📚 Éducation</option>
+        <option value="autre">✨ Autre</option>
+      </select>
+      <select class="filter-select" id="filter-niveau">
+        <option value="">⭐ Tous niveaux</option>
+        <option value="simple">Simple</option>
+        <option value="standard">Standard</option>
+        <option value="pro">Pro</option>
+      </select>
+      <button class="btn-filter-reset" onclick="reinitialiserFiltres()">✕ Réinitialiser</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FEED PRINCIPAL
+  ============================================================ -->
+  <div class="main-layout">
+    <section id="feed">
+      <h2 class="section-title">🌟 Talents de la plateforme</h2>
+      <p class="section-subtitle" id="feed-count">Chargement en cours...</p>
+
+      <div id="feed-container">
+        <!-- Skeletons -->
+        <div class="skeleton" style="height:220px">
+          <div style="height:80px;background:var(--gray-200)"></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div class="skel-line" style="height:14px;width:60%"></div>
+            <div class="skel-line" style="height:12px;width:40%"></div>
+            <div class="skel-line" style="height:12px;width:80%"></div>
+          </div>
+        </div>
+        <div class="skeleton" style="height:220px">
+          <div style="height:80px;background:var(--gray-200)"></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div class="skel-line" style="height:14px;width:55%"></div>
+            <div class="skel-line" style="height:12px;width:35%"></div>
+            <div class="skel-line" style="height:12px;width:75%"></div>
+          </div>
+        </div>
+        <div class="skeleton" style="height:220px">
+          <div style="height:80px;background:var(--gray-200)"></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div class="skel-line" style="height:14px;width:65%"></div>
+            <div class="skel-line" style="height:12px;width:45%"></div>
+            <div class="skel-line" style="height:12px;width:70%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo-text">TalentProof Africa</div>
+        <p>La plateforme panafricaine de mise en relation entre talents vérifiés et recruteurs du monde entier.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Plateforme</h4>
+        <a href="#feed">Voir les talents</a>
+        <a href="#jobs">Offres d'emploi</a>
+        <a href="#" onclick="ouvrirModal('signup')">S'inscrire</a>
+      </div>
+      <div class="footer-links">
+        <h4>Contact</h4>
+        <a href="/cdn-cgi/l/email-protection#e1828e8f95808295a195808d848f9591938e8e87cf808793888280"><span class="__cf_email__" data-cfemail="67040809130604132713060b0209131715080801490601150e0406">[email&#160;protected]</span></a>
+        <a href="https://wa.me/message/..." target="_blank">WhatsApp</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 TalentProof Africa. Tous droits réservés. 🌍</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       MODAL LOGIN
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-login">
+    <div class="modal">
+      <button class="modal-close" onclick="fermerModal('login')">✕</button>
+      <div class="modal-title">Bon retour ! 👋</div>
+      <p class="modal-subtitle">Connectez-vous à votre espace TalentProof</p>
+
+      <button class="btn-google" onclick="connexionGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continuer avec Google
+      </button>
+
+      <div class="divider"><hr /><span>ou</span><hr /></div>
+
+      <form onsubmit="connexionEmail(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="vous@exemple.com" required />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="login-password" placeholder="••••••••" required minlength="6" />
+        </div>
+        <button type="submit" class="btn-submit" id="btn-login-submit">Se connecter</button>
+      </form>
+
+      <div class="modal-switch">
+        Pas encore de compte ? <a onclick="basculerModal('login','signup')">S'inscrire</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL SIGNUP
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-signup">
+    <div class="modal">
+      <button class="modal-close" onclick="fermerModal('signup')">✕</button>
+      <div class="modal-title">Rejoindre TalentProof 🌍</div>
+      <p class="modal-subtitle">Créez votre profil visible par les recruteurs africains et internationaux</p>
+
+      <button class="btn-google" onclick="connexionGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        S'inscrire avec Google
+      </button>
+
+      <div class="divider"><hr /><span>ou</span><hr /></div>
+
+      <form onsubmit="inscrireEmail(event)">
+        <div class="form-group">
+          <label>Nom complet *</label>
+          <input type="text" id="signup-name" placeholder="Prénom Nom" required />
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="signup-email" placeholder="vous@exemple.com" required />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe *</label>
+          <input type="password" id="signup-password" placeholder="Min. 6 caractères" required minlength="6" />
+        </div>
+        <div class="form-group">
+          <label>Pays *</label>
+          <select id="signup-pays" required>
+            <option value="">Sélectionnez votre pays</option>
+            <option>Sénégal</option><option>Côte d'Ivoire</option><option>Ghana</option>
+            <option>Nigeria</option><option>Cameroun</option><option>Mali</option>
+            <option>Bénin</option><option>Togo</option><option>Burkina Faso</option>
+            <option>Guinée</option><option>Maroc</option><option>Tunisie</option>
+            <option>Égypte</option><option>Kenya</option><option>Éthiopie</option>
+            <option>Tanzania</option><option>Afrique du Sud</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Votre métier / rôle *</label>
+          <input type="text" id="signup-role" placeholder="Ex: Développeur Full-Stack, Designer UI..." required />
+        </div>
+        <div class="form-group">
+          <label>Secteur *</label>
+          <select id="signup-secteur" required>
+            <option value="">Sélectionnez votre secteur</option>
+            <option value="tech">Tech / Informatique</option>
+            <option value="design">Design / Créatif</option>
+            <option value="business">Business / Commerce</option>
+            <option value="finance">Finance / Comptabilité</option>
+            <option value="sante">Santé / Medical</option>
+            <option value="education">Éducation / Formation</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp (optionnel)</label>
+          <input type="tel" id="signup-whatsapp" placeholder="+221 77 000 00 00" />
+        </div>
+        <button type="submit" class="btn-submit" id="btn-signup-submit">🚀 Créer mon profil</button>
+      </form>
+
+      <div class="modal-switch">
+        Déjà inscrit ? <a onclick="basculerModal('signup','login')">Se connecter</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase status badge -->
+  <div id="supabase-status">
+    <div class="dot"></div>
+    <span id="status-text">Connexion...</span>
+  </div>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ============================================================
+    // CONFIG SUPABASE — v1.6 CORRIGÉE
+    // ============================================================
+    const SUPABASE_URL = 'https://xupwyckrdonuyxkjswfh.supabase.co';
+    // ⚠️ REMPLACE PAR TA VRAIE CLÉ anon public (commence par eyJhbGci...)
+    // Supabase → Settings → API → anon public
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cHd5Y2tyZG9udXl4a2pzd2ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0Mjk0NTEsImV4cCI6MjA5MTAwNTQ1MX0.cgjCs7rlxeoudKimVHj6KOyr1VyznbVtJ3Dj5ekrcHc';
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true   // ← CRUCIAL pour Google OAuth
+      }
+    });
+
+    // ============================================================
+    // UTILITAIRES
+    // ============================================================
+    function sanitize(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function afficherToast(msg, type = 'info', duree = 4000) {
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${icons[type]}</span><span>${sanitize(msg)}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, duree);
+    }
+
+    function setStatutSupabase(etat, texte) {
+      const el = document.getElementById('supabase-status');
+      const txt = document.getElementById('status-text');
+      el.className = etat;
+      txt.textContent = texte;
+    }
+
+    // ============================================================
+    // AUTH — GOOGLE OAUTH (CORRIGÉ v1.6)
+    // ============================================================
+    async function connexionGoogle() {
+      try {
+        afficherToast('Redirection vers Google...', 'info', 3000);
+
+        const { data, error } = await db.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin,   // s'adapte auto à talentproof.africa ou vercel
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        });
+
+        if (error) {
+          console.error('Google OAuth error:', error);
+          afficherToast('Erreur Google : ' + error.message, 'error');
+        }
+        // Si OK → Supabase redirige automatiquement vers Google
+        // Après connexion → Google renvoie vers redirectTo → onAuthStateChange s'en occupe
+      } catch (e) {
+        console.error('Exception Google auth:', e);
+        afficherToast('Impossible de contacter Google. Vérifiez votre connexion.', 'error');
+      }
+    }
+
+    // ============================================================
+    // AUTH — CONNEXION EMAIL
+    // ============================================================
+    async function connexionEmail(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login-submit');
+      btn.disabled = true;
+      btn.textContent = 'Connexion...';
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        afficherToast('Erreur : ' + error.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Se connecter';
+        return;
+      }
+
+      afficherToast('✅ Connexion réussie ! Bienvenue.', 'success');
+      fermerModal('login');
+      mettreAJourNavbarUser(data.user);
+    }
+
+    // ============================================================
+    // AUTH — INSCRIPTION EMAIL (CORRIGÉE v1.6)
+    // ============================================================
+    async function inscrireEmail(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-signup-submit');
+      btn.disabled = true;
+      btn.textContent = '⏳ Création en cours...';
+
+      const nom    = document.getElementById('signup-name').value.trim();
+      const email  = document.getElementById('signup-email').value.trim();
+      const mdp    = document.getElementById('signup-password').value;
+      const pays   = document.getElementById('signup-pays').value;
+      const role   = document.getElementById('signup-role').value.trim();
+      const secteur = document.getElementById('signup-secteur').value;
+      const whatsapp = document.getElementById('signup-whatsapp').value.trim();
+
+      // 1. Créer le compte auth Supabase
+      const { data: authData, error: authError } = await db.auth.signUp({
+        email,
+        password: mdp,
+        options: {
+          data: {
+            full_name: nom,
+            country: pays,
+            role_professionnel: role
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('Auth signup error:', authError);
+        afficherToast('Erreur inscription : ' + authError.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '🚀 Créer mon profil';
+        return;
+      }
+
+      // 2. Insérer dans la table talents
+      const userId = authData.user?.id;
+      const { error: insertError } = await db.from('talents').insert([{
+        user_id: userId || null,
+        name: nom,
+        email: email,
+        country: pays,
+        role: role,
+        sector: secteur || 'autre',
+        whatsapp: whatsapp || null,
+        level: 'simple',
+        verified: false,
+        active: true,
+        created_at: new Date().toISOString()
+      }]);
+
+      if (insertError) {
+        console.error('Insert talent error:', insertError);
+        // L'utilisateur est créé dans auth mais le profil talent a échoué
+        afficherToast('Compte créé ! Problème profil : ' + insertError.message, 'error');
+      } else {
+        afficherToast('🎉 Bienvenue ' + nom + ' ! Vérifiez votre email pour confirmer.', 'success', 6000);
+        fermerModal('signup');
+        // Recharger le feed pour voir le nouveau talent
+        setTimeout(() => chargerFeed(), 1500);
+      }
+
+      if (authData.user) mettreAJourNavbarUser(authData.user);
+      btn.disabled = false;
+      btn.textContent = '🚀 Créer mon profil';
+    }
+
+    // ============================================================
+    // AUTH — DÉCONNEXION
+    // ============================================================
+    async function deconnexion() {
+      await db.auth.signOut();
+      document.getElementById('nav-user').classList.remove('visible');
+      document.getElementById('nav-auth-buttons').style.display = 'flex';
+      afficherToast('Vous êtes déconnecté.', 'info');
+    }
+
+    // ============================================================
+    // NAVBAR — MISE À JOUR UTILISATEUR
+    // ============================================================
+    function mettreAJourNavbarUser(user) {
+      if (!user) return;
+      const nomAffiche = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Talent';
+      const initiales = nomAffiche.charAt(0).toUpperCase();
+      const avatar = user.user_metadata?.avatar_url;
+
+      document.getElementById('nav-user-initials').textContent = initiales;
+      document.getElementById('nav-user-name').textContent = nomAffiche;
+
+      if (avatar) {
+        document.getElementById('nav-user-initials').outerHTML =
+          `<img src="${avatar}" alt="avatar" onerror="this.style.display='none'" id="nav-user-initials">`;
+      }
+
+      document.getElementById('nav-user').classList.add('visible');
+      document.getElementById('nav-auth-buttons').style.display = 'none';
+    }
+
+    // ============================================================
+    // FEED — CHARGER TALENTS DEPUIS SUPABASE
+    // ============================================================
+    async function chargerFeed(filtres = {}) {
+      const container = document.getElementById('feed-container');
+
+      // Afficher skeletons pendant le chargement
+      container.innerHTML = [1,2,3,4,5,6].map(() => `
+        <div class="skeleton" style="height:220px">
+          <div style="height:80px;background:var(--gray-200)"></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div class="skel-line" style="height:14px;width:60%"></div>
+            <div class="skel-line" style="height:12px;width:40%"></div>
+            <div class="skel-line" style="height:12px;width:80%"></div>
+          </div>
+        </div>
+      `).join('');
+
+      try {
+        let query = db
+          .from('talents')
+          .select('*')
+          .eq('active', true)
+          .order('created_at', { ascending: false })
+          .limit(60);
+
+        if (filtres.pays)     query = query.eq('country', filtres.pays);
+        if (filtres.secteur)  query = query.eq('sector', filtres.secteur);
+        if (filtres.niveau)   query = query.eq('level', filtres.niveau);
+        if (filtres.recherche && filtres.recherche.length > 1) {
+          query = query.or(`name.ilike.%${filtres.recherche}%,role.ilike.%${filtres.recherche}%,skills.ilike.%${filtres.recherche}%`);
+        }
+
+        const { data: talents, error } = await query;
+
+        if (error) {
+          console.error('Erreur chargement talents - code:', error.code, '| msg:', error.message, '| hint:', error.hint);
+          setStatutSupabase('error', '⚠️ Erreur DB');
+          let msgErr = error.message || JSON.stringify(error); container.innerHTML = `<p class="no-results">❌ ${sanitize(msgErr)}</p>`;
+          return;
+        }
+
+        setStatutSupabase('connected', '🟢 Connecté à Supabase');
+        document.getElementById('feed-count').textContent =
+          talents.length === 0 ? 'Aucun talent trouvé' :
+          `${talents.length} talent${talents.length > 1 ? 's' : ''} trouvé${talents.length > 1 ? 's' : ''}`;
+
+        if (talents.length === 0) {
+          container.innerHTML = `
+            <div class="no-results">
+              <p style="font-size:2rem;margin-bottom:12px">🔍</p>
+              <strong>Aucun talent trouvé</strong>
+              <p style="margin-top:8px">Essayez d'autres filtres ou <a href="#" onclick="ouvrirModal('signup')" style="color:var(--gold)">soyez le premier à rejoindre !</a></p>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = talents.map((t, i) => rendreCarte(t, i)).join('');
+
+      } catch (err) {
+        console.error('Exception feed:', err);
+        setStatutSupabase('error', '⚠️ Erreur réseau');
+        container.innerHTML = `<p class="no-results">❌ Impossible de charger les talents. Vérifiez votre connexion.</p>`;
+      }
+    }
+
+    function rendreCarte(t, index) {
+      const niveauClass = {simple:'simple', standard:'standard', pro:'pro'}[t.level] || 'simple';
+      const niveauLabel = {simple:'Simple', standard:'Standard', pro:'⭐ Pro'}[t.level] || 'Simple';
+      const initiale = (t.name || '?').charAt(0).toUpperCase();
+      const couleurs = ['#1a3a6b','#166534','#92400e','#7c3aed','#b45309','#0e7490'];
+      const couleur = couleurs[index % couleurs.length];
+
+      return `
+        <div class="talent-card" style="animation-delay:${index * 0.05}s">
+          <div class="card-cover" style="background:linear-gradient(135deg,${couleur},${couleur}99)"></div>
+          <div class="card-header">
+            <div class="card-avatar" style="background:linear-gradient(135deg,${couleur},${couleur}cc)">
+              ${t.avatar_url ? `<img src="${sanitize(t.avatar_url)}" alt="avatar" onerror="this.style.display='none'" />` : ''}
+              ${initiale}
+            </div>
+            <div class="card-info">
+              <div class="card-name">${sanitize(t.name)}</div>
+              <div class="card-role">${sanitize(t.role || '')}</div>
+            </div>
+          </div>
+          <div class="card-badges">
+            ${t.country ? `<span class="badge badge-pays">${t.flag || '🌍'} ${sanitize(t.country)}</span>` : ''}
+            <span class="badge badge-${niveauClass}">${niveauLabel}</span>
+            ${t.verified ? `<span class="badge badge-verified">✓ Vérifié</span>` : ''}
+          </div>
+          ${t.skills ? `<div class="card-skills">💼 ${sanitize(t.skills)}</div>` : ''}
+          <div class="card-actions">
+            ${t.whatsapp ? `<a href="https://wa.me/${t.whatsapp.replace(/\D/g,'')}" target="_blank" rel="noopener" class="btn-contact btn-wa">📱 WhatsApp</a>` : ''}
+            ${t.email    ? `<a href="mailto:${sanitize(t.email)}" class="btn-contact btn-email">✉️ Email</a>` : ''}
+            ${t.linkedin ? `<a href="${sanitize(t.linkedin)}" target="_blank" rel="noopener" class="btn-contact btn-li">🔗 LinkedIn</a>` : ''}
+          </div>
+        </div>`;
+    }
+
+    // ============================================================
+    // FILTRES — DEBOUNCE + ÉVÉNEMENTS
+    // ============================================================
+    let debounceTimer;
+    function appliquerFiltres() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        chargerFeed({
+          recherche : document.getElementById('search-input').value.trim(),
+          pays      : document.getElementById('filter-pays').value,
+          secteur   : document.getElementById('filter-secteur').value,
+          niveau    : document.getElementById('filter-niveau').value
+        });
+      }, 350);
+    }
+
+    function reinitialiserFiltres() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('filter-pays').value = '';
+      document.getElementById('filter-secteur').value = '';
+      document.getElementById('filter-niveau').value = '';
+      chargerFeed();
+    }
+
+    document.getElementById('search-input').addEventListener('input', appliquerFiltres);
+    document.getElementById('filter-pays').addEventListener('change', appliquerFiltres);
+    document.getElementById('filter-secteur').addEventListener('change', appliquerFiltres);
+    document.getElementById('filter-niveau').addEventListener('change', appliquerFiltres);
+
+    // ============================================================
+    // MODALS
+    // ============================================================
+    function ouvrirModal(id) {
+      document.getElementById('modal-' + id).classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function fermerModal(id) {
+      document.getElementById('modal-' + id).classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    function basculerModal(fermer, ouvrir) {
+      fermerModal(fermer);
+      setTimeout(() => ouvrirModal(ouvrir), 100);
+    }
+
+    // Fermer modal en cliquant sur l'overlay
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) fermerModal(overlay.id.replace('modal-', ''));
+      });
+    });
+
+    // Fermer modal avec Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => {
+          fermerModal(m.id.replace('modal-', ''));
+        });
+      }
+    });
+
+    // ============================================================
+    // SCROLL PROGRESS BAR
+    // ============================================================
+    window.addEventListener('scroll', () => {
+      const scroll = window.scrollY;
+      const height = document.body.scrollHeight - window.innerHeight;
+      document.getElementById('scroll-bar').style.width = (scroll / height * 100) + '%';
+    });
+
+    // ============================================================
+    // MARQUEE PAYS
+    // ============================================================
+    const pays = [
+      '🇸🇳 Sénégal','🇨🇮 Côte d\'Ivoire','🇬🇭 Ghana','🇳🇬 Nigeria','🇨🇲 Cameroun',
+      '🇲🇱 Mali','🇧🇯 Bénin','🇹🇬 Togo','🇧🇫 Burkina Faso','🇬🇳 Guinée',
+      '🇲🇦 Maroc','🇹🇳 Tunisie','🇪🇬 Égypte','🇰🇪 Kenya','🇪🇹 Éthiopie',
+      '🇹🇿 Tanzania','🇿🇦 Afrique du Sud','🇷🇼 Rwanda','🇺🇬 Uganda','🇿🇼 Zimbabwe',
+      '🇲🇿 Mozambique','🇸🇳 Sénégal','🇨🇮 Côte d\'Ivoire','🇬🇭 Ghana','🇳🇬 Nigeria'
+    ];
+    const track = document.getElementById('marquee-track');
+    const doubled = [...pays, ...pays];
+    track.innerHTML = doubled.map(p => `<span class="marquee-item">${p}</span>`).join('');
+
+    // ============================================================
+    // INITIALISATION PRINCIPALE
+    // ============================================================
+    async function init() {
+      setStatutSupabase('', 'Connexion...');
+
+      // Vérifier la session existante (et les retours OAuth Google)
+      const { data: { session }, error: sessionError } = await db.auth.getSession();
+
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        setStatutSupabase('error', '⚠️ Erreur auth');
+      }
+
+      if (session) {
+        mettreAJourNavbarUser(session.user);
+
+        // Si retour après Google OAuth → créer le profil talent si inexistant
+        if (session.user.app_metadata?.provider === 'google') {
+          const { data: existing } = await db
+            .from('talents')
+            .select('id')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+
+          if (!existing) {
+            const meta = session.user.user_metadata || {};
+            await db.from('talents').insert([{
+              user_id   : session.user.id,
+              name      : meta.full_name || meta.name || session.user.email?.split('@')[0],
+              email     : session.user.email,
+              country   : meta.country || '',
+              role      : meta.role_professionnel || 'Talent',
+              sector    : 'autre',
+              level     : 'simple',
+              verified  : false,
+              active    : true,
+              avatar_url: meta.avatar_url || meta.picture || null,
+              created_at: new Date().toISOString()
+            }]);
+            afficherToast('🎉 Profil créé automatiquement via Google !', 'success', 5000);
+          }
+        }
+      }
+
+      // Écouter les changements d'auth (connexion / déconnexion)
+      db.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth event:', event);
+
+        if (event === 'SIGNED_IN' && session) {
+          mettreAJourNavbarUser(session.user);
+
+          if (session.user.app_metadata?.provider === 'google') {
+            const { data: existing } = await db
+              .from('talents')
+              .select('id')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
+
+            if (!existing) {
+              const meta = session.user.user_metadata || {};
+              await db.from('talents').insert([{
+                user_id   : session.user.id,
+                name      : meta.full_name || meta.name || session.user.email?.split('@')[0],
+                email     : session.user.email,
+                country   : '',
+                role      : 'Talent',
+                sector    : 'autre',
+                level     : 'simple',
+                verified  : false,
+                active    : true,
+                avatar_url: meta.avatar_url || meta.picture || null,
+                created_at: new Date().toISOString()
+              }]);
+            }
+
+            afficherToast('✅ Connecté avec Google !', 'success');
+            chargerFeed(); // Recharger pour voir son profil
+          }
+
+        } else if (event === 'SIGNED_OUT') {
+          document.getElementById('nav-user').classList.remove('visible');
+          document.getElementById('nav-auth-buttons').style.display = 'flex';
+        }
+      });
+
+      // Charger le feed
+      await chargerFeed();
+
+      // Masquer le loading overlay
+      setTimeout(() => {
+        document.getElementById('loading-overlay').classList.add('hidden');
+      }, 1200);
+    }
+
+    // Lancer l'init
+    init();
+
+    // ============================================================
+    // MISC
+    // ============================================================
+    function toggleMenu() { /* Mobile menu - à implémenter */ }
+
+    // Désactiver clic droit
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    //
