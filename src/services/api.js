@@ -1,12 +1,14 @@
-// ═══════════════════════════════════════════════════════
+﻿import { supabase } from '../lib/supabaseClient';
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TALENTPROOF - SERVICE API
-// Gestion centralisée des appels API backend
-// ═══════════════════════════════════════════════════════
+// Gestion centralisÃ©e des appels API backend
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 /**
- * Classe d'erreur personnalisée pour les erreurs API
+ * Classe d'erreur personnalisÃ©e pour les erreurs API
  */
 class APIError extends Error {
   constructor(message, status, data) {
@@ -32,12 +34,12 @@ async function fetchAPI(endpoint, options = {}) {
       ...fetchOptions,
     });
 
-    // Tenter de parser la réponse JSON
+    // Tenter de parser la rÃ©ponse JSON
     let data;
     try {
       data = await response.json();
     } catch (e) {
-      // Si le parsing échoue, utiliser le texte brut
+      // Si le parsing Ã©choue, utiliser le texte brut
       data = { message: await response.text() };
     }
 
@@ -51,12 +53,12 @@ async function fetchAPI(endpoint, options = {}) {
 
     return data;
   } catch (error) {
-    // Si c'est déjà une APIError, la relancer
+    // Si c'est dÃ©jÃ  une APIError, la relancer
     if (error instanceof APIError) {
       throw error;
     }
 
-    // Erreur réseau ou autre
+    // Erreur rÃ©seau ou autre
     if (retries > 0) {
       console.log(`Retry ${retries} tentatives restantes...`);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -64,24 +66,33 @@ async function fetchAPI(endpoint, options = {}) {
     }
 
     throw new APIError(
-      'Impossible de se connecter au serveur. Vérifie ta connexion.',
+      'Impossible de se connecter au serveur. VÃ©rifie ta connexion.',
       0,
       null
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // API TALENTS / PROFILS
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export const talentAPI = {
   /**
-   * Récupérer tous les profils avec filtres et pagination
+   * RÃ©cupÃ©rer tous les profils avec filtres et pagination
    * @param {Object} filters - Filtres de recherche
    * @returns {Promise<{data: Array, total: number, page: number}>}
    */
   getAll: async (filters = {}) => {
+    let query = supabase.from('talents').select('*');
+    if (filters.metier) query = query.eq('metier', filters.metier);
+    if (filters.ville) query = query.eq('ville', filters.ville);
+    if (filters.pays) query = query.eq('pays', filters.pays);
+    if (filters.niveau) query = query.eq('niveau', filters.niveau);
+    const { data, error } = await query;
+    if (error) throw error;
+    return { data: data || [], total: data?.length || 0 };
+    // ancien code supprimé
     const params = new URLSearchParams();
     
     // Filtres de recherche
@@ -103,7 +114,7 @@ export const talentAPI = {
   },
 
   /**
-   * Récupérer un profil par ID
+   * RÃ©cupÃ©rer un profil par ID
    * @param {string} id - ID du profil
    * @returns {Promise<Object>}
    */
@@ -123,8 +134,8 @@ export const talentAPI = {
   },
 
   /**
-   * Créer un nouveau profil
-   * @param {Object} profileData - Données du profil
+   * CrÃ©er un nouveau profil
+   * @param {Object} profileData - DonnÃ©es du profil
    * @returns {Promise<Object>}
    */
   create: async (profileData) => {
@@ -135,9 +146,9 @@ export const talentAPI = {
   },
 
   /**
-   * Mettre à jour un profil
+   * Mettre Ã  jour un profil
    * @param {string} id - ID du profil
-   * @param {Object} updates - Données à mettre à jour
+   * @param {Object} updates - DonnÃ©es Ã  mettre Ã  jour
    * @returns {Promise<Object>}
    */
   update: async (id, updates) => {
@@ -159,14 +170,14 @@ export const talentAPI = {
   },
 };
 
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // API AUTHENTIFICATION
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export const authAPI = {
   /**
    * Connexion utilisateur
-   * @param {string} phone - Numéro de téléphone
+   * @param {string} phone - NumÃ©ro de tÃ©lÃ©phone
    * @param {string} password - Mot de passe
    * @returns {Promise<{token: string, user: Object}>}
    */
@@ -179,7 +190,7 @@ export const authAPI = {
 
   /**
    * Inscription utilisateur
-   * @param {Object} userData - Données utilisateur
+   * @param {Object} userData - DonnÃ©es utilisateur
    * @returns {Promise<{token: string, user: Object}>}
    */
   register: async (userData) => {
@@ -190,7 +201,7 @@ export const authAPI = {
   },
 
   /**
-   * Vérifier le token actuel
+   * VÃ©rifier le token actuel
    * @param {string} token - JWT token
    * @returns {Promise<Object>}
    */
@@ -203,7 +214,7 @@ export const authAPI = {
   },
 
   /**
-   * Déconnexion
+   * DÃ©connexion
    * @returns {Promise<Object>}
    */
   logout: async () => {
@@ -213,14 +224,14 @@ export const authAPI = {
   },
 };
 
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // API DOCUMENTS
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export const documentAPI = {
   /**
    * Upload un document
-   * @param {File} file - Fichier à uploader
+   * @param {File} file - Fichier Ã  uploader
    * @param {string} profileId - ID du profil
    * @returns {Promise<Object>}
    */
@@ -232,7 +243,7 @@ export const documentAPI = {
     return fetch(`${API_URL}/documents/upload`, {
       method: 'POST',
       body: formData,
-      // Ne pas définir Content-Type, le navigateur le fera automatiquement
+      // Ne pas dÃ©finir Content-Type, le navigateur le fera automatiquement
     }).then(async (response) => {
       const data = await response.json();
       if (!response.ok) {
@@ -243,7 +254,7 @@ export const documentAPI = {
   },
 
   /**
-   * Récupérer les documents d'un profil
+   * RÃ©cupÃ©rer les documents d'un profil
    * @param {string} profileId - ID du profil
    * @returns {Promise<Array>}
    */
@@ -263,13 +274,13 @@ export const documentAPI = {
   },
 };
 
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // API BADGES
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export const badgeAPI = {
   /**
-   * Récupérer les badges d'un profil
+   * RÃ©cupÃ©rer les badges d'un profil
    * @param {string} profileId - ID du profil
    * @returns {Promise<Array>}
    */
@@ -278,7 +289,7 @@ export const badgeAPI = {
   },
 
   /**
-   * Attribuer un badge à un profil
+   * Attribuer un badge Ã  un profil
    * @param {string} profileId - ID du profil
    * @param {string} badgeType - Type de badge
    * @returns {Promise<Object>}
@@ -291,9 +302,9 @@ export const badgeAPI = {
   },
 };
 
-// ═══════════════════════════════════════════════════════
-// EXPORT PAR DÉFAUT
-// ═══════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// EXPORT PAR DÃ‰FAUT
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export default {
   talent: talentAPI,
@@ -304,3 +315,5 @@ export default {
 
 // Export de l'erreur pour gestion dans les composants
 export { APIError };
+
+
