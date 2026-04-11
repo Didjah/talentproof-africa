@@ -345,15 +345,15 @@ export default function AnnuairePage(){
       bio: t.bio || "Profil en cours de validation",
       tags: t.competences ? t.competences.split(',').map(c => c.trim()).slice(0, 3) : [],
       verified: t.status === "active",
-      hasVideo: !!t.videoUrl,
-      hasPhoto: !!t.photoRealisationUrl, // Photo de réalisation (publique)
-      hasDoc: !!(t.cvUrl || t.diplomeUrl), // Documents protégés
+      hasVideo: !!t.has_video,
+      hasPhoto: !!t.has_photo,
+      hasDoc: !!(t.cvUrl || t.diplomeUrl),
       grad: "linear-gradient(135deg,#0B1628,#1A3560)",
       accent: "#4A9EFF",
       phone: t.telephone || WA_NUM1,
-      videoUrl: t.videoUrl || null,
-      photoUrl: t.photoRealisationUrl || null, // Photo de réalisation pour le modal
-      photoProfilUrl: t.photoProfilUrl || null, // Photo de profil (avatar)
+      videoUrl: null,
+      photoUrl: t.preuve_url || null,
+      photoProfilUrl: t.avatar_url || null,
     }));
 
     // Si pas de données, utiliser les profils mockés

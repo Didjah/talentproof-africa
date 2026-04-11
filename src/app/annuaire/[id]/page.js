@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getInscriptions } from "@/utils/storage";
+import { getTalent } from "@/services/api";
 import { CheckCircle, MapPin, Calendar, Briefcase, Phone, Mail, ArrowLeft } from "lucide-react";
 
 const WA_NUM1 = "2250705503089";
@@ -109,17 +109,18 @@ export default function ProfilDetailPage() {
   const [showDocModal, setShowDocModal] = useState(false);
 
   useEffect(() => {
-    const talents = getInscriptions('talents') || [];
-    // Chercher dans les talents réels d'abord (convertir les IDs en string pour comparaison)
-    let found = talents.find(t => String(t.id) === String(params.id));
-    
-    // Si pas trouvé, chercher dans les profils mockés
-    if (!found) {
-      found = PROFILS_MOCK.find(p => String(p.id) === String(params.id));
+    async function load() {
+      try {
+        const data = await getTalent(params.id);
+        setTalent(data);
+      } catch {
+        const found = PROFILS_MOCK.find(p => String(p.id) === String(params.id));
+        setTalent(found || null);
+      } finally {
+        setLoading(false);
+      }
     }
-    
-    setTalent(found);
-    setLoading(false);
+    load();
   }, [params.id]);
 
   if (loading) {
@@ -174,11 +175,11 @@ export default function ProfilDetailPage() {
         <div style={{background:"linear-gradient(135deg,#1B6B47,#2D9A68)",padding:"3rem 1.5rem 2rem",textAlign:"center",position:"relative"}}>
           <div style={{maxWidth:900,margin:"0 auto"}}>
             {/* Photo de profil grande */}
-            {talent.photoProfilUrl ? (
-              <img 
-                src={talent.photoProfilUrl} 
+            {talent.avatar_url ? (
+              <img
+                src={talent.avatar_url}
                 alt={`${talent.prenom} ${talent.nom}`}
-                onClick={() => setLightbox({src: talent.photoProfilUrl, alt: `${talent.prenom} ${talent.nom}`})}
+                onClick={() => setLightbox({src: talent.avatar_url, alt: `${talent.prenom} ${talent.nom}`})}
                 style={{width:120,height:120,borderRadius:"50%",objectFit:"cover",border:"4px solid white",boxShadow:"0 8px 32px rgba(0,0,0,.3)",marginBottom:"1rem",cursor:"zoom-in",transition:"transform .2s"}}
                 onMouseEnter={e=>e.currentTarget.style.transform="scale(1.05)"}
                 onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
@@ -267,9 +268,9 @@ export default function ProfilDetailPage() {
                 )}
 
                 {/* Photo de réalisation */}
-                {talent.photoRealisationUrl && (
-                  <div style={{background:"#F9FAFB",border:"2px solid #E5E7EB",borderRadius:"16px",overflow:"hidden",transition:"transform .2s",cursor:"pointer"}} onClick={() => setLightbox({src: talent.photoRealisationUrl, alt: "Photo de réalisation"})} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                    <img src={talent.photoRealisationUrl} alt="Réalisation" style={{width:"100%",height:200,objectFit:"cover"}} />
+                {talent.preuve_url && (
+                  <div style={{background:"#F9FAFB",border:"2px solid #E5E7EB",borderRadius:"16px",overflow:"hidden",transition:"transform .2s",cursor:"pointer"}} onClick={() => setLightbox({src: talent.preuve_url, alt: "Photo de réalisation"})} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                    <img src={talent.preuve_url} alt="Réalisation" style={{width:"100%",height:200,objectFit:"cover"}} />
                     <div style={{padding:"1rem",textAlign:"center"}}>
                       <div style={{fontSize:".9rem",fontWeight:700,color:"#0F766E",marginBottom:".3rem"}}>📸 Photo de réalisation</div>
                       <div style={{fontSize:".75rem",color:"#16A34A"}}>✓ Accès public</div>
@@ -277,7 +278,7 @@ export default function ProfilDetailPage() {
                   </div>
                 )}
 
-                {!talent.videoUrl && !talent.photoRealisationUrl && (
+                {!talent.videoUrl && !talent.preuve_url && (
                   <div style={{gridColumn:"1/-1",textAlign:"center",padding:"2rem",color:"#9CA3AF"}}>
                     <div style={{fontSize:"2rem",marginBottom:".5rem"}}>📷</div>
                     <div style={{fontSize:".9rem"}}>Aucune preuve visuelle ajoutée pour le moment</div>
