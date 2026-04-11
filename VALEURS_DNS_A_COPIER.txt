@@ -1,0 +1,80 @@
+═══════════════════════════════════════════════════════════════
+  CONFIGURATION DNS POUR TALENTPROOF.AFRICA
+═══════════════════════════════════════════════════════════════
+
+📋 INSTRUCTIONS : Copiez ces valeurs dans votre interface de gestion de domaine
+
+───────────────────────────────────────────────────────────────
+  OPTION 1 : NAMESERVERS VERCEL (RECOMMANDÉ)
+───────────────────────────────────────────────────────────────
+
+Allez dans : Nameservers / DNS Servers / Serveurs de noms
+Sélectionnez : Custom Nameservers / DNS personnalisés
+
+Nameserver 1: ns1.vercel-dns.com
+Nameserver 2: ns2.vercel-dns.com
+
+⏱️ Propagation : 2-24 heures
+
+
+───────────────────────────────────────────────────────────────
+  OPTION 2 : RECORDS DNS (SI OPTION 1 IMPOSSIBLE)
+───────────────────────────────────────────────────────────────
+
+RECORD A (Domaine principal)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Type: A
+Name: @ (ou laissez vide)
+Value: 76.76.21.21
+TTL: 3600
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RECORD CNAME (Sous-domaine www)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Type: CNAME
+Name: www
+Value: cname.vercel-dns.com
+TTL: 3600
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ IMPORTANT : Supprimez tous les anciens records A et CNAME avant d'ajouter ces nouveaux
+
+
+───────────────────────────────────────────────────────────────
+  VÉRIFICATION
+───────────────────────────────────────────────────────────────
+
+Après configuration, vérifiez sur :
+🔍 https://dnschecker.org
+
+Entrez : talentproof.africa
+Type : NS (pour nameservers) ou A (pour IP)
+
+✅ Quand la majorité des serveurs affichent les nouvelles valeurs, c'est prêt !
+
+
+───────────────────────────────────────────────────────────────
+  RÉSULTAT ATTENDU
+───────────────────────────────────────────────────────────────
+
+✅ https://talentproof.africa → Votre site
+✅ https://www.talentproof.africa → Redirige vers talentproof.africa
+✅ Cadenas 🔒 SSL/HTTPS actif
+✅ Rapide partout en Afrique (CDN)
+
+
+───────────────────────────────────────────────────────────────
+  SUPPORT
+───────────────────────────────────────────────────────────────
+
+Si vous avez des difficultés :
+📱 WhatsApp : +225 07 05 50 30 89
+📧 Email : contact@talentproof.africa
+
+Documentation Vercel :
+🔗 https://vercel.com/docs/concepts/projects/domains
+
+
+═══════════════════════════════════════════════════════════════
+  PRÊT À COPIER-COLLER !
+═══════════════════════════════════════════════════════════════

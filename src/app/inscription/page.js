@@ -145,13 +145,48 @@ export default function InscriptionPage() {
 
   const choisirMedia=e=>{ const f=e.target.files[0]; if(!f) return; const t=f.type.startsWith("video")?"video":"image"; setForm(x=>({...x,fichierMedia:f,mediaType:t})); simTraitement(t); };
 
-  const soumettre=()=>{
-    setProg({label:"Envoi de ton profil en cours…",pct:0}); let p=0;
-    const iv=setInterval(()=>{
-      p+=Math.floor(Math.random()*14)+6;
-      if(p>=100){p=100;clearInterval(iv);setProg({label:"✅ Profil envoyé !",pct:100});setTimeout(()=>setSubmit(true),700);}
-      else setProg({label:"Envoi de ton profil en cours…",pct:p});
-    },200);
+  const soumettre=async()=>{
+    setProg({label:"Envoi de ton profil en cours…",pct:10});
+    try {
+      let avatarUrl = null;
+      let preuveUrl = null;
+
+      // Upload photo/vidéo dans bucket "preuves"
+      if(form.fichierMedia) {
+        setProg({label:"Upload de ta preuve visuelle…",pct:30});
+        const ext = form.fichierMedia.name.split('.').pop();
+        const chemin = `${Date.now()}_${form.prenom}_${form.nom}.${ext}`;
+        preuveUrl = await uploadFichier("preuves", form.fichierMedia, chemin);
+      }
+
+      setProg({label:"Sauvegarde de ton profil…",pct:70});
+
+      // Sauvegarde dans la table "talents"
+      const { error } = await supabase.from('talents').insert([{
+        prenom: form.prenom,
+        nom: form.nom,
+        age: parseInt(form.age),
+        ville: form.ville,
+        pays: form.pays,
+        metier: form.metier,
+        niveau: form.niveau,
+        type_profil: form.typeProfile,
+        bio: form.bio,
+        phone: form.phone,
+        disponible: form.disponible,
+        avatar_url: avatarUrl,
+        preuve_url: preuveUrl,
+      }]);
+
+      if(error) throw error;
+
+      setProg({label:"✅ Profil envoyé !",pct:100});
+      setTimeout(()=>setSubmit(true),700);
+    } catch(err) {
+      console.error(err);
+      setProg(null);
+      alert("Erreur lors de l'envoi : " + err.message);
+    }
   };
 
   if(submitted) return (

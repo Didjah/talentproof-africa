@@ -3,7 +3,8 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Upload, CheckCircle, Mic, Play, Square, RotateCcw, X } from "lucide-react";
-import { saveInscription } from "@/utils/storage";
+import { supabase } from "@/lib/supabaseClient";
+import { uploadFichier } from "@/services/api";
 
 const WA_NUM1 = "2250705503089";
 
@@ -304,34 +305,68 @@ export default function InscriptionTalentPage() {
 
   const router = useRouter();
 
-  const soumettre = () => {
+  const soumettre = async () => {
     if (!v3()) return;
-    setProgress({ label: "Création de votre profil en cours…", pct: 0 });
-    
-    // Sauvegarder dans localStorage
-    const result = saveInscription('talents', form);
-    
-    if (!result.success) {
-      alert("Erreur lors de la sauvegarde. Veuillez réessayer.");
-      setProgress(null);
-      return;
-    }
-    
-    let p = 0;
-    const iv = setInterval(() => {
-      p += Math.floor(Math.random() * 12) + 5;
-      if (p >= 100) {
-        p = 100;
-        clearInterval(iv);
-        setProgress({ label: "✅ Profil créé !", pct: 100 });
-        setTimeout(() => {
-          // Rediriger vers la page de succès
-          router.push(`/success?type=talent&nom=${encodeURIComponent(form.prenom)}`);
-        }, 700);
-      } else {
-        setProgress({ label: "Création de votre profil en cours…", pct: p });
+    setProgress({ label: "Préparation de ton profil…", pct: 5 });
+
+    try {
+      let avatarUrl = null;
+      let preuveUrl = null;
+
+      // Upload photo de profil
+      if (form.photoProfilUrl && form.photoProfilUrl.startsWith("blob:")) {
+        setProgress({ label: "Upload photo de profil…", pct: 20 });
+        const res = await fetch(form.photoProfilUrl);
+        const blob = await res.blob();
+        const fichier = new File([blob], `avatar-${Date.now()}.jpg`, { type: blob.type });
+        const chemin = `${Date.now()}-avatar.jpg`;
+        avatarUrl = await uploadFichier("avatars", fichier, chemin);
       }
-    }, 180);
+
+      // Upload photo de réalisation
+      if (form.photoUrl && form.photoUrl.startsWith("blob:")) {
+        setProgress({ label: "Upload photo de réalisation…", pct: 45 });
+        const res = await fetch(form.photoUrl);
+        const blob = await res.blob();
+        const fichier = new File([blob], `preuve-${Date.now()}.jpg`, { type: blob.type });
+        const chemin = `${Date.now()}-preuve.jpg`;
+        preuveUrl = await uploadFichier("preuves", fichier, chemin);
+      }
+
+      setProgress({ label: "Sauvegarde du profil…", pct: 70 });
+
+      // Sauvegarde dans Supabase
+      const { error } = await supabase.from("talents").insert({
+        prenom: form.prenom,
+        nom: form.nom,
+        email: form.email,
+        telephone: form.telephone,
+        pays: form.pays,
+        ville: form.ville,
+        metier: form.metier === "Autre métier" ? form.autreMetier : form.metier,
+        experience: form.experience,
+        competences: form.competences,
+        disponibilite: form.disponibilite,
+        bio: form.bio,
+        niveau_etude: form.niveauEtude,
+        avatar_url: avatarUrl,
+        preuve_url: preuveUrl,
+        has_photo: !!preuveUrl,
+        has_video: !!form.videoUrl,
+      });
+
+      if (error) throw error;
+
+      setProgress({ label: "✅ Profil créé !", pct: 100 });
+      setTimeout(() => {
+        router.push(`/success?type=talent&nom=${encodeURIComponent(form.prenom)}`);
+      }, 700);
+
+    } catch (err) {
+      console.error("Erreur inscription:", err);
+      alert("Erreur lors de la création du profil : " + err.message);
+      setProgress(null);
+    }
   };
 
   if (submitted) {

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getInscriptions } from "@/utils/storage";
+import { getAll } from "@/services/api";
 
 const WA_NUM1  = "2250705503089";
 const WA_NUM2  = "2250507939706";
@@ -326,10 +326,10 @@ export default function AnnuairePage(){
 
   // Charger les profils depuis localStorage au montage
   useEffect(() => {
-    const talents = getInscriptions('talents') || [];
-    
-    // Convertir les données localStorage en format compatible avec l'affichage
-    const profilsFormatés = (talents || []).map((t, index) => ({
+    async function chargerTalents() {
+      try {
+        const talents = await getAll();
+        const profilsFormatés = (talents || []).map((t, index) => ({
       id: t.id || index + 1,
       prenom: t.prenom || "Talent",
       nom: t.nom || "",
@@ -358,8 +358,15 @@ export default function AnnuairePage(){
 
     // Si pas de données, utiliser les profils mockés
     const profilsFinaux = profilsFormatés.length > 0 ? profilsFormatés : PROFILS_MOCK;
-    setProfils(profilsFinaux);
-    setLoading(false);
+          setProfils(profilsFinaux);
+        } catch (err) {
+          console.error("Erreur chargement talents:", err);
+          setProfils(PROFILS_MOCK);
+        } finally {
+          setLoading(false);
+        }
+      }
+      chargerTalents();
   }, []);
 
   const METIERS = ["Tous", ...new Set(profils.map(p => p.metier))];
