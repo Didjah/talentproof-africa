@@ -341,28 +341,31 @@ export default function AnnuairePage(){
         const profilsFormatés = (talents || []).map((t, index) => {
           const type = t.typeProfile || "simple";
           const { grad, accent } = GRAD_BY_TYPE[type] || GRAD_BY_TYPE.simple;
+          const competences = t.competences || t.skills || "";
+          const ageCalc = t.dateNaissance ? new Date().getFullYear() - new Date(t.dateNaissance).getFullYear() : null;
+          const metierRaw = t.metier || t.role || "Non spécifié";
           return {
             id: t.id || index + 1,
-            prenom: t.prenom || "Talent",
+            prenom: t.prenom || t.name || "Talent",
             nom: t.nom || "",
-            metier: t.metier === "Autre métier" ? t.autreMetier : (t.metier || "Non spécifié"),
+            metier: metierRaw === "Autre métier" ? (t.autreMetier || metierRaw) : metierRaw,
             ville: t.ville || "Non spécifié",
-            pays: t.pays || "Afrique",
-            age: t.dateNaissance ? new Date().getFullYear() - new Date(t.dateNaissance).getFullYear() : null,
+            pays: t.pays || t.country || "Afrique",
+            age: t.age || ageCalc,
             exp: t.experience || "Non spécifié",
             avatar: "👤",
             dispo: t.disponibilite || "negotiable",
-            typeProfile: type,
+            typeProfile: t.typeProfile || type,
             niveau: t.niveau_etude || null,
             bio: t.bio || "Profil en cours de validation",
-            tags: t.competences ? t.competences.split(',').map(c => c.trim()).filter(Boolean).slice(0, 3) : [],
-            verified: t.status === "active",
+            tags: competences ? competences.split(',').map(c => c.trim()).filter(Boolean).slice(0, 3) : [],
+            verified: !!(t.verified || t.status === "active"),
             hasVideo: !!t.has_video,
             hasPhoto: !!t.has_photo,
             hasDoc: !!(t.cvUrl || t.diplomeUrl),
             grad,
             accent,
-            phone: t.telephone || WA_NUM1,
+            phone: t.telephone || t.whatsapp || WA_NUM1,
             videoUrl: null,
             photoUrl: t.preuve_url || null,
             photoProfilUrl: t.avatar_url || null,
