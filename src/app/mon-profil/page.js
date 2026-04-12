@@ -176,6 +176,7 @@ function MonProfilContent() {
       } else {
         setTalent(profil);
         setForm(profil);
+        try { localStorage.setItem("tp_talent", JSON.stringify({ id: profil.id, telephone: profil.telephone })); } catch {}
       }
     } catch {
       setSearchError("Erreur de connexion. Réessayez.");
@@ -188,6 +189,7 @@ function MonProfilContent() {
     if (pinInput === pendingProfil.pin_code) {
       setTalent(pendingProfil);
       setForm(pendingProfil);
+      try { localStorage.setItem("tp_talent", JSON.stringify({ id: pendingProfil.id, telephone: pendingProfil.telephone })); } catch {}
       setPinStep(false);
       setPendingProfil(null);
       setPinInput("");
@@ -232,6 +234,12 @@ function MonProfilContent() {
 
   /* ── Sauvegarde ── */
   const handleSave = async () => {
+    // Garde de sécurité : l'utilisateur doit être authentifié
+    if (!talent || !phone.trim()) {
+      setTalent(null);
+      setSaving(false);
+      return;
+    }
     setSaving(true);
     setSaveOk(false);
     try {
@@ -289,6 +297,7 @@ function MonProfilContent() {
 
       setTalent(data);
       setForm(data);
+      try { localStorage.setItem("tp_talent", JSON.stringify({ id: data.id, telephone: data.telephone })); } catch {}
       setEditing(false);
       retirerAvatar();
       retirerPreuve();
@@ -317,7 +326,7 @@ function MonProfilContent() {
       <div style={{maxWidth:800,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <Link href="/" style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#ECC94B",textDecoration:"none"}}>TalentProof</Link>
         {talent
-          ? <button onClick={() => { setTalent(null); setPhone(""); setEditing(false); setSaveOk(false); }} style={{color:"rgba(255,255,255,.7)",background:"none",border:"none",fontSize:".85rem",cursor:"pointer",fontWeight:600}}>← Changer de compte</button>
+          ? <button onClick={() => { setTalent(null); setPhone(""); setEditing(false); setSaveOk(false); try { localStorage.removeItem("tp_talent"); } catch {} }} style={{color:"rgba(255,255,255,.7)",background:"none",border:"none",fontSize:".85rem",cursor:"pointer",fontWeight:600}}>← Changer de compte</button>
           : <Link href="/" style={{color:"rgba(255,255,255,.7)",fontSize:".85rem",textDecoration:"none",fontWeight:600}}>← Accueil</Link>
         }
       </div>

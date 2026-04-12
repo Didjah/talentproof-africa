@@ -335,7 +335,9 @@ function Dashboard({ partenaire, onLogout }) {
                           <div style={{color:"#555",fontSize:".8rem",lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{a.description}</div>
                           <div style={{color:"#9CA3AF",fontSize:".72rem",marginTop:".4rem"}}>Publiée le {new Date(a.created_at).toLocaleDateString("fr-FR")}</div>
                         </div>
-                        <button onClick={()=>supprimerAnnonce(a.id)} style={{background:"#FEF2F2",border:"1px solid #FECACA",color:"#DC2626",fontWeight:600,fontSize:".75rem",padding:".4rem .8rem",borderRadius:"8px",cursor:"pointer",flexShrink:0}}>🗑 Supprimer</button>
+                        {a.auteur_id === partenaire.id && (
+                          <button onClick={()=>supprimerAnnonce(a.id)} style={{background:"#FEF2F2",border:"1px solid #FECACA",color:"#DC2626",fontWeight:600,fontSize:".75rem",padding:".4rem .8rem",borderRadius:"8px",cursor:"pointer",flexShrink:0}}>🗑 Supprimer</button>
+                        )}
                       </div>
                     ))}
                   </div>

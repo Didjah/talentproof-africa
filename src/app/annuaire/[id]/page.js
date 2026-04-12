@@ -107,8 +107,15 @@ export default function ProfilDetailPage() {
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState(null);
   const [showDocModal, setShowDocModal] = useState(false);
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
+    // Lire la session talent depuis localStorage (stockée par /mon-profil)
+    try {
+      const saved = localStorage.getItem("tp_talent");
+      if (saved) setSession(JSON.parse(saved));
+    } catch {}
+
     async function load() {
       try {
         const data = await getTalent(params.id);
@@ -164,10 +171,18 @@ export default function ProfilDetailPage() {
         <header style={{background:"linear-gradient(135deg,#0B1628 0%,#0F2744 60%,#162F52 100%)",borderBottom:"1px solid rgba(240,192,64,.18)",boxShadow:"0 4px 24px rgba(0,0,0,.4)",padding:"1rem"}}>
           <div style={{maxWidth:1100,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:".8rem"}}>
             <Link href="/" style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#ECC94B",textDecoration:"none"}}>TalentProof</Link>
-            <Link href="/annuaire" style={{display:"flex",alignItems:"center",gap:".4rem",color:"rgba(255,255,255,.7)",fontSize:".85rem",textDecoration:"none",fontWeight:600}}>
-              <ArrowLeft size={16} />
-              Retour à l'annuaire
-            </Link>
+            <div style={{display:"flex",alignItems:"center",gap:".75rem",flexWrap:"wrap"}}>
+              {session && session.id === talent?.id && (
+                <Link href="/mon-profil"
+                  style={{display:"inline-flex",alignItems:"center",gap:".35rem",background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".8rem",padding:".4rem .95rem",borderRadius:"99px",textDecoration:"none"}}>
+                  ✏️ Modifier mon profil
+                </Link>
+              )}
+              <Link href="/annuaire" style={{display:"flex",alignItems:"center",gap:".4rem",color:"rgba(255,255,255,.7)",fontSize:".85rem",textDecoration:"none",fontWeight:600}}>
+                <ArrowLeft size={16} />
+                Retour à l'annuaire
+              </Link>
+            </div>
           </div>
         </header>
 
