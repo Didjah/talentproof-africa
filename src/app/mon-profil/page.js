@@ -2,7 +2,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import { updateTalent, uploadFichier } from "@/services/api";
+import { uploadFichier } from "@/services/api";
 import { Save, Upload, X } from "lucide-react";
 
 const WA_NUM = "2250705503089";
@@ -13,16 +13,118 @@ const inputSt = {
   outline:"none", boxSizing:"border-box",
 };
 
+const DISPO_OPTIONS = [
+  { value:"immediate", label:"Disponible immédiatement" },
+  { value:"1_month",   label:"Dans 1 mois" },
+  { value:"negotiable",label:"À négocier" },
+];
+const DISPO_COLOR = { immediate:"#16A34A", "1_month":"#D97706", negotiable:"#6B7280" };
+const DISPO_LABEL = { immediate:"Disponible", "1_month":"Dans 1 mois", negotiable:"À négocier" };
+
+const NIVEAU_OPTIONS = [
+  "Sans niveau d'étude","Niveau CM2","Niveau 3ème","Brevet","Bac","Bac+2","Bac+3","Bac+5 et plus",
+];
+
+const METIERS = [
+  "Chauffeur VTC","Chauffeur camion","Chauffeur particulier",
+  "Mécanicien","Électricien","Plombier","Maçon","Peintre en bâtiment","Carreleur",
+  "Couturier / Tailleur","Coiffeur / Coiffeuse","Esthéticienne",
+  "Cuisinier / Chef","Aide ménagère","Gardien / Vigile",
+  "Informaticien","Comptable","Secrétaire","Commercial","Autre métier",
+];
+
+const TYPE_STYLE = {
+  expert:   { label:"Expert",   bg:"#1D4ED8" },
+  pratique: { label:"Pratique", bg:"#D97706" },
+  simple:   { label:"Simple",   bg:"#6B7280" },
+};
+
+/* ── Aperçu carte annuaire ── */
+function ApercuCarte({ t }) {
+  const metier = t.metier || "Non spécifié";
+  const tags = (t.competences || "").split(",").map(c => c.trim()).filter(Boolean).slice(0, 3);
+  const ts = TYPE_STYLE[t.typeProfile] || TYPE_STYLE.simple;
+  const dispo = t.disponibilite || "negotiable";
+  const GRAD = {
+    expert:   "linear-gradient(135deg,#0B1628,#1A3560)",
+    pratique: "linear-gradient(135deg,#1A1000,#3D2800)",
+    simple:   "linear-gradient(135deg,#071F15,#1B6B47)",
+  }[t.typeProfile] || "linear-gradient(135deg,#071F15,#1B6B47)";
+
+  return (
+    <div style={{background:"white",borderRadius:"18px",overflow:"hidden",boxShadow:"0 2px 8px rgba(0,0,0,.08)",maxWidth:340,margin:"0 auto"}}>
+      {/* Bannière */}
+      <div style={{height:80,background:GRAD,position:"relative",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <span style={{fontSize:"2.2rem"}}>👤</span>
+        <div style={{position:"absolute",top:".45rem",left:".5rem"}}>
+          <span style={{background:ts.bg,color:"white",fontSize:".56rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px"}}>{ts.label}</span>
+        </div>
+        {t.has_video && (
+          <div style={{position:"absolute",top:".45rem",right:".5rem"}}>
+            <span style={{background:"rgba(93,33,211,.9)",color:"white",fontSize:".56rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px"}}>▶ Vidéo</span>
+          </div>
+        )}
+        {t.has_photo && (
+          <div style={{position:"absolute",top: t.has_video ? "1.7rem" : ".45rem",right:".5rem"}}>
+            <span style={{background:"rgba(15,118,110,.9)",color:"white",fontSize:".56rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px"}}>📸 Photo</span>
+          </div>
+        )}
+      </div>
+      {/* Corps */}
+      <div style={{padding:".85rem .9rem .95rem"}}>
+        <div style={{display:"flex",gap:".5rem",alignItems:"flex-start",marginBottom:".3rem"}}>
+          {t.avatar_url
+            ? <img src={t.avatar_url} alt="profil" style={{width:44,height:44,borderRadius:"50%",objectFit:"cover",border:"2px solid #E5E7EB",flexShrink:0}}/>
+            : <div style={{width:44,height:44,borderRadius:"50%",background:"#E5E7EB",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.3rem",flexShrink:0}}>👤</div>
+          }
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:".25rem",flexWrap:"wrap"}}>
+              <span style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".88rem",color:"#111"}}>{t.prenom} {t.nom}</span>
+              {t.verified && <span style={{background:"#EFF6FF",color:"#1D4ED8",fontSize:".58rem",fontWeight:700,padding:"1px 5px",borderRadius:"99px"}}>✔ Vérifié</span>}
+            </div>
+            <div style={{color:"#1B6B47",fontWeight:700,fontSize:".75rem",marginTop:"1px"}}>{metier} · {t.experience || "—"}</div>
+            <div style={{color:"#9CA3AF",fontSize:".7rem"}}>📍 {t.ville || "—"}, {t.pays || "—"}</div>
+          </div>
+          <span style={{fontSize:".62rem",fontWeight:700,color:DISPO_COLOR[dispo],flexShrink:0,display:"flex",alignItems:"center",gap:2}}>
+            <span style={{width:5,height:5,borderRadius:"50%",background:DISPO_COLOR[dispo],display:"inline-block"}}/>
+            {DISPO_LABEL[dispo]}
+          </span>
+        </div>
+        {t.bio && (
+          <p style={{color:"#555",fontSize:".76rem",lineHeight:1.55,margin:".3rem 0 .45rem",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+            {t.bio}
+          </p>
+        )}
+        {tags.length > 0 && (
+          <div style={{display:"flex",gap:".22rem",flexWrap:"wrap"}}>
+            {tags.map(tag => (
+              <span key={tag} style={{background:"#F0FDF4",color:"#166534",fontSize:".63rem",fontWeight:600,padding:"1px 6px",borderRadius:"99px",border:"1px solid #D1FAE5"}}>{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MonProfilContent() {
-  const [phone, setPhone]           = useState("");
-  const [talent, setTalent]         = useState(null);
-  const [loading, setLoading]       = useState(false);
-  const [saving, setSaving]         = useState(false);
-  const [editing, setEditing]       = useState(false);
-  const [searchError, setSearchError] = useState("");
-  const [form, setForm]             = useState({});
-  const [newPhoto, setNewPhoto]     = useState(null);
-  const [newPhotoPreview, setNewPhotoPreview] = useState(null);
+  const [phone, setPhone]                   = useState("");
+  const [talent, setTalent]                 = useState(null);
+  const [loading, setLoading]               = useState(false);
+  const [saving, setSaving]                 = useState(false);
+  const [editing, setEditing]               = useState(false);
+  const [searchError, setSearchError]       = useState("");
+  const [form, setForm]                     = useState({});
+  const [saveOk, setSaveOk]                 = useState(false);
+
+  // Photo profil
+  const [newAvatar, setNewAvatar]           = useState(null);
+  const [newAvatarPreview, setNewAvatarPreview] = useState(null);
+
+  // Photo preuve
+  const [newPreuve, setNewPreuve]           = useState(null);
+  const [newPreuvePreview, setNewPreuvePreview] = useState(null);
+  const [deletePreuve, setDeletePreuve]     = useState(false);
 
   /* ── Recherche par téléphone ── */
   const rechercher = async () => {
@@ -49,37 +151,89 @@ function MonProfilContent() {
     }
   };
 
-  /* ── Gestion photo ── */
-  const handlePhoto = (e) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setNewPhoto(f);
-    setNewPhotoPreview(URL.createObjectURL(f));
+  const f = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+
+  /* ── Gestion photo profil ── */
+  const handleAvatar = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setNewAvatar(file);
+    setNewAvatarPreview(URL.createObjectURL(file));
+  };
+  const retirerAvatar = () => {
+    setNewAvatar(null);
+    if (newAvatarPreview) URL.revokeObjectURL(newAvatarPreview);
+    setNewAvatarPreview(null);
   };
 
-  const retirerPhoto = () => {
-    setNewPhoto(null);
-    if (newPhotoPreview) URL.revokeObjectURL(newPhotoPreview);
-    setNewPhotoPreview(null);
+  /* ── Gestion photo preuve ── */
+  const handlePreuve = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setNewPreuve(file);
+    setNewPreuvePreview(URL.createObjectURL(file));
+    setDeletePreuve(false);
+  };
+  const retirerPreuve = () => {
+    setNewPreuve(null);
+    if (newPreuvePreview) URL.revokeObjectURL(newPreuvePreview);
+    setNewPreuvePreview(null);
+  };
+  const supprimerPreuve = () => {
+    retirerPreuve();
+    setDeletePreuve(true);
   };
 
   /* ── Sauvegarde ── */
   const handleSave = async () => {
     setSaving(true);
+    setSaveOk(false);
     try {
       const updates = {
-        bio: form.bio || "",
-        competences: form.competences || "",
+        prenom:       form.prenom       || "",
+        nom:          form.nom          || "",
+        metier:       form.metier       || "",
+        ville:        form.ville        || "",
+        pays:         form.pays         || "",
+        bio:          form.bio          || "",
+        competences:  form.competences  || "",
+        disponibilite:form.disponibilite|| "negotiable",
+        experience:   form.experience   || "",
+        niveau_etude: form.niveau_etude || null,
       };
-      if (newPhoto) {
+
+      // Upload avatar si changé
+      if (newAvatar) {
         const chemin = `${Date.now()}-avatar.jpg`;
-        updates.avatar_url = await uploadFichier("avatars", newPhoto, chemin);
+        updates.avatar_url = await uploadFichier("avatars", newAvatar, chemin);
       }
-      const updated = await updateTalent(talent.id, updates);
-      setTalent(updated);
-      setForm(updated);
+
+      // Photo preuve
+      if (deletePreuve) {
+        updates.preuve_url = null;
+        updates.has_photo  = false;
+      } else if (newPreuve) {
+        const chemin = `${Date.now()}-preuve.jpg`;
+        updates.preuve_url = await uploadFichier("preuves", newPreuve, chemin);
+        updates.has_photo  = true;
+      }
+
+      const { data, error } = await supabase
+        .from("talents")
+        .update(updates)
+        .eq("telephone", phone.trim())
+        .select()
+        .single();
+      if (error) throw error;
+
+      setTalent(data);
+      setForm(data);
       setEditing(false);
-      retirerPhoto();
+      retirerAvatar();
+      retirerPreuve();
+      setDeletePreuve(false);
+      setSaveOk(true);
+      setTimeout(() => setSaveOk(false), 3000);
     } catch (e) {
       alert("Erreur : " + e.message);
     } finally {
@@ -90,7 +244,9 @@ function MonProfilContent() {
   const annuler = () => {
     setEditing(false);
     setForm(talent);
-    retirerPhoto();
+    retirerAvatar();
+    retirerPreuve();
+    setDeletePreuve(false);
   };
 
   /* ── Header ── */
@@ -99,7 +255,7 @@ function MonProfilContent() {
       <div style={{maxWidth:800,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <Link href="/" style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"#ECC94B",textDecoration:"none"}}>TalentProof</Link>
         {talent
-          ? <button onClick={() => { setTalent(null); setPhone(""); setEditing(false); }} style={{color:"rgba(255,255,255,.7)",background:"none",border:"none",fontSize:".85rem",cursor:"pointer",fontWeight:600}}>← Changer de compte</button>
+          ? <button onClick={() => { setTalent(null); setPhone(""); setEditing(false); setSaveOk(false); }} style={{color:"rgba(255,255,255,.7)",background:"none",border:"none",fontSize:".85rem",cursor:"pointer",fontWeight:600}}>← Changer de compte</button>
           : <Link href="/" style={{color:"rgba(255,255,255,.7)",fontSize:".85rem",textDecoration:"none",fontWeight:600}}>← Accueil</Link>
         }
       </div>
@@ -116,7 +272,7 @@ function MonProfilContent() {
     </div>
   );
 
-  /* ── Écran login (aucun talent chargé) ── */
+  /* ── Écran login ── */
   if (!talent) return (
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <Header/>
@@ -125,7 +281,6 @@ function MonProfilContent() {
         <h1 style={{fontFamily:"'Sora',sans-serif",fontSize:"2rem",fontWeight:800,color:"white",marginBottom:".5rem"}}>Mon Profil TalentProof</h1>
         <p style={{color:"rgba(255,255,255,.8)",fontSize:"1rem",margin:0}}>Accédez à votre profil avec votre numéro de téléphone</p>
       </div>
-
       <div style={{maxWidth:480,margin:"-2rem auto 4rem",padding:"0 1.5rem"}}>
         <div style={{background:"white",borderRadius:"20px",padding:"2.5rem",boxShadow:"0 8px 32px rgba(0,0,0,.12)"}}>
           <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:"1.3rem",fontWeight:800,color:"#111",marginBottom:"1.5rem",textAlign:"center"}}>
@@ -145,9 +300,7 @@ function MonProfilContent() {
                 style={{...inputSt, borderColor: searchError ? "#EF4444" : "#E5E7EB"}}
               />
               {searchError && (
-                <p style={{color:"#EF4444",fontSize:".78rem",marginTop:".4rem",margin:".4rem 0 0"}}>
-                  {searchError}
-                </p>
+                <p style={{color:"#EF4444",fontSize:".78rem",margin:".4rem 0 0"}}>{searchError}</p>
               )}
             </div>
             <button
@@ -160,7 +313,6 @@ function MonProfilContent() {
               Utilisez le numéro renseigné lors de votre inscription
             </p>
           </div>
-
           <div style={{marginTop:"2rem",padding:"1.2rem",background:"#F0FDF4",borderRadius:"12px",border:"1px solid #D1FAE5",textAlign:"center"}}>
             <p style={{color:"#1B6B47",fontSize:".82rem",margin:0,lineHeight:1.6}}>
               Profil introuvable ?{" "}
@@ -179,9 +331,16 @@ function MonProfilContent() {
   );
 
   /* ── Profil chargé ── */
-  const metier = talent.metier === "Autre métier" ? talent.autreMetier : talent.metier;
-  const avatarSrc = newPhotoPreview || talent.avatar_url || null;
+  const metier = talent.metier === "Autre métier" ? (talent.autreMetier || talent.metier) : talent.metier;
+  const avatarSrc = newAvatarPreview || talent.avatar_url || null;
   const dispoLabel = {immediate:"✓ Disponible immédiatement","1_month":"📅 Dans 1 mois",negotiable:"💬 À négocier"}[talent.disponibilite] || talent.disponibilite;
+
+  // Données aperçu carte (fusionnées avec les modifs en cours si édition)
+  const aperçuData = editing
+    ? { ...talent, ...form, avatar_url: newAvatarPreview || form.avatar_url || talent.avatar_url,
+        preuve_url: deletePreuve ? null : (newPreuvePreview || form.preuve_url || talent.preuve_url),
+        has_photo: deletePreuve ? false : !!(newPreuvePreview || form.preuve_url || talent.preuve_url) }
+    : talent;
 
   return (
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
@@ -205,6 +364,14 @@ function MonProfilContent() {
       </div>
 
       <div style={{maxWidth:700,margin:"-2rem auto 4rem",padding:"0 1.5rem"}}>
+
+        {/* Notification de succès */}
+        {saveOk && (
+          <div style={{background:"#F0FDF4",border:"1px solid #D1FAE5",borderRadius:"12px",padding:".9rem 1.2rem",marginBottom:"1rem",display:"flex",alignItems:"center",gap:".6rem",color:"#1B6B47",fontWeight:700,fontSize:".88rem"}}>
+            ✅ Profil mis à jour avec succès !
+          </div>
+        )}
+
         <div style={{background:"white",borderRadius:"20px",padding:"2rem",boxShadow:"0 8px 32px rgba(0,0,0,.12)"}}>
 
           {!editing ? (
@@ -222,6 +389,7 @@ function MonProfilContent() {
                 {talent.ville && <div><strong>Localisation :</strong> {talent.ville}, {talent.pays}</div>}
                 <div><strong>Métier :</strong> {metier}</div>
                 {talent.experience && <div><strong>Expérience :</strong> {talent.experience}</div>}
+                {talent.niveau_etude && <div><strong>Niveau d'étude :</strong> {talent.niveau_etude}</div>}
                 {talent.disponibilite && <div><strong>Disponibilité :</strong> {dispoLabel}</div>}
                 {talent.competences && <div><strong>Compétences :</strong> {talent.competences}</div>}
                 {talent.bio && (
@@ -232,7 +400,7 @@ function MonProfilContent() {
               </div>
               {talent.preuve_url && (
                 <div style={{marginTop:"1.5rem"}}>
-                  <p style={{fontSize:".85rem",fontWeight:700,color:"#374151",marginBottom:".6rem",margin:"0 0 .6rem"}}>📸 Photo de réalisation</p>
+                  <p style={{fontSize:".85rem",fontWeight:700,color:"#374151",margin:"0 0 .6rem"}}>📸 Photo de réalisation</p>
                   <img src={talent.preuve_url} alt="Réalisation" style={{width:"100%",maxHeight:220,objectFit:"cover",borderRadius:"12px",border:"1px solid #E5E7EB"}}/>
                 </div>
               )}
@@ -243,40 +411,80 @@ function MonProfilContent() {
               <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:"1.2rem",fontWeight:800,color:"#1B6B47",marginBottom:"1.2rem"}}>✏️ Modifier mon profil</h2>
               <div style={{display:"flex",flexDirection:"column",gap:"1.1rem"}}>
 
-                {/* Photo de profil */}
-                <div>
-                  <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".5rem"}}>Photo de profil</label>
-                  <div style={{display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
-                    {(newPhotoPreview || talent.avatar_url) && (
-                      <img
-                        src={newPhotoPreview || talent.avatar_url}
-                        alt="Profil"
-                        style={{width:60,height:60,borderRadius:"50%",objectFit:"cover",border:"2px solid #D1FAE5"}}
-                      />
-                    )}
-                    <label style={{display:"inline-flex",alignItems:"center",gap:".4rem",background:"#F0FDF4",border:"1.5px dashed #1B6B47",borderRadius:"8px",padding:".55rem 1rem",fontSize:".82rem",fontWeight:600,color:"#1B6B47",cursor:"pointer"}}>
-                      <Upload size={16}/>
-                      {newPhoto ? newPhoto.name : "Changer la photo"}
-                      <input type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
-                    </label>
-                    {newPhoto && (
-                      <button onClick={retirerPhoto} style={{background:"none",border:"none",cursor:"pointer",color:"#9CA3AF",display:"flex",alignItems:"center"}}>
-                        <X size={18}/>
-                      </button>
-                    )}
+                {/* Identité */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".8rem"}}>
+                  <div>
+                    <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Prénom</label>
+                    <input value={form.prenom||""} onChange={e=>f("prenom",e.target.value)} style={inputSt}/>
                   </div>
+                  <div>
+                    <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Nom</label>
+                    <input value={form.nom||""} onChange={e=>f("nom",e.target.value)} style={inputSt}/>
+                  </div>
+                </div>
+
+                {/* Métier */}
+                <div>
+                  <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Métier</label>
+                  <select value={form.metier||""} onChange={e=>f("metier",e.target.value)} style={{...inputSt,background:"white"}}>
+                    <option value="">-- Choisir --</option>
+                    {METIERS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  {form.metier === "Autre métier" && (
+                    <input
+                      value={form.autreMetier||""}
+                      onChange={e=>f("autreMetier",e.target.value)}
+                      placeholder="Précisez votre métier"
+                      style={{...inputSt,marginTop:".5rem"}}
+                    />
+                  )}
+                </div>
+
+                {/* Localisation */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".8rem"}}>
+                  <div>
+                    <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Ville</label>
+                    <input value={form.ville||""} onChange={e=>f("ville",e.target.value)} placeholder="Ex: Abidjan" style={inputSt}/>
+                  </div>
+                  <div>
+                    <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Pays</label>
+                    <input value={form.pays||""} onChange={e=>f("pays",e.target.value)} placeholder="Ex: Côte d'Ivoire" style={inputSt}/>
+                  </div>
+                </div>
+
+                {/* Expérience + Disponibilité */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".8rem"}}>
+                  <div>
+                    <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Expérience</label>
+                    <input value={form.experience||""} onChange={e=>f("experience",e.target.value)} placeholder="Ex: 5 ans" style={inputSt}/>
+                  </div>
+                  <div>
+                    <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Disponibilité</label>
+                    <select value={form.disponibilite||"negotiable"} onChange={e=>f("disponibilite",e.target.value)} style={{...inputSt,background:"white"}}>
+                      {DISPO_OPTIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Niveau d'étude */}
+                <div>
+                  <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Niveau d'étude</label>
+                  <select value={form.niveau_etude||""} onChange={e=>f("niveau_etude",e.target.value||null)} style={{...inputSt,background:"white"}}>
+                    <option value="">-- Non renseigné --</option>
+                    {NIVEAU_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
                 </div>
 
                 {/* Bio */}
                 <div>
                   <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Présentation / Bio</label>
                   <textarea
-                    value={form.bio || ""}
-                    onChange={e => setForm(f => ({...f, bio: e.target.value}))}
+                    value={form.bio||""}
+                    onChange={e=>f("bio",e.target.value)}
                     rows={4}
                     maxLength={300}
                     placeholder="Décrivez votre expérience et vos points forts..."
-                    style={{...inputSt, resize:"vertical", lineHeight:1.6}}
+                    style={{...inputSt,resize:"vertical",lineHeight:1.6}}
                   />
                   <span style={{fontSize:".72rem",color:"#9CA3AF"}}>{(form.bio||"").length}/300</span>
                 </div>
@@ -285,12 +493,66 @@ function MonProfilContent() {
                 <div>
                   <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>Compétences</label>
                   <input
-                    value={form.competences || ""}
-                    onChange={e => setForm(f => ({...f, competences: e.target.value}))}
+                    value={form.competences||""}
+                    onChange={e=>f("competences",e.target.value)}
                     placeholder="Ex: Ponctuel, Permis B, Connaissance Abidjan"
                     style={inputSt}
                   />
                   <span style={{fontSize:".72rem",color:"#9CA3AF"}}>Séparées par des virgules</span>
+                </div>
+
+                {/* Photo de profil */}
+                <div>
+                  <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".5rem"}}>Photo de profil</label>
+                  <div style={{display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
+                    {(newAvatarPreview || talent.avatar_url) && (
+                      <img src={newAvatarPreview||talent.avatar_url} alt="Profil" style={{width:56,height:56,borderRadius:"50%",objectFit:"cover",border:"2px solid #D1FAE5"}}/>
+                    )}
+                    <label style={{display:"inline-flex",alignItems:"center",gap:".4rem",background:"#F0FDF4",border:"1.5px dashed #1B6B47",borderRadius:"8px",padding:".5rem .9rem",fontSize:".82rem",fontWeight:600,color:"#1B6B47",cursor:"pointer"}}>
+                      <Upload size={15}/>
+                      {newAvatar ? newAvatar.name : "Changer la photo"}
+                      <input type="file" accept="image/*" onChange={handleAvatar} style={{display:"none"}}/>
+                    </label>
+                    {newAvatar && (
+                      <button onClick={retirerAvatar} style={{background:"none",border:"none",cursor:"pointer",color:"#9CA3AF",display:"flex",alignItems:"center"}}><X size={17}/></button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Photo de réalisation (preuve) */}
+                <div>
+                  <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".5rem"}}>📸 Photo de réalisation</label>
+
+                  {/* Aperçu actuel ou nouveau */}
+                  {!deletePreuve && (newPreuvePreview || talent.preuve_url) && (
+                    <div style={{position:"relative",marginBottom:".6rem",display:"inline-block"}}>
+                      <img
+                        src={newPreuvePreview||talent.preuve_url}
+                        alt="Réalisation"
+                        style={{width:"100%",maxHeight:180,objectFit:"cover",borderRadius:"10px",border:"1px solid #E5E7EB",display:"block"}}
+                      />
+                      <button
+                        onClick={supprimerPreuve}
+                        style={{position:"absolute",top:6,right:6,background:"rgba(239,68,68,.9)",border:"none",borderRadius:"50%",width:28,height:28,color:"white",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
+                      ><X size={14}/></button>
+                    </div>
+                  )}
+
+                  {deletePreuve && (
+                    <p style={{color:"#EF4444",fontSize:".78rem",margin:"0 0 .5rem",fontWeight:600}}>⚠️ Photo supprimée (sera retirée à l'enregistrement)</p>
+                  )}
+
+                  <div style={{display:"flex",gap:".6rem",flexWrap:"wrap"}}>
+                    <label style={{display:"inline-flex",alignItems:"center",gap:".4rem",background:"#F0FDF4",border:"1.5px dashed #1B6B47",borderRadius:"8px",padding:".5rem .9rem",fontSize:".82rem",fontWeight:600,color:"#1B6B47",cursor:"pointer"}}>
+                      <Upload size={15}/>
+                      {newPreuve ? newPreuve.name : (deletePreuve ? "Ajouter une photo" : "Changer la photo")}
+                      <input type="file" accept="image/*" onChange={handlePreuve} style={{display:"none"}}/>
+                    </label>
+                    {newPreuve && (
+                      <button onClick={retirerPreuve} style={{background:"none",border:"none",cursor:"pointer",color:"#9CA3AF",display:"flex",alignItems:"center"}}><X size={17}/></button>
+                    )}
+                  </div>
+                  <span style={{fontSize:".72rem",color:"#9CA3AF",display:"block",marginTop:".3rem"}}>Photo d'un de vos travaux ou réalisations</span>
                 </div>
 
                 {/* Boutons */}
@@ -312,6 +574,14 @@ function MonProfilContent() {
               </div>
             </>
           )}
+        </div>
+
+        {/* ── Aperçu carte annuaire ── */}
+        <div style={{background:"white",borderRadius:"20px",padding:"1.5rem 2rem",boxShadow:"0 8px 32px rgba(0,0,0,.12)",marginTop:"1.2rem"}}>
+          <h3 style={{fontFamily:"'Sora',sans-serif",fontSize:"1rem",fontWeight:800,color:"#374151",margin:"0 0 1rem",display:"flex",alignItems:"center",gap:".4rem"}}>
+            👁️ Aperçu dans l'annuaire
+          </h3>
+          <ApercuCarte t={aperçuData}/>
         </div>
 
         <div style={{marginTop:"1rem",textAlign:"center"}}>
