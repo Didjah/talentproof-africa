@@ -126,6 +126,12 @@ function MonProfilContent() {
   const [newPreuvePreview, setNewPreuvePreview] = useState(null);
   const [deletePreuve, setDeletePreuve]     = useState(false);
 
+  // PIN
+  const [pendingProfil, setPendingProfil]   = useState(null);
+  const [pinStep, setPinStep]               = useState(false);
+  const [pinInput, setPinInput]             = useState("");
+  const [pinError, setPinError]             = useState("");
+
   /* ── Recherche par téléphone ── */
   /* ── Génère les variantes d'un numéro (+225, 225, 0…) ── */
   const variantesTel = (input) => {
@@ -162,6 +168,11 @@ function MonProfilContent() {
       const profil = data?.[0] || null;
       if (!profil) {
         setSearchError("Aucun profil trouvé avec ce numéro. Vérifiez le numéro utilisé lors de votre inscription.");
+      } else if (profil.pin_code) {
+        setPendingProfil(profil);
+        setPinStep(true);
+        setPinInput("");
+        setPinError("");
       } else {
         setTalent(profil);
         setForm(profil);
@@ -170,6 +181,19 @@ function MonProfilContent() {
       setSearchError("Erreur de connexion. Réessayez.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const validerPin = () => {
+    if (pinInput === pendingProfil.pin_code) {
+      setTalent(pendingProfil);
+      setForm(pendingProfil);
+      setPinStep(false);
+      setPendingProfil(null);
+      setPinInput("");
+    } else {
+      setPinError("Code PIN incorrect. Réessayez.");
+      setPinInput("");
     }
   };
 
@@ -211,6 +235,18 @@ function MonProfilContent() {
     setSaving(true);
     setSaveOk(false);
     try {
+      // Validation PIN si modifié
+      if (form._newPin && !/^\d{4}$/.test(form._newPin)) {
+        alert("Le PIN doit contenir exactement 4 chiffres.");
+        setSaving(false);
+        return;
+      }
+      if (form._newPin && form._newPin !== form._newPinConfirm) {
+        alert("Les PIN ne correspondent pas.");
+        setSaving(false);
+        return;
+      }
+
       const updates = {
         prenom:       form.prenom       || "",
         nom:          form.nom          || "",
@@ -223,6 +259,9 @@ function MonProfilContent() {
         experience:   form.experience   || "",
         niveau_etude: form.niveau_etude || null,
       };
+      if (form._newPin && form._newPin === form._newPinConfirm) {
+        updates.pin_code = form._newPin;
+      }
 
       // Upload avatar si changé
       if (newAvatar) {
@@ -265,7 +304,8 @@ function MonProfilContent() {
 
   const annuler = () => {
     setEditing(false);
-    setForm(talent);
+    const { _newPin: _, _newPinConfirm: __, ...clean } = form;
+    setForm({ ...talent, ...clean, _newPin: "", _newPinConfirm: "" });
     retirerAvatar();
     retirerPreuve();
     setDeletePreuve(false);
@@ -290,6 +330,55 @@ function MonProfilContent() {
       <div style={{textAlign:"center"}}>
         <div style={{fontSize:"3rem",marginBottom:"1rem"}}>⏳</div>
         <div style={{color:"#666",fontWeight:600}}>Chargement...</div>
+      </div>
+    </div>
+  );
+
+  /* ── Écran PIN ── */
+  if (pinStep && pendingProfil) return (
+    <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
+      <Header/>
+      <div style={{background:"linear-gradient(135deg,#0B1628,#162F52)",padding:"3rem 1.5rem 2.5rem",textAlign:"center"}}>
+        <div style={{fontSize:"3rem",marginBottom:"1rem"}}>🔐</div>
+        <h1 style={{fontFamily:"'Sora',sans-serif",fontSize:"1.8rem",fontWeight:800,color:"white",marginBottom:".5rem"}}>Code PIN requis</h1>
+        <p style={{color:"rgba(255,255,255,.7)",fontSize:".9rem",margin:0}}>Ce profil est protégé par un code PIN</p>
+      </div>
+      <div style={{maxWidth:400,margin:"-2rem auto 4rem",padding:"0 1.5rem"}}>
+        <div style={{background:"white",borderRadius:"20px",padding:"2rem",boxShadow:"0 8px 32px rgba(0,0,0,.12)"}}>
+          <div style={{textAlign:"center",marginBottom:"1.5rem"}}>
+            <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".95rem",color:"#111",marginBottom:".3rem"}}>
+              {pendingProfil.prenom} {pendingProfil.nom}
+            </div>
+            <div style={{color:"#9CA3AF",fontSize:".8rem"}}>{pendingProfil.metier || ""}</div>
+          </div>
+          <div style={{marginBottom:"1.2rem"}}>
+            <label style={{fontSize:".85rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".5rem"}}>Entrez votre code PIN (4 chiffres)</label>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={pinInput}
+              onChange={e => { setPinInput(e.target.value.replace(/\D/g,"").slice(0,4)); setPinError(""); }}
+              onKeyDown={e => e.key === "Enter" && validerPin()}
+              placeholder="●●●●"
+              autoFocus
+              style={{...inputSt, textAlign:"center", fontSize:"1.5rem", letterSpacing:".4em", borderColor: pinError ? "#EF4444" : "#E5E7EB"}}
+            />
+            {pinError && <p style={{color:"#EF4444",fontSize:".78rem",margin:".4rem 0 0"}}>{pinError}</p>}
+          </div>
+          <button
+            onClick={validerPin}
+            style={{width:"100%",padding:".85rem",borderRadius:"10px",border:"none",background:"linear-gradient(135deg,#0B1628,#162F52)",color:"white",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}
+          >
+            Accéder à mon profil →
+          </button>
+          <button
+            onClick={() => { setPinStep(false); setPendingProfil(null); setPinInput(""); setPinError(""); }}
+            style={{width:"100%",padding:".6rem",marginTop:".7rem",background:"none",border:"none",color:"#9CA3AF",fontSize:".82rem",cursor:"pointer",fontWeight:600}}
+          >
+            ← Retour
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -575,6 +664,53 @@ function MonProfilContent() {
                     )}
                   </div>
                   <span style={{fontSize:".72rem",color:"#9CA3AF",display:"block",marginTop:".3rem"}}>Photo d'un de vos travaux ou réalisations</span>
+                </div>
+
+                {/* ── Section Sécurité ── */}
+                <div style={{padding:"1rem",background:"#F9FAFB",borderRadius:"12px",border:"1px solid #E5E7EB"}}>
+                  <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".88rem",color:"#374151",marginBottom:"1rem"}}>🔐 Sécurité</div>
+
+                  {/* PIN */}
+                  <div style={{marginBottom:".9rem"}}>
+                    <label style={{fontSize:".82rem",fontWeight:700,color:"#374151",display:"block",marginBottom:".4rem"}}>
+                      {talent.pin_code ? "Modifier le code PIN" : "Définir un code PIN (4 chiffres)"}
+                    </label>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".5rem"}}>
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={4}
+                        value={form._newPin || ""}
+                        onChange={e => f("_newPin", e.target.value.replace(/\D/g,"").slice(0,4))}
+                        placeholder="Nouveau PIN"
+                        style={{...inputSt,textAlign:"center",letterSpacing:".25em"}}
+                      />
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={4}
+                        value={form._newPinConfirm || ""}
+                        onChange={e => f("_newPinConfirm", e.target.value.replace(/\D/g,"").slice(0,4))}
+                        placeholder="Confirmer"
+                        style={{...inputSt,textAlign:"center",letterSpacing:".25em"}}
+                      />
+                    </div>
+                    {talent.pin_code && <p style={{color:"#9CA3AF",fontSize:".72rem",margin:".3rem 0 0"}}>Laissez vide pour conserver le PIN actuel</p>}
+                  </div>
+
+                  {/* Email récupération */}
+                  {talent.email && (
+                    <div style={{marginBottom:".7rem",fontSize:".82rem",color:"#6B7280"}}>
+                      <span style={{fontWeight:700}}>📧 Email :</span> {talent.email}
+                    </div>
+                  )}
+
+                  {/* WhatsApp récupération */}
+                  {talent.telephone && (
+                    <div style={{fontSize:".82rem",color:"#6B7280"}}>
+                      <span style={{fontWeight:700}}>📱 WhatsApp :</span> {talent.telephone}
+                    </div>
+                  )}
                 </div>
 
                 {/* Boutons */}

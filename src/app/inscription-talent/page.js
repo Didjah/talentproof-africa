@@ -131,6 +131,12 @@ export default function InscriptionTalentPage() {
     diplomeUrl: null,
     niveauEtude: "",
     bio: "",
+
+    // Sécurité (optionnel)
+    pinCode: "",
+    pinConfirm: "",
+    recoveryEmail: "",
+    recoveryWhatsapp: "",
   });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -167,6 +173,8 @@ export default function InscriptionTalentPage() {
       e.media = "Ajoutez au moins une vidéo ou une photo";
     }
     if (!form.bio.trim()) e.bio = "Présentez-vous brièvement";
+    if (form.pinCode && !/^\d{4}$/.test(form.pinCode)) e.pinCode = "Le PIN doit contenir exactement 4 chiffres";
+    if (form.pinCode && form.pinCode !== form.pinConfirm) e.pinConfirm = "Les PIN ne correspondent pas";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -239,6 +247,7 @@ export default function InscriptionTalentPage() {
         video_url: videoUrl,
         has_photo: !!preuveUrl,
         has_video: !!videoUrl,
+        pin_code: (form.pinCode && form.pinCode === form.pinConfirm) ? form.pinCode : null,
       });
 
       if (error) throw error;
@@ -736,6 +745,75 @@ export default function InscriptionTalentPage() {
               <p style={{color:"#B45309",fontSize:".78rem",lineHeight:1.65,margin:0}}>
                 Sur TalentProof, <strong>ta preuve c'est ce que tu sais faire</strong>. Une vidéo ou une photo de ton travail suffit.
               </p>
+            </div>
+
+            {/* Section sécurité optionnelle */}
+            <div style={{background:"white",borderRadius:"18px",padding:"1.35rem",boxShadow:"0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.07)"}}>
+              <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".95rem",color:"#111",marginBottom:".25rem"}}>
+                🔐 Sécuriser mon profil <span style={{fontWeight:400,color:"#9CA3AF",fontSize:".8rem"}}>(optionnel)</span>
+              </h2>
+              <p style={{color:"#666",fontSize:".78rem",marginBottom:"1.1rem",lineHeight:1.6}}>
+                Protège ton profil et facilite la récupération en cas d'oubli.
+              </p>
+
+              {/* Option PIN */}
+              <div style={{marginBottom:"1rem",padding:".9rem",background:"#F9FAFB",borderRadius:"12px",border:"1px solid #E5E7EB"}}>
+                <div style={{fontSize:".82rem",fontWeight:700,color:"#374151",marginBottom:".6rem"}}>🔑 Code PIN (4 chiffres)</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".6rem"}}>
+                  <div>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={form.pinCode}
+                      onChange={e => set("pinCode", e.target.value.replace(/\D/g,"").slice(0,4))}
+                      placeholder="●●●●"
+                      style={{...inputSt,letterSpacing:".25em",textAlign:"center"}}
+                      onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}
+                    />
+                    {errors.pinCode && <p style={{color:"#EF4444",fontSize:".72rem",margin:".3rem 0 0"}}>{errors.pinCode}</p>}
+                  </div>
+                  <div>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={form.pinConfirm}
+                      onChange={e => set("pinConfirm", e.target.value.replace(/\D/g,"").slice(0,4))}
+                      placeholder="Confirmer"
+                      style={{...inputSt,letterSpacing:".25em",textAlign:"center"}}
+                      onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}
+                    />
+                    {errors.pinConfirm && <p style={{color:"#EF4444",fontSize:".72rem",margin:".3rem 0 0"}}>{errors.pinConfirm}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Option Email de récupération */}
+              <div style={{marginBottom:"1rem",padding:".9rem",background:"#F9FAFB",borderRadius:"12px",border:"1px solid #E5E7EB"}}>
+                <div style={{fontSize:".82rem",fontWeight:700,color:"#374151",marginBottom:".6rem"}}>📧 Email de récupération</div>
+                <input
+                  type="email"
+                  value={form.recoveryEmail || form.email}
+                  onChange={e => set("recoveryEmail", e.target.value)}
+                  placeholder="ton@email.com"
+                  style={inputSt}
+                  onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}
+                />
+              </div>
+
+              {/* Option WhatsApp de récupération */}
+              <div style={{padding:".9rem",background:"#F9FAFB",borderRadius:"12px",border:"1px solid #E5E7EB"}}>
+                <div style={{fontSize:".82rem",fontWeight:700,color:"#374151",marginBottom:".6rem"}}>📱 WhatsApp de récupération</div>
+                <input
+                  type="tel"
+                  value={form.recoveryWhatsapp}
+                  onChange={e => set("recoveryWhatsapp", e.target.value)}
+                  placeholder="+225 07 00 00 00 00"
+                  style={inputSt}
+                  onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}
+                />
+              </div>
             </div>
           </div>
         )}
