@@ -45,7 +45,7 @@ const TEMOIGNAGES = [
 /* ─────────────────────────────────────────────────────────
    SECTION LOGIN
 ───────────────────────────────────────────────────────── */
-function LoginForm({ onLogin }) {
+function LoginForm({ onLogin, onShowLanding }) {
   const [identifiant, setIdentifiant] = useState("");
   const [pin, setPin]                 = useState("");
   const [loading, setLoading]         = useState(false);
@@ -104,9 +104,10 @@ function LoginForm({ onLogin }) {
           </div>
           <div style={{textAlign:"center",marginTop:"1.5rem",paddingTop:"1.5rem",borderTop:"1px solid rgba(255,255,255,.1)"}}>
             <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".6rem"}}>Pas encore de compte ?</p>
-            <Link href="/inscription-entreprise" style={{display:"inline-block",background:"rgba(255,255,255,.1)",color:"white",fontWeight:700,fontSize:".82rem",padding:".55rem 1.2rem",borderRadius:"99px",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)"}}>
-              🏢 Créer un compte recruteur
-            </Link>
+            <button onClick={onShowLanding}
+              style={{display:"inline-block",background:"rgba(255,255,255,.1)",color:"white",fontWeight:700,fontSize:".82rem",padding:".55rem 1.2rem",borderRadius:"99px",border:"1px solid rgba(255,255,255,.2)",cursor:"pointer"}}>
+              🏢 S'inscrire
+            </button>
           </div>
         </div>
         <div style={{textAlign:"center",marginTop:"1rem"}}>
@@ -403,7 +404,7 @@ function Dashboard({ recruteur, onLogout }) {
    PAGE PRINCIPALE (landing + connexion)
 ───────────────────────────────────────────────────────── */
 export default function RecruteurPage() {
-  const [mode, setMode]       = useState("landing"); // landing | login | dashboard
+  const [mode, setMode]       = useState("login"); // login | landing | dashboard
   const [recruteur, setRecr]  = useState(null);
 
   // Restaurer session localStorage ou auto-login depuis URL (?tel=...&auto=1)
@@ -438,9 +439,9 @@ export default function RecruteurPage() {
   },[]);
 
   const handleLogin = (data)=>{ setRecr(data); localStorage.setItem("tp_recruteur",JSON.stringify(data)); setMode("dashboard"); };
-  const handleLogout= ()=>{ setRecr(null); localStorage.removeItem("tp_recruteur"); setMode("landing"); };
+  const handleLogout= ()=>{ setRecr(null); localStorage.removeItem("tp_recruteur"); setMode("login"); };
 
-  if(mode==="login") return <LoginForm onLogin={handleLogin}/>;
+  if(mode==="login") return <LoginForm onLogin={handleLogin} onShowLanding={()=>setMode("landing")}/>;
   if(mode==="dashboard" && recruteur) return <Dashboard recruteur={recruteur} onLogout={handleLogout}/>;
 
   /* ── LANDING ── */
