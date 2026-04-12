@@ -1019,17 +1019,17 @@ function AnnonceSection() {
   if (!ready || annonces.length === 0) return null;
 
   return (
-    <div style={{background:"#F8FAFC",padding:"2.8rem 1rem",borderTop:"1px solid #E5E7EB"}}>
+    <div style={{background:"linear-gradient(135deg,#0B1628,#0F2744,#162F52)",padding:"2.8rem 1rem"}}>
       <div style={{maxWidth:1100,margin:"0 auto"}}>
         {/* Titre */}
         <div style={{textAlign:"center",marginBottom:"1.8rem"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"linear-gradient(135deg,#EFF6FF,#DBEAFE)",border:"1px solid #BFDBFE",borderRadius:"99px",padding:".35rem .95rem",marginBottom:".75rem"}}>
-            <span style={{fontSize:".72rem",color:"#1D4ED8",fontWeight:700,letterSpacing:".06em"}}>📢 OFFRES EN DIRECT</span>
+          <div style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"rgba(240,192,64,.12)",border:"1px solid rgba(240,192,64,.28)",borderRadius:"99px",padding:".35rem .95rem",marginBottom:".75rem"}}>
+            <span style={{fontSize:".72rem",color:"#F0C040",fontWeight:700,letterSpacing:".06em"}}>📢 OFFRES EN DIRECT</span>
           </div>
-          <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:"clamp(1.2rem,3.5vw,1.6rem)",color:"#111",marginBottom:".4rem"}}>
+          <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:"clamp(1.2rem,3.5vw,1.6rem)",color:"white",marginBottom:".4rem"}}>
             Offres & Annonces
           </h2>
-          <p style={{color:"#6B7280",fontSize:".85rem",margin:0}}>
+          <p style={{color:"rgba(255,255,255,.55)",fontSize:".85rem",margin:0}}>
             Publiées directement par nos recruteurs et partenaires vérifiés
           </p>
         </div>
@@ -1045,9 +1045,9 @@ function AnnonceSection() {
             const desc  = a.description || "";
             return (
               <div key={a.id}
-                style={{background:"white",borderRadius:"18px",padding:"1.2rem 1.25rem",boxShadow:"0 2px 12px rgba(0,0,0,.07)",border:"1px solid #E5E7EB",display:"flex",flexDirection:"column",gap:".7rem",transition:"box-shadow .2s,transform .2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 28px rgba(0,0,0,.12)";e.currentTarget.style.transform="translateY(-2px)";}}
-                onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.07)";e.currentTarget.style.transform="none";}}>
+                style={{background:"#fff",borderRadius:"18px",padding:"1.2rem 1.25rem",boxShadow:"0 2px 12px rgba(0,0,0,.08)",border:"1px solid #E5E7EB",display:"flex",flexDirection:"column",gap:".7rem",transition:"box-shadow .2s,transform .2s"}}
+                onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 28px rgba(0,0,0,.18)";e.currentTarget.style.transform="translateY(-2px)";}}
+                onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.08)";e.currentTarget.style.transform="none";}}>
 
                 {/* Badges */}
                 <div style={{display:"flex",gap:".4rem",flexWrap:"wrap"}}>
@@ -1100,9 +1100,10 @@ function AnnonceSection() {
 
         {/* Lien voir toutes */}
         <div style={{textAlign:"center",marginTop:"1.8rem"}}>
-          <a href="/annuaire" style={{color:"#1B6B47",fontWeight:700,fontSize:".85rem",textDecoration:"none",border:"1.5px solid #D1FAE5",padding:".55rem 1.4rem",borderRadius:"99px",display:"inline-block",transition:"all .2s"}}
-            onMouseEnter={e=>{e.currentTarget.style.background="#F0FDF4";e.currentTarget.style.borderColor="#1B6B47";}}
-            onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="#D1FAE5";}}>
+          <a href="/annuaire"
+            style={{color:"white",fontWeight:700,fontSize:".85rem",textDecoration:"none",border:"1.5px solid rgba(255,255,255,.28)",padding:".55rem 1.4rem",borderRadius:"99px",display:"inline-block",transition:"all .2s"}}
+            onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.1)";e.currentTarget.style.borderColor="rgba(255,255,255,.5)";}}
+            onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(255,255,255,.28)";}}>
             Voir tous les talents disponibles →
           </a>
         </div>
