@@ -175,7 +175,7 @@ export default function InscriptionEntreprisePage() {
       }]);
       if (error) throw error;
       setProg({label:"✅ Inscription enregistrée !",pct:100});
-      setTimeout(()=>router.push(`/success?type=recruteur&nom=${encodeURIComponent(form.nomEntreprise)}`), 700);
+      setTimeout(()=>router.push(`/recruteur?tel=${encodeURIComponent(form.telephone)}&auto=1`), 700);
     } catch(err) {
       console.error(err);
       setProg(null);

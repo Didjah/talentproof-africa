@@ -406,12 +406,35 @@ export default function RecruteurPage() {
   const [mode, setMode]       = useState("landing"); // landing | login | dashboard
   const [recruteur, setRecr]  = useState(null);
 
-  // Restaurer session depuis localStorage
+  // Restaurer session localStorage ou auto-login depuis URL (?tel=...&auto=1)
   useEffect(()=>{
+    // 1. Session existante
     try {
       const saved = localStorage.getItem("tp_recruteur");
-      if(saved) { setRecr(JSON.parse(saved)); setMode("dashboard"); }
+      if(saved) { setRecr(JSON.parse(saved)); setMode("dashboard"); return; }
     } catch {}
+
+    // 2. Auto-login après inscription (tel + auto=1 dans l'URL)
+    const params = new URLSearchParams(window.location.search);
+    const tel  = params.get("tel");
+    const auto = params.get("auto");
+    if(tel && auto==="1"){
+      supabase
+        .from("recruteurs")
+        .select("*")
+        .eq("contact_telephone", decodeURIComponent(tel))
+        .order("created_at",{ascending:false})
+        .limit(1)
+        .then(({ data })=>{
+          if(data && data.length>0){
+            const r = data[0];
+            setRecr(r);
+            localStorage.setItem("tp_recruteur", JSON.stringify(r));
+            setMode("dashboard");
+          }
+        })
+        .catch(()=>{});
+    }
   },[]);
 
   const handleLogin = (data)=>{ setRecr(data); localStorage.setItem("tp_recruteur",JSON.stringify(data)); setMode("dashboard"); };
