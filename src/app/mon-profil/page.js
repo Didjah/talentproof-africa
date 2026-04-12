@@ -127,22 +127,44 @@ function MonProfilContent() {
   const [deletePreuve, setDeletePreuve]     = useState(false);
 
   /* ── Recherche par téléphone ── */
+  /* ── Génère les variantes d'un numéro (+225, 225, 0…) ── */
+  const variantesTel = (input) => {
+    const t = input.replace(/[\s\-\.]/g, "");
+    let local;
+    if (t.startsWith("+225")) local = t.slice(4);
+    else if (t.startsWith("225") && t.length >= 12) local = t.slice(3);
+    else local = t;
+    const avecZero = local.startsWith("0") ? local : "0" + local;
+    const sansZero = local.startsWith("0") ? local.slice(1) : local;
+    return [...new Set([
+      "+225" + avecZero,
+      "225"  + avecZero,
+      avecZero,
+      "+225" + sansZero,
+      "225"  + sansZero,
+      sansZero,
+    ])];
+  };
+
   const rechercher = async () => {
     if (!phone.trim()) { setSearchError("Entrez votre numéro de téléphone"); return; }
     setLoading(true);
     setSearchError("");
     try {
+      const variantes = variantesTel(phone.trim());
+      const orClause = variantes.map(v => `telephone.eq.${v}`).join(",");
       const { data, error } = await supabase
         .from("talents")
         .select("*")
-        .eq("telephone", phone.trim())
-        .maybeSingle();
+        .or(orClause)
+        .limit(1);
       if (error) throw error;
-      if (!data) {
+      const profil = data?.[0] || null;
+      if (!profil) {
         setSearchError("Aucun profil trouvé avec ce numéro. Vérifiez le numéro utilisé lors de votre inscription.");
       } else {
-        setTalent(data);
-        setForm(data);
+        setTalent(profil);
+        setForm(profil);
       }
     } catch {
       setSearchError("Erreur de connexion. Réessayez.");
