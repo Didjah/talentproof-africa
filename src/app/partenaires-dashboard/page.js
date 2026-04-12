@@ -1,8 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-
 
 const METIERS_ANNONCE = [
   "Formateur / Enseignant", "Chauffeur VTC", "Livreur", "Mécanicien",
@@ -18,13 +17,20 @@ const inputSt = {
 };
 
 /* ─────────────────────────────────────────────────────────
-   LOGIN PARTENAIRE
+   MODAL LOGIN
 ───────────────────────────────────────────────────────── */
-function LoginForm({ onLogin }) {
+function ModalLogin({ onLogin, onClose }) {
   const [identifiant, setIdentifiant] = useState("");
   const [pin, setPin]                 = useState("");
   const [loading, setLoading]         = useState(false);
   const [err, setErr]                 = useState("");
+  const overlayRef                    = useRef(null);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const connexion = async () => {
     if (!identifiant.trim() || pin.length < 4) { setErr("Email/téléphone et code PIN requis."); return; }
@@ -44,47 +50,90 @@ function LoginForm({ onLogin }) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem",fontFamily:"system-ui,sans-serif"}}>
-      <div style={{maxWidth:400,width:"100%"}}>
-        <div style={{textAlign:"center",marginBottom:"2rem"}}>
-          <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1.3rem",textDecoration:"none"}}>TalentProof</Link>
-          <p style={{color:"rgba(255,255,255,.6)",fontSize:".82rem",marginTop:".5rem"}}>Espace Partenaires</p>
+    <div ref={overlayRef}
+      onClick={e => e.target === overlayRef.current && onClose()}
+      style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+      <div style={{maxWidth:400,width:"100%",background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)",borderRadius:"20px",padding:"2rem",boxShadow:"0 24px 60px rgba(0,0,0,.5)"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.5rem"}}>
+          <h2 style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:"1.05rem",margin:0}}>🤝 Connexion Partenaire</h2>
+          <button onClick={onClose}
+            style={{background:"rgba(255,255,255,.12)",border:"none",color:"white",width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            ✕
+          </button>
         </div>
-        <div style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:"20px",padding:"2rem"}}>
-          <h2 style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:"1.1rem",marginBottom:"1.5rem",textAlign:"center"}}>🤝 Connexion Partenaire</h2>
-          <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
-            <div>
-              <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Email ou téléphone</label>
-              <input value={identifiant} onChange={e=>setIdentifiant(e.target.value)}
-                placeholder="contact@organisation.com ou +225..."
-                style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white"}}
-                onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}/>
-            </div>
-            <div>
-              <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Code PIN (4 chiffres)</label>
-              <input type="password" inputMode="numeric" maxLength={4} value={pin}
-                onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,4))}
-                placeholder="●●●●"
-                style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white",letterSpacing:".3em",textAlign:"center"}}
-                onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}
-                onKeyDown={e=>e.key==="Enter"&&connexion()}/>
-            </div>
-            {err&&<div style={{background:"#FEF2F2",border:"1px solid #FCA5A5",borderRadius:"8px",padding:".7rem",color:"#991B1B",fontSize:".82rem"}}>{err}</div>}
-            <button onClick={connexion} disabled={loading}
-              style={{padding:".8rem",borderRadius:"99px",border:"none",background:loading?"#374151":"linear-gradient(135deg,#C9960F,#F0C040)",color:loading?"#9CA3AF":"#0D3B2E",fontWeight:800,fontSize:".9rem",cursor:loading?"wait":"pointer"}}>
-              {loading?"⏳ Connexion…":"🔑 Se connecter"}
-            </button>
+        <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
+          <div>
+            <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Email ou téléphone</label>
+            <input value={identifiant} onChange={e=>setIdentifiant(e.target.value)}
+              placeholder="contact@organisation.com ou +225…"
+              style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white"}}
+              onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}/>
           </div>
-          <div style={{textAlign:"center",marginTop:"1.5rem",paddingTop:"1.5rem",borderTop:"1px solid rgba(255,255,255,.1)"}}>
-            <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".6rem"}}>Pas encore partenaire ?</p>
-            <Link href="/partenaire" style={{display:"inline-block",background:"rgba(255,255,255,.1)",color:"white",fontWeight:700,fontSize:".82rem",padding:".55rem 1.2rem",borderRadius:"99px",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)"}}>
-              🤝 S'inscrire comme partenaire
-            </Link>
+          <div>
+            <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Code PIN (4 chiffres)</label>
+            <input type="password" inputMode="numeric" maxLength={4} value={pin}
+              onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,4))}
+              placeholder="●●●●"
+              style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white",letterSpacing:".3em",textAlign:"center"}}
+              onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}
+              onKeyDown={e=>e.key==="Enter"&&connexion()}/>
           </div>
+          {err && <div style={{background:"#FEF2F2",border:"1px solid #FCA5A5",borderRadius:"8px",padding:".7rem",color:"#991B1B",fontSize:".82rem"}}>{err}</div>}
+          <button onClick={connexion} disabled={loading}
+            style={{padding:".8rem",borderRadius:"99px",border:"none",background:loading?"#374151":"linear-gradient(135deg,#C9960F,#F0C040)",color:loading?"#9CA3AF":"#0D3B2E",fontWeight:800,fontSize:".9rem",cursor:loading?"wait":"pointer",transition:"all .2s"}}>
+            {loading ? "⏳ Connexion…" : "🔑 Se connecter"}
+          </button>
         </div>
-        <div style={{textAlign:"center",marginTop:"1rem"}}>
-          <Link href="/partenaires-dashboard" style={{color:"rgba(255,255,255,.4)",fontSize:".75rem",textDecoration:"none"}}>← Retour au programme partenaires</Link>
+        <div style={{textAlign:"center",marginTop:"1.2rem",paddingTop:"1.2rem",borderTop:"1px solid rgba(255,255,255,.1)"}}>
+          <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".5rem"}}>Pas encore partenaire ?</p>
+          <Link href="/partenaire" onClick={onClose}
+            style={{color:"#F0C040",fontWeight:700,fontSize:".82rem",textDecoration:"none"}}>
+            S'inscrire comme partenaire →
+          </Link>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   CARTE PARTENAIRE
+───────────────────────────────────────────────────────── */
+function CartePartenaire({ p }) {
+  const initiales = (p.nom_organisation || "?").substring(0, 2).toUpperCase();
+  const isActive  = p.statut === "active";
+  return (
+    <div style={{background:"white",borderRadius:"16px",padding:"1.2rem",boxShadow:"0 2px 12px rgba(0,0,0,.07)",border:"1px solid #E5E7EB",display:"flex",flexDirection:"column",gap:".75rem",transition:"box-shadow .2s,transform .2s"}}
+      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 28px rgba(0,0,0,.13)";e.currentTarget.style.transform="translateY(-2px)";}}
+      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.07)";e.currentTarget.style.transform="none";}}>
+      <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
+        <div style={{width:46,height:46,borderRadius:"12px",background:"linear-gradient(135deg,#071F15,#1B4332)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <span style={{color:"#F0C040",fontWeight:900,fontSize:".95rem",fontFamily:"'Sora',sans-serif"}}>{initiales}</span>
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".9rem",color:"#111",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.nom_organisation || "—"}</div>
+          <div style={{color:"#6B7280",fontSize:".74rem",marginTop:"2px"}}>{[p.type_partenariat,p.ville,p.pays].filter(Boolean).join(" · ")}</div>
+        </div>
+      </div>
+      {p.secteur && (
+        <div style={{fontSize:".76rem",color:"#374151",background:"#F9FAFB",borderRadius:"8px",padding:".4rem .65rem"}}>
+          🏭 {p.secteur}
+        </div>
+      )}
+      {p.objectifs && (
+        <div style={{fontSize:".76rem",color:"#374151",background:"#F0FDF4",borderRadius:"8px",padding:".4rem .65rem",lineHeight:1.55,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+          🎯 {p.objectifs}
+        </div>
+      )}
+      <div style={{display:"flex",gap:".45rem",flexWrap:"wrap",marginTop:"auto"}}>
+        <span style={{background:isActive?"#F0FDF4":"#FFF7ED",color:isActive?"#16A34A":"#D97706",fontSize:".68rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px",border:`1px solid ${isActive?"#86EFAC":"#FDE68A"}`}}>
+          {isActive ? "✅ Actif" : "⏳ En attente"}
+        </span>
+        {p.nombre_talents && (
+          <span style={{background:"#EFF6FF",color:"#1D4ED8",fontSize:".68rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px",border:"1px solid #BFDBFE"}}>
+            {p.nombre_talents} talents/an
+          </span>
+        )}
       </div>
     </div>
   );
@@ -210,7 +259,6 @@ function Dashboard({ partenaire, onLogout }) {
                     </div>
                 }
               </div>
-
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"1rem"}}>
                 {[
                   ["nom_organisation","🏢 Nom de l'organisation"],
@@ -235,7 +283,6 @@ function Dashboard({ partenaire, onLogout }) {
                   </div>
                 ))}
               </div>
-
               <div style={{marginTop:"1rem",paddingTop:"1rem",borderTop:"1px solid #F3F4F6"}}>
                 <div style={{display:"flex",gap:"1.5rem",flexWrap:"wrap"}}>
                   <div>
@@ -249,8 +296,6 @@ function Dashboard({ partenaire, onLogout }) {
                 </div>
               </div>
             </div>
-
-            {/* Badge partenaire */}
             <div style={{background:"linear-gradient(135deg,#F0FDF4,#DCFCE7)",border:"2px solid #86EFAC",borderRadius:"16px",padding:"1.3rem",display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
               <div style={{width:60,height:60,borderRadius:"50%",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.8rem",flexShrink:0}}>✨</div>
               <div style={{flex:1}}>
@@ -368,23 +413,103 @@ function Dashboard({ partenaire, onLogout }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   PAGE PRINCIPALE
+   PAGE PRINCIPALE — publique
 ───────────────────────────────────────────────────────── */
 export default function PartenairesDashboardPage() {
-  const [mode, setMode]        = useState("login"); // login | dashboard
-  const [partenaire, setPartn] = useState(null);
+  const [partenaires, setPartenaires] = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [showModal, setShowModal]     = useState(false);
+  const [partenaire, setPartn]        = useState(null);
 
-  // Restaurer session depuis localStorage
-  useEffect(()=>{
-    try {
-      const saved = localStorage.getItem("partenaire_session");
-      if(saved) { setPartn(JSON.parse(saved)); setMode("dashboard"); }
-    } catch {}
-  },[]);
+  useEffect(() => {
+    supabase.from("partenaires").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => { setPartenaires(data || []); setLoading(false); });
+  }, []);
 
-  const handleLogin  = (data)=>{ setPartn(data); localStorage.setItem("partenaire_session",JSON.stringify(data)); setMode("dashboard"); };
-  const handleLogout = ()=>{ setPartn(null); localStorage.removeItem("partenaire_session"); setMode("login"); };
+  const handleLogin  = (data) => { setPartn(data); setShowModal(false); };
+  const handleLogout = ()     => setPartn(null);
 
-  if(mode==="dashboard" && partenaire) return <Dashboard partenaire={partenaire} onLogout={handleLogout}/>;
-  return <LoginForm onLogin={handleLogin}/>;
+  if (partenaire) return <Dashboard partenaire={partenaire} onLogout={handleLogout}/>;
+
+  return (
+    <div style={{minHeight:"100vh",background:"#F0F4F0",fontFamily:"system-ui,sans-serif"}}>
+      {showModal && <ModalLogin onLogin={handleLogin} onClose={()=>setShowModal(false)}/>}
+
+      {/* ── HEADER ── */}
+      <div style={{background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)"}}>
+        <div style={{maxWidth:1100,margin:"0 auto",padding:"1rem 1.2rem",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:".75rem"}}>
+          <div>
+            <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1.1rem",textDecoration:"none"}}>TalentProof</Link>
+            <div style={{color:"rgba(255,255,255,.5)",fontSize:".74rem",marginTop:"2px"}}>🤝 Programme Partenaires</div>
+          </div>
+          <div style={{display:"flex",gap:".6rem",alignItems:"center",flexWrap:"wrap"}}>
+            <Link href="/partenaire"
+              style={{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.22)",color:"white",fontWeight:600,fontSize:".82rem",padding:".45rem 1.05rem",borderRadius:"99px",textDecoration:"none"}}>
+              ✍️ Devenir partenaire
+            </Link>
+            <button onClick={()=>setShowModal(true)}
+              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",border:"none",color:"#0D3B2E",fontWeight:800,fontSize:".82rem",padding:".48rem 1.15rem",borderRadius:"99px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              🔑 Se connecter à mon espace
+            </button>
+          </div>
+        </div>
+
+        {/* ── HERO ── */}
+        <div style={{maxWidth:680,margin:"0 auto",padding:"2rem 1.2rem 2.5rem",textAlign:"center"}}>
+          <h1 style={{fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:"clamp(1.45rem,4vw,2.1rem)",color:"white",lineHeight:1.25,marginBottom:".7rem"}}>
+            Les partenaires qui accompagnent<br/>les talents en Afrique
+          </h1>
+          <p style={{color:"rgba(255,255,255,.6)",fontSize:".9rem",lineHeight:1.75,marginBottom:"1.6rem"}}>
+            {loading ? "Chargement…" : `${partenaires.length} organisation${partenaires.length!==1?"s":""} partenaire${partenaires.length!==1?"s":""} active${partenaires.length!==1?"s":""} sur TalentProof.`}
+          </p>
+          <div style={{display:"flex",gap:".75rem",justifyContent:"center",flexWrap:"wrap"}}>
+            <Link href="/partenaire"
+              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".9rem",padding:".72rem 1.6rem",borderRadius:"99px",textDecoration:"none",boxShadow:"0 4px 18px rgba(201,150,15,.4)"}}>
+              🤝 Rejoindre le programme
+            </Link>
+            <button onClick={()=>setShowModal(true)}
+              style={{background:"rgba(255,255,255,.1)",border:"1.5px solid rgba(255,255,255,.28)",color:"white",fontWeight:700,fontSize:".9rem",padding:".72rem 1.4rem",borderRadius:"99px",cursor:"pointer"}}>
+              🔑 Connexion
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── GRILLE ── */}
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"2rem 1rem"}}>
+        {loading ? (
+          <div style={{textAlign:"center",padding:"4rem",color:"#9CA3AF",fontSize:".9rem"}}>⏳ Chargement des partenaires…</div>
+        ) : partenaires.length === 0 ? (
+          <div style={{textAlign:"center",padding:"4rem"}}>
+            <div style={{fontSize:"3.5rem",marginBottom:"1rem"}}>🤝</div>
+            <p style={{color:"#6B7280",fontFamily:"'Sora',sans-serif",fontWeight:700,marginBottom:".5rem"}}>Aucun partenaire inscrit pour l'instant</p>
+            <p style={{color:"#9CA3AF",fontSize:".85rem",marginBottom:"1.5rem"}}>Soyez la première organisation à rejoindre TalentProof.</p>
+            <Link href="/partenaire" style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".88rem",padding:".65rem 1.5rem",borderRadius:"99px",textDecoration:"none"}}>
+              Devenir partenaire
+            </Link>
+          </div>
+        ) : (
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"1rem"}}>
+            {partenaires.map(p => <CartePartenaire key={p.id} p={p}/>)}
+          </div>
+        )}
+
+        {/* ── CTA BAS ── */}
+        <div style={{marginTop:"3rem",background:"linear-gradient(135deg,#071F15,#0D3B2E)",borderRadius:"20px",padding:"2rem",textAlign:"center"}}>
+          <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"white",marginBottom:".5rem"}}>Votre organisation veut collaborer ?</h2>
+          <p style={{color:"rgba(255,255,255,.6)",fontSize:".85rem",marginBottom:"1.3rem"}}>Rejoignez le réseau de partenaires TalentProof et accédez à 14 000+ talents.</p>
+          <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
+            <Link href="/partenaire"
+              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".9rem",padding:".72rem 1.6rem",borderRadius:"99px",textDecoration:"none"}}>
+              🤝 Devenir partenaire
+            </Link>
+            <button onClick={()=>setShowModal(true)}
+              style={{background:"rgba(255,255,255,.1)",border:"1.5px solid rgba(255,255,255,.28)",color:"white",fontWeight:700,fontSize:".9rem",padding:".72rem 1.4rem",borderRadius:"99px",cursor:"pointer"}}>
+              🔑 Déjà partenaire ? Se connecter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

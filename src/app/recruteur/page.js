@@ -1,9 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-
-const WA_NUM1 = "2250705503089";
 
 const METIERS_ANNONCE = [
   "Chauffeur VTC", "Chauffeur camion", "Livreur", "Mécanicien",
@@ -19,42 +17,24 @@ const inputSt = {
   outline:"none", background:"white", color:"#111", transition:"border-color .2s", boxSizing:"border-box",
 };
 
-function WaLogo({ size=20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="white">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.123 1.527 5.852L.057 23.5l5.797-1.497A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.518-5.162-1.416l-.37-.218-3.441.889.917-3.346-.24-.387A9.944 9.944 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/>
-    </svg>
-  );
-}
-
-const AVANTAGES = [
-  { icon:"🔍", titre:"Recherche ciblée",       desc:"Filtre par métier, ville, disponibilité et type de profil." },
-  { icon:"✅", titre:"Profils vérifiés",        desc:"Chaque talent est contrôlé par notre équipe avant publication." },
-  { icon:"🔒", titre:"Documents sécurisés",     desc:"Accède aux diplômes et certificats sur demande approuvée." },
-  { icon:"💬", titre:"Contact direct WhatsApp", desc:"Contacte le talent directement, sans intermédiaire." },
-  { icon:"📊", titre:"Statistiques",           desc:"Suis tes contacts et recrutements depuis ton tableau de bord." },
-  { icon:"🌍", titre:"9 pays couverts",         desc:"Dakar, Abidjan, Accra, Lagos, Bamako, Lomé et plus encore." },
-];
-
-const TEMOIGNAGES = [
-  { nom:"Aminata Traoré",    role:"DRH, PME Abidjan",     txt:"En 48h j'ai trouvé un électricien certifié. La qualité des profils est impressionnante.", avatar:"👩‍💼" },
-  { nom:"Jean-Baptiste Koné",role:"Propriétaire, Villa Dakar",txt:"J'ai recruté une aide ménagère de confiance. Le système de vérification me rassure.", avatar:"👨‍💼" },
-];
-
 /* ─────────────────────────────────────────────────────────
-   SECTION LOGIN
+   MODAL LOGIN
 ───────────────────────────────────────────────────────── */
-function LoginForm({ onLogin, onShowLanding }) {
+function ModalLogin({ onLogin, onClose }) {
   const [identifiant, setIdentifiant] = useState("");
   const [pin, setPin]                 = useState("");
   const [loading, setLoading]         = useState(false);
   const [err, setErr]                 = useState("");
+  const overlayRef                    = useRef(null);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const connexion = async () => {
-    if (!identifiant.trim() || pin.length < 4) {
-      setErr("Email/téléphone et code PIN requis."); return;
-    }
+    if (!identifiant.trim() || pin.length < 4) { setErr("Email/téléphone et code PIN requis."); return; }
     setLoading(true); setErr("");
     try {
       const isEmail = identifiant.includes("@");
@@ -64,55 +44,97 @@ function LoginForm({ onLogin, onShowLanding }) {
         .eq(isEmail ? "contact_email" : "contact_telephone", identifiant.trim())
         .eq("pin_code", pin)
         .single();
-      if (error || !data) { setErr("Identifiants incorrects. Vérifiez votre email/téléphone et PIN."); }
-      else { onLogin(data); }
+      if (error || !data) setErr("Identifiants incorrects. Vérifiez votre email/téléphone et PIN.");
+      else onLogin(data);
     } catch { setErr("Erreur de connexion. Réessayez."); }
     finally { setLoading(false); }
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0B1628,#162F52)",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem",fontFamily:"system-ui,sans-serif"}}>
-      <div style={{maxWidth:400,width:"100%"}}>
-        <div style={{textAlign:"center",marginBottom:"2rem"}}>
-          <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1.3rem",textDecoration:"none"}}>TalentProof</Link>
-          <p style={{color:"rgba(255,255,255,.6)",fontSize:".82rem",marginTop:".5rem"}}>Espace Recruteur</p>
+    <div ref={overlayRef}
+      onClick={e => e.target === overlayRef.current && onClose()}
+      style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+      <div style={{maxWidth:400,width:"100%",background:"linear-gradient(135deg,#0B1628,#162F52)",borderRadius:"20px",padding:"2rem",boxShadow:"0 24px 60px rgba(0,0,0,.5)"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.5rem"}}>
+          <h2 style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:"1.05rem",margin:0}}>🏢 Connexion Recruteur</h2>
+          <button onClick={onClose}
+            style={{background:"rgba(255,255,255,.12)",border:"none",color:"white",width:32,height:32,borderRadius:"50%",cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            ✕
+          </button>
         </div>
-        <div style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:"20px",padding:"2rem"}}>
-          <h2 style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:"1.1rem",marginBottom:"1.5rem",textAlign:"center"}}>🏢 Connexion Recruteur</h2>
-          <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
-            <div>
-              <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Email ou téléphone</label>
-              <input value={identifiant} onChange={e=>setIdentifiant(e.target.value)}
-                placeholder="marie@entreprise.com ou +225..."
-                style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white"}}
-                onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}/>
-            </div>
-            <div>
-              <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Code PIN (4 chiffres)</label>
-              <input type="password" inputMode="numeric" maxLength={4} value={pin}
-                onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,4))}
-                placeholder="●●●●"
-                style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white",letterSpacing:".3em",textAlign:"center"}}
-                onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}
-                onKeyDown={e=>e.key==="Enter"&&connexion()}/>
-            </div>
-            {err&&<div style={{background:"#FEF2F2",border:"1px solid #FCA5A5",borderRadius:"8px",padding:".7rem",color:"#991B1B",fontSize:".82rem"}}>{err}</div>}
-            <button onClick={connexion} disabled={loading}
-              style={{padding:".8rem",borderRadius:"99px",border:"none",background:loading?"#374151":"linear-gradient(135deg,#C9960F,#F0C040)",color:loading?"#9CA3AF":"#0D3B2E",fontWeight:800,fontSize:".9rem",cursor:loading?"wait":"pointer",transition:"all .2s"}}>
-              {loading?"⏳ Connexion…":"🔑 Se connecter"}
-            </button>
+        <div style={{display:"flex",flexDirection:"column",gap:"1rem"}}>
+          <div>
+            <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Email ou téléphone</label>
+            <input value={identifiant} onChange={e=>setIdentifiant(e.target.value)}
+              placeholder="marie@entreprise.com ou +225…"
+              style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white"}}
+              onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}/>
           </div>
-          <div style={{textAlign:"center",marginTop:"1.5rem",paddingTop:"1.5rem",borderTop:"1px solid rgba(255,255,255,.1)"}}>
-            <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".6rem"}}>Pas encore de compte ?</p>
-            <button onClick={onShowLanding}
-              style={{display:"inline-block",background:"rgba(255,255,255,.1)",color:"white",fontWeight:700,fontSize:".82rem",padding:".55rem 1.2rem",borderRadius:"99px",border:"1px solid rgba(255,255,255,.2)",cursor:"pointer"}}>
-              🏢 S'inscrire
-            </button>
+          <div>
+            <label style={{color:"rgba(255,255,255,.7)",fontSize:".82rem",fontWeight:600,display:"block",marginBottom:".4rem"}}>Code PIN (4 chiffres)</label>
+            <input type="password" inputMode="numeric" maxLength={4} value={pin}
+              onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,4))}
+              placeholder="●●●●"
+              style={{...inputSt,background:"rgba(255,255,255,.08)",border:"1.5px solid rgba(255,255,255,.18)",color:"white",letterSpacing:".3em",textAlign:"center"}}
+              onFocus={e=>e.target.style.borderColor="#F0C040"} onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.18)"}
+              onKeyDown={e=>e.key==="Enter"&&connexion()}/>
           </div>
+          {err && <div style={{background:"#FEF2F2",border:"1px solid #FCA5A5",borderRadius:"8px",padding:".7rem",color:"#991B1B",fontSize:".82rem"}}>{err}</div>}
+          <button onClick={connexion} disabled={loading}
+            style={{padding:".8rem",borderRadius:"99px",border:"none",background:loading?"#374151":"linear-gradient(135deg,#C9960F,#F0C040)",color:loading?"#9CA3AF":"#0D3B2E",fontWeight:800,fontSize:".9rem",cursor:loading?"wait":"pointer",transition:"all .2s"}}>
+            {loading ? "⏳ Connexion…" : "🔑 Se connecter"}
+          </button>
         </div>
-        <div style={{textAlign:"center",marginTop:"1rem"}}>
-          <Link href="/recruteur" style={{color:"rgba(255,255,255,.4)",fontSize:".75rem",textDecoration:"none"}}>← Retour à l'espace recruteur</Link>
+        <div style={{textAlign:"center",marginTop:"1.2rem",paddingTop:"1.2rem",borderTop:"1px solid rgba(255,255,255,.1)"}}>
+          <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".5rem"}}>Pas encore de compte ?</p>
+          <Link href="/inscription-entreprise" onClick={onClose}
+            style={{color:"#F0C040",fontWeight:700,fontSize:".82rem",textDecoration:"none"}}>
+            S'inscrire comme recruteur →
+          </Link>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   CARTE RECRUTEUR
+───────────────────────────────────────────────────────── */
+function CarteRecruteur({ r }) {
+  const initiales = (r.nom_entreprise || "?").substring(0, 2).toUpperCase();
+  const isActive  = r.statut === "active";
+  return (
+    <div style={{background:"white",borderRadius:"16px",padding:"1.2rem",boxShadow:"0 2px 12px rgba(0,0,0,.07)",border:"1px solid #E5E7EB",display:"flex",flexDirection:"column",gap:".75rem",transition:"box-shadow .2s,transform .2s"}}
+      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 28px rgba(0,0,0,.13)";e.currentTarget.style.transform="translateY(-2px)";}}
+      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.07)";e.currentTarget.style.transform="none";}}>
+      <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
+        <div style={{width:46,height:46,borderRadius:"12px",background:"linear-gradient(135deg,#0B1628,#162F52)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <span style={{color:"#F0C040",fontWeight:900,fontSize:".95rem",fontFamily:"'Sora',sans-serif"}}>{initiales}</span>
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".9rem",color:"#111",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{r.nom_entreprise || "—"}</div>
+          <div style={{color:"#6B7280",fontSize:".74rem",marginTop:"2px"}}>{[r.secteur,r.ville,r.pays].filter(Boolean).join(" · ")}</div>
+        </div>
+      </div>
+      {r.types_profils && (
+        <div style={{fontSize:".76rem",color:"#374151",background:"#F9FAFB",borderRadius:"8px",padding:".4rem .65rem",lineHeight:1.55,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+          🎯 {r.types_profils}
+        </div>
+      )}
+      <div style={{display:"flex",gap:".45rem",flexWrap:"wrap",marginTop:"auto"}}>
+        <span style={{background:isActive?"#F0FDF4":"#FFF7ED",color:isActive?"#16A34A":"#D97706",fontSize:".68rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px",border:`1px solid ${isActive?"#86EFAC":"#FDE68A"}`}}>
+          {isActive ? "✅ Actif" : "⏳ En attente"}
+        </span>
+        {r.abonnement && (
+          <span style={{background:"#EFF6FF",color:"#1D4ED8",fontSize:".68rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px",border:"1px solid #BFDBFE"}}>
+            {r.abonnement}
+          </span>
+        )}
+        {r.volume_recrutement && (
+          <span style={{background:"#F5F3FF",color:"#7C3AED",fontSize:".68rem",fontWeight:700,padding:"2px 8px",borderRadius:"99px",border:"1px solid #DDD6FE"}}>
+            {r.volume_recrutement} recrut./an
+          </span>
+        )}
       </div>
     </div>
   );
@@ -238,7 +260,6 @@ function Dashboard({ recruteur, onLogout }) {
                     </div>
                 }
               </div>
-
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"1rem"}}>
                 {[
                   ["nom_entreprise","🏢 Nom de l'entreprise"],
@@ -262,7 +283,6 @@ function Dashboard({ recruteur, onLogout }) {
                   </div>
                 ))}
               </div>
-
               <div style={{marginTop:"1rem",paddingTop:"1rem",borderTop:"1px solid #F3F4F6"}}>
                 <div style={{display:"flex",gap:"1.5rem",flexWrap:"wrap"}}>
                   <div>
@@ -280,8 +300,6 @@ function Dashboard({ recruteur, onLogout }) {
                 </div>
               </div>
             </div>
-
-            {/* CTA annuaire */}
             <div style={{background:"linear-gradient(135deg,#071F15,#1B6B47)",borderRadius:"16px",padding:"1.3rem",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"1rem"}}>
               <div>
                 <div style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:".95rem",marginBottom:".25rem"}}>Parcourir l'annuaire des talents</div>
@@ -401,149 +419,101 @@ function Dashboard({ recruteur, onLogout }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   PAGE PRINCIPALE (landing + connexion)
+   PAGE PRINCIPALE — publique
 ───────────────────────────────────────────────────────── */
 export default function RecruteurPage() {
-  const [mode, setMode]       = useState("login"); // login | landing | dashboard
-  const [recruteur, setRecr]  = useState(null);
+  const [recruteurs, setRecruteurs] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [showModal, setShowModal]   = useState(false);
+  const [recruteur, setRecr]        = useState(null);
 
-  // Restaurer session localStorage ou auto-login depuis URL (?tel=...&auto=1)
-  useEffect(()=>{
-    // 1. Session existante
-    try {
-      const saved = localStorage.getItem("tp_recruteur");
-      if(saved) { setRecr(JSON.parse(saved)); setMode("dashboard"); return; }
-    } catch {}
+  useEffect(() => {
+    supabase.from("recruteurs").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => { setRecruteurs(data || []); setLoading(false); });
+  }, []);
 
-    // 2. Auto-login après inscription (tel + auto=1 dans l'URL)
-    const params = new URLSearchParams(window.location.search);
-    const tel  = params.get("tel");
-    const auto = params.get("auto");
-    if(tel && auto==="1"){
-      supabase
-        .from("recruteurs")
-        .select("*")
-        .eq("contact_telephone", decodeURIComponent(tel))
-        .order("created_at",{ascending:false})
-        .limit(1)
-        .then(({ data })=>{
-          if(data && data.length>0){
-            const r = data[0];
-            setRecr(r);
-            localStorage.setItem("tp_recruteur", JSON.stringify(r));
-            setMode("dashboard");
-          }
-        })
-        .catch(()=>{});
-    }
-  },[]);
+  const handleLogin  = (data) => { setRecr(data); setShowModal(false); };
+  const handleLogout = ()     => setRecr(null);
 
-  const handleLogin = (data)=>{ setRecr(data); localStorage.setItem("tp_recruteur",JSON.stringify(data)); setMode("dashboard"); };
-  const handleLogout= ()=>{ setRecr(null); localStorage.removeItem("tp_recruteur"); setMode("login"); };
+  if (recruteur) return <Dashboard recruteur={recruteur} onLogout={handleLogout}/>;
 
-  if(mode==="login") return <LoginForm onLogin={handleLogin} onShowLanding={()=>setMode("landing")}/>;
-  if(mode==="dashboard" && recruteur) return <Dashboard recruteur={recruteur} onLogout={handleLogout}/>;
-
-  /* ── LANDING ── */
   return (
-    <div style={{ minHeight:"100vh", background:"#F0F4F0", fontFamily:"system-ui,sans-serif" }}>
+    <div style={{minHeight:"100vh",background:"#F0F4F0",fontFamily:"system-ui,sans-serif"}}>
+      {showModal && <ModalLogin onLogin={handleLogin} onClose={()=>setShowModal(false)}/>}
 
-      {/* Header hero */}
-      <div style={{ background:"linear-gradient(135deg,#0B1628,#0F2744,#162F52)", padding:"2.5rem 1rem", textAlign:"center", position:"relative", overflow:"hidden" }}>
-        <div style={{ position:"absolute", top:-60, right:-60, width:220, height:220, borderRadius:"50%", background:"rgba(240,192,64,.07)", pointerEvents:"none" }}/>
-        <div style={{ maxWidth:640, margin:"0 auto", position:"relative" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"1.2rem" }}>
-            <Link href="/" style={{ color:"rgba(255,255,255,0.5)", fontSize:".79rem", textDecoration:"none" }}>← Retour</Link>
-            <button onClick={()=>setMode("login")} style={{ background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.25)", color:"white", fontWeight:700, fontSize:".8rem", padding:".45rem 1rem", borderRadius:"99px", cursor:"pointer" }}>
-              🔑 Connexion espace recruteur
+      {/* ── HEADER ── */}
+      <div style={{background:"linear-gradient(135deg,#0B1628,#0F2744,#162F52)"}}>
+        <div style={{maxWidth:1100,margin:"0 auto",padding:"1rem 1.2rem",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:".75rem"}}>
+          <div>
+            <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1.1rem",textDecoration:"none"}}>TalentProof</Link>
+            <div style={{color:"rgba(255,255,255,.5)",fontSize:".74rem",marginTop:"2px"}}>🏢 Espace Recruteur</div>
+          </div>
+          <div style={{display:"flex",gap:".6rem",alignItems:"center",flexWrap:"wrap"}}>
+            <Link href="/inscription-entreprise"
+              style={{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.22)",color:"white",fontWeight:600,fontSize:".82rem",padding:".45rem 1.05rem",borderRadius:"99px",textDecoration:"none"}}>
+              ✍️ S'inscrire
+            </Link>
+            <button onClick={()=>setShowModal(true)}
+              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",border:"none",color:"#0D3B2E",fontWeight:800,fontSize:".82rem",padding:".48rem 1.15rem",borderRadius:"99px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              🔑 Se connecter à mon espace
             </button>
           </div>
-          <div style={{ display:"inline-block", background:"rgba(240,192,64,.14)", color:"#F0C040", fontSize:".66rem", fontWeight:800, letterSpacing:".9px", textTransform:"uppercase", padding:"4px 12px", borderRadius:"99px", marginBottom:".85rem", border:"1px solid rgba(240,192,64,.3)" }}>
-            🏢 ESPACE RECRUTEUR
-          </div>
-          <h1 style={{ fontFamily:"'Sora',sans-serif", color:"#F5F0E8", fontWeight:900, fontSize:"clamp(1.3rem,4vw,1.85rem)", lineHeight:1.25, margin:"0 0 .65rem" }}>
-            Recrutez les meilleurs talents<br/>
-            <span style={{ color:"#F0C040" }}>d'Afrique en 48 heures.</span>
+        </div>
+
+        {/* ── HERO ── */}
+        <div style={{maxWidth:680,margin:"0 auto",padding:"2rem 1.2rem 2.5rem",textAlign:"center"}}>
+          <h1 style={{fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:"clamp(1.45rem,4vw,2.1rem)",color:"white",lineHeight:1.25,marginBottom:".7rem"}}>
+            Les entreprises qui recrutent<br/>sur TalentProof
           </h1>
-          <p style={{ color:"rgba(210,225,245,.72)", fontSize:".88rem", lineHeight:1.7, marginBottom:"1.5rem" }}>
-            14 000+ profils vérifiés — chauffeurs, artisans, personnels de maison, techniciens.
-            Tous disponibles, joignables directement sur WhatsApp.
+          <p style={{color:"rgba(255,255,255,.6)",fontSize:".9rem",lineHeight:1.75,marginBottom:"1.6rem"}}>
+            {loading ? "Chargement…" : `${recruteurs.length} entreprise${recruteurs.length!==1?"s":""} inscrite${recruteurs.length!==1?"s":""} recherchent activement des talents en Afrique.`}
           </p>
-          <div style={{ display:"flex", gap:".65rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <Link href="/inscription-entreprise" style={{ display:"inline-flex", alignItems:"center", gap:".45rem", background:"linear-gradient(135deg,#C9960F,#F0C040)", color:"#0D3B2E", fontWeight:800, fontSize:".9rem", padding:".78rem 1.75rem", borderRadius:"99px", textDecoration:"none", boxShadow:"0 4px 18px rgba(201,150,15,.42)" }}>
-              🏢 S'inscrire maintenant
+          <div style={{display:"flex",gap:".75rem",justifyContent:"center",flexWrap:"wrap"}}>
+            <Link href="/inscription-entreprise"
+              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".9rem",padding:".72rem 1.6rem",borderRadius:"99px",textDecoration:"none",boxShadow:"0 4px 18px rgba(201,150,15,.4)"}}>
+              🏢 Inscrire mon entreprise
             </Link>
-            <Link href="/annuaire" style={{ display:"inline-flex", alignItems:"center", gap:".45rem", color:"rgba(255,255,255,.78)", fontWeight:600, fontSize:".88rem", padding:".78rem 1.4rem", borderRadius:"99px", textDecoration:"none", border:"1.5px solid rgba(255,255,255,.22)" }}>
-              🔍 Parcourir l'annuaire
-            </Link>
+            <button onClick={()=>setShowModal(true)}
+              style={{background:"rgba(255,255,255,.1)",border:"1.5px solid rgba(255,255,255,.28)",color:"white",fontWeight:700,fontSize:".9rem",padding:".72rem 1.4rem",borderRadius:"99px",cursor:"pointer"}}>
+              🔑 Connexion
+            </button>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth:820, margin:"0 auto", padding:"1.5rem 1rem" }}>
+      {/* ── GRILLE ── */}
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"2rem 1rem"}}>
+        {loading ? (
+          <div style={{textAlign:"center",padding:"4rem",color:"#9CA3AF",fontSize:".9rem"}}>⏳ Chargement des entreprises…</div>
+        ) : recruteurs.length === 0 ? (
+          <div style={{textAlign:"center",padding:"4rem"}}>
+            <div style={{fontSize:"3.5rem",marginBottom:"1rem"}}>🏢</div>
+            <p style={{color:"#6B7280",fontFamily:"'Sora',sans-serif",fontWeight:700,marginBottom:".5rem"}}>Aucune entreprise inscrite pour l'instant</p>
+            <p style={{color:"#9CA3AF",fontSize:".85rem",marginBottom:"1.5rem"}}>Soyez la première à rejoindre TalentProof.</p>
+            <Link href="/inscription-entreprise" style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".88rem",padding:".65rem 1.5rem",borderRadius:"99px",textDecoration:"none"}}>
+              S'inscrire maintenant
+            </Link>
+          </div>
+        ) : (
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"1rem"}}>
+            {recruteurs.map(r => <CarteRecruteur key={r.id} r={r}/>)}
+          </div>
+        )}
 
-        {/* Stats */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:".75rem", marginBottom:"1.5rem" }}>
-          {[["14 000+","talents inscrits"],["9 pays","couverts"],["48h","délai moyen"]].map(([v,l]) => (
-            <div key={l} style={{ background:"white", borderRadius:"14px", padding:"1rem .75rem", textAlign:"center", boxShadow:"0 2px 8px rgba(0,0,0,.05)" }}>
-              <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:900, fontSize:"clamp(1rem,3vw,1.3rem)", color:"#1B6B47" }}>{v}</div>
-              <div style={{ color:"#888", fontSize:".72rem", marginTop:"3px" }}>{l}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Avantages */}
-        <h2 style={{ fontFamily:"'Sora',sans-serif", fontWeight:800, fontSize:"1.05rem", color:"#111", marginBottom:".85rem" }}>Pourquoi choisir TalentProof ?</h2>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(230px,1fr))", gap:".75rem", marginBottom:"1.5rem" }}>
-          {AVANTAGES.map((a,i) => (
-            <div key={i} style={{ background:"white", borderRadius:"14px", padding:"1rem", boxShadow:"0 2px 8px rgba(0,0,0,.05)", display:"flex", gap:".7rem", alignItems:"flex-start" }}>
-              <span style={{ fontSize:"1.4rem", flexShrink:0 }}>{a.icon}</span>
-              <div>
-                <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:700, fontSize:".85rem", color:"#111", marginBottom:".18rem" }}>{a.titre}</div>
-                <div style={{ color:"#666", fontSize:".78rem", lineHeight:1.55 }}>{a.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Témoignages */}
-        <h2 style={{ fontFamily:"'Sora',sans-serif", fontWeight:800, fontSize:"1.05rem", color:"#111", marginBottom:".85rem" }}>Ils ont recruté via TalentProof</h2>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:".75rem", marginBottom:"1.5rem" }}>
-          {TEMOIGNAGES.map((t,i) => (
-            <div key={i} style={{ background:"white", borderRadius:"14px", padding:"1.1rem", boxShadow:"0 2px 8px rgba(0,0,0,.05)" }}>
-              <div style={{ color:"#F0C040", fontSize:"1.2rem", marginBottom:".5rem" }}>★★★★★</div>
-              <p style={{ color:"#444", fontSize:".82rem", lineHeight:1.68, fontStyle:"italic", marginBottom:".65rem" }}>« {t.txt} »</p>
-              <div style={{ display:"flex", alignItems:"center", gap:".5rem" }}>
-                <div style={{ width:36, height:36, borderRadius:"50%", background:"linear-gradient(135deg,#0B1628,#162F52)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.1rem" }}>{t.avatar}</div>
-                <div>
-                  <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:700, fontSize:".8rem", color:"#111" }}>{t.nom}</div>
-                  <div style={{ color:"#888", fontSize:".72rem" }}>{t.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div style={{ background:"linear-gradient(135deg,#071F15,#1B6B47)", borderRadius:"18px", padding:"1.6rem 1rem", textAlign:"center" }}>
-          <div style={{ fontFamily:"'Sora',sans-serif", fontWeight:900, color:"white", fontSize:"1.05rem", marginBottom:".4rem" }}>Prêt à recruter ?</div>
-          <p style={{ color:"rgba(255,255,255,.65)", fontSize:".82rem", marginBottom:"1.1rem" }}>Inscrivez votre entreprise pour accéder aux meilleurs talents d'Afrique.</p>
-          <div style={{ display:"flex", gap:".65rem", justifyContent:"center", flexWrap:"wrap" }}>
-            <Link href="/inscription-entreprise" style={{ display:"inline-flex", alignItems:"center", gap:".4rem", background:"linear-gradient(135deg,#C9960F,#F0C040)", color:"#0D3B2E", fontWeight:800, fontSize:".88rem", padding:".72rem 1.7rem", borderRadius:"99px", textDecoration:"none", boxShadow:"0 4px 18px rgba(201,150,15,.42)" }}>
+        {/* ── CTA BAS ── */}
+        <div style={{marginTop:"3rem",background:"linear-gradient(135deg,#0B1628,#162F52)",borderRadius:"20px",padding:"2rem",textAlign:"center"}}>
+          <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"white",marginBottom:".5rem"}}>Votre entreprise recrute ?</h2>
+          <p style={{color:"rgba(255,255,255,.6)",fontSize:".85rem",marginBottom:"1.3rem"}}>Inscrivez-vous et accédez à 14 000+ talents vérifiés.</p>
+          <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
+            <Link href="/inscription-entreprise"
+              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".9rem",padding:".72rem 1.6rem",borderRadius:"99px",textDecoration:"none"}}>
               🏢 S'inscrire maintenant
             </Link>
-            <button onClick={()=>setMode("login")} style={{ display:"inline-flex", alignItems:"center", gap:".4rem", color:"white", fontWeight:600, fontSize:".88rem", padding:".72rem 1.5rem", borderRadius:"99px", textDecoration:"none", border:"1.5px solid rgba(255,255,255,.3)", background:"transparent", cursor:"pointer" }}>
-              🔑 Se connecter
+            <button onClick={()=>setShowModal(true)}
+              style={{background:"rgba(255,255,255,.1)",border:"1.5px solid rgba(255,255,255,.28)",color:"white",fontWeight:700,fontSize:".9rem",padding:".72rem 1.4rem",borderRadius:"99px",cursor:"pointer"}}>
+              🔑 Déjà inscrit ? Se connecter
             </button>
           </div>
-        </div>
-
-        <div style={{ textAlign:"center", marginTop:"1.5rem", color:"#AAA", fontSize:".73rem", paddingBottom:"1.5rem" }}>
-          <Link href="/" style={{ color:"#1B6B47", textDecoration:"none", fontWeight:600 }}>← TalentProof</Link>
-          {" · "}
-          <Link href="/mentions-legales" style={{ color:"#888", textDecoration:"none" }}>Mentions légales</Link>
-          {" · "}
-          <Link href="/confidentialite" style={{ color:"#888", textDecoration:"none" }}>Confidentialité</Link>
         </div>
       </div>
     </div>
