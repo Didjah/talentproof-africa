@@ -112,8 +112,8 @@ function ModalVideo({p,onClose}){
         <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,color:"white",fontSize:".9rem"}}>🎥 {p.prenom} {p.nom} — {p.metier}</div>
         <div style={{color:"rgba(255,255,255,.5)",fontSize:".74rem"}}>📍 {p.ville}, {p.pays}</div>
       </div>
-      {p.videoUrl
-        ?<video controls autoPlay style={{width:"100%",maxHeight:420,background:"#000",display:"block"}} src={p.videoUrl}/>
+      {p.video_url
+        ?<video controls autoPlay style={{width:"100%",maxHeight:420,background:"#000",display:"block"}} src={p.video_url}/>
         :<div style={{background:"linear-gradient(135deg,#071F15,#1B6B47)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"3.5rem 1rem",textAlign:"center"}}>
           <span style={{fontSize:"4rem",marginBottom:".6rem"}}>{p.avatar}</span>
           <div style={{color:"white",fontWeight:700,fontSize:".9rem"}}>Vidéo en cours de validation</div>
@@ -229,7 +229,7 @@ function CarteProfilCard({p}){
 
           {/* Badges Vidéo / Photo — haut à droite, cliquables */}
           <div style={{position:"absolute",top:".5rem",right:".55rem",display:"flex",flexDirection:"column",gap:".25rem",alignItems:"flex-end"}}>
-            {p.hasVideo&&(
+            {(p.hasVideo||p.video_url)&&(
               <button onClick={(e)=>{e.preventDefault();e.stopPropagation();setModal("video");}}
                 style={{background:"rgba(93,33,211,.9)",color:"white",fontSize:".58rem",fontWeight:700,padding:"3px 9px",borderRadius:"99px",border:"none",cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 8px rgba(0,0,0,.3)",transition:"transform .15s"}}
                 onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
@@ -366,7 +366,7 @@ export default function AnnuairePage(){
             grad,
             accent,
             phone: t.telephone || t.whatsapp || WA_NUM1,
-            videoUrl: null,
+            video_url: t.video_url || null,
             photoUrl: t.preuve_url || null,
             photoProfilUrl: t.avatar_url || null,
           };

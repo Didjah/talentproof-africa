@@ -250,6 +250,26 @@ export default function ProfilDetailPage() {
               </div>
             )}
 
+            {/* Preuve vidéo */}
+            {talent.video_url && (
+              <div style={{marginBottom:"2.5rem"}}>
+                <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:"1.3rem",fontWeight:800,color:"#1B6B47",marginBottom:"1rem",display:"flex",alignItems:"center",gap:".5rem"}}>
+                  🎥 Preuve vidéo
+                </h2>
+                <div style={{background:"#F9FAFB",border:"2px solid #E5E7EB",borderRadius:"16px",overflow:"hidden"}}>
+                  <video
+                    controls
+                    src={talent.video_url}
+                    style={{width:"100%",maxHeight:400,background:"#000",display:"block"}}
+                  />
+                  <div style={{padding:".75rem 1rem",display:"flex",alignItems:"center",gap:".5rem"}}>
+                    <span style={{fontSize:".85rem",fontWeight:700,color:"#5B21B6"}}>Vidéo de présentation</span>
+                    <span style={{fontSize:".75rem",color:"#16A34A",marginLeft:"auto"}}>✓ Accès public</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Médias (Accès libre) */}
             <div style={{marginBottom:"2.5rem"}}>
               <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:"1.3rem",fontWeight:800,color:"#1B6B47",marginBottom:"1rem"}}>
@@ -257,9 +277,9 @@ export default function ProfilDetailPage() {
               </h2>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:"1rem"}}>
                 {/* Vidéo */}
-                {talent.videoUrl && (
+                {talent.video_url && (
                   <div style={{background:"#F9FAFB",border:"2px solid #E5E7EB",borderRadius:"16px",overflow:"hidden",transition:"transform .2s",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
-                    <video controls style={{width:"100%",height:200,objectFit:"cover",background:"#000"}} src={talent.videoUrl} />
+                    <video controls style={{width:"100%",height:200,objectFit:"cover",background:"#000"}} src={talent.video_url} />
                     <div style={{padding:"1rem",textAlign:"center"}}>
                       <div style={{fontSize:".9rem",fontWeight:700,color:"#5B21B6",marginBottom:".3rem"}}>🎥 Vidéo de présentation</div>
                       <div style={{fontSize:".75rem",color:"#16A34A"}}>✓ Accès public</div>
@@ -278,7 +298,7 @@ export default function ProfilDetailPage() {
                   </div>
                 )}
 
-                {!talent.videoUrl && !talent.preuve_url && (
+                {!talent.video_url && !talent.preuve_url && (
                   <div style={{gridColumn:"1/-1",textAlign:"center",padding:"2rem",color:"#9CA3AF"}}>
                     <div style={{fontSize:"2rem",marginBottom:".5rem"}}>📷</div>
                     <div style={{fontSize:".9rem"}}>Aucune preuve visuelle ajoutée pour le moment</div>
