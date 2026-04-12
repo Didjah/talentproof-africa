@@ -1,8 +1,8 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Upload, CheckCircle, Mic, Play, Square, RotateCcw, X } from "lucide-react";
+import { Upload, CheckCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { uploadFichier } from "@/services/api";
 
@@ -97,137 +97,13 @@ function Barre({ label, pct, color="#1B6B47" }) {
   );
 }
 
-// Enregistreur vocal simplifié
-function VoiceRecorder({ onRecorded }) {
-  const [phase, setPhase] = useState("idle"); // idle, recording, preview
-  const [elapsed, setElapsed] = useState(0);
-  const [audioUrl, setAudioUrl] = useState(null);
-  const recorderRef = useRef(null);
-  const chunksRef = useRef([]);
-  const timerRef = useRef(null);
-  const streamRef = useRef(null);
-  const MAX_SEC = 60;
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      chunksRef.current = [];
-      
-      const mimeType = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg"].find(t => 
-        MediaRecorder.isTypeSupported(t)
-      ) || "";
-      
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
-      recorderRef.current = recorder;
-      
-      recorder.ondataavailable = (e) => {
-        if (e.data?.size > 0) chunksRef.current.push(e.data);
-      };
-      
-      recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: mimeType || "audio/webm" });
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
-        setPhase("preview");
-        streamRef.current?.getTracks().forEach(t => t.stop());
-      };
-      
-      recorder.start(100);
-      setPhase("recording");
-      setElapsed(0);
-      
-      timerRef.current = setInterval(() => {
-        setElapsed(n => {
-          if (n + 1 >= MAX_SEC) {
-            stopRecording();
-            return MAX_SEC;
-          }
-          return n + 1;
-        });
-      }, 1000);
-    } catch (err) {
-      alert("Impossible d'accéder au microphone. Vérifiez les autorisations.");
-      setPhase("idle");
-    }
-  };
-
-  const stopRecording = () => {
-    clearInterval(timerRef.current);
-    if (recorderRef.current?.state === "recording") {
-      recorderRef.current.stop();
-    }
-  };
-
-  const reset = () => {
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
-    setAudioUrl(null);
-    setElapsed(0);
-    setPhase("idle");
-  };
-
-  const confirm = () => {
-    onRecorded(audioUrl);
-  };
-
-  const formatTime = (s) => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-
-  return (
-    <div style={{background:"rgba(240,192,64,.08)",border:"1.5px solid rgba(240,192,64,.25)",borderRadius:"14px",padding:"1.2rem",textAlign:"center"}}>
-      {phase === "idle" && (
-        <>
-          <p style={{color:"#666",fontSize:".82rem",marginBottom:"1rem",lineHeight:1.6}}>
-            Présentez-vous en 60 secondes : votre métier, votre expérience, vos compétences.
-          </p>
-          <button onClick={startRecording} style={{width:70,height:70,borderRadius:"50%",background:"linear-gradient(135deg,#C9960F,#F0C040)",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto",boxShadow:"0 4px 18px rgba(201,150,15,.42)",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-            <Mic size={32} color="#0D3B2E" strokeWidth={2.5}/>
-          </button>
-          <p style={{color:"#9CA3AF",fontSize:".72rem",marginTop:".6rem"}}>Appuyez pour commencer</p>
-        </>
-      )}
-      
-      {phase === "recording" && (
-        <>
-          <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,color:"#111",fontSize:"1.8rem",marginBottom:".5rem"}}>{formatTime(elapsed)}</div>
-          <div style={{background:"#E5E7EB",borderRadius:"99px",height:6,marginBottom:"1rem",overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${(elapsed/MAX_SEC)*100}%`,background:"linear-gradient(90deg,#F0C040,#C9960F)",borderRadius:"99px",transition:"width .9s linear"}}/>
-          </div>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",marginBottom:"1rem"}}>
-            <span style={{width:8,height:8,borderRadius:"50%",background:"#EF4444",animation:"blink 1s infinite"}}/>
-            <span style={{color:"#EF4444",fontSize:".82rem",fontWeight:700}}>Enregistrement en cours</span>
-          </div>
-          <button onClick={stopRecording} style={{width:60,height:60,borderRadius:"50%",background:"#EF4444",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto",boxShadow:"0 4px 18px rgba(239,68,68,.4)"}}>
-            <Square size={22} color="white" fill="white"/>
-          </button>
-          <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }`}</style>
-        </>
-      )}
-      
-      {phase === "preview" && audioUrl && (
-        <>
-          <div style={{fontFamily:"'Sora',sans-serif",fontWeight:700,color:"#111",fontSize:".92rem",marginBottom:".8rem"}}>
-            ✅ {formatTime(elapsed)} enregistrées
-          </div>
-          <audio controls src={audioUrl} style={{width:"100%",marginBottom:"1rem",borderRadius:"8px"}}/>
-          <div style={{display:"flex",gap:".5rem"}}>
-            <button onClick={reset} style={{flex:1,padding:".6rem",borderRadius:"99px",border:"1.5px solid #D1FAE5",background:"white",color:"#666",fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:".3rem"}}>
-              <RotateCcw size={14}/> Refaire
-            </button>
-            <button onClick={confirm} style={{flex:2,padding:".6rem",borderRadius:"99px",border:"none",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",fontWeight:800,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:".3rem"}}>
-              <CheckCircle size={14}/> Valider
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function InscriptionTalentPage() {
   const [etape, setEtape] = useState(1);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
   const [form, setForm] = useState({
     // Étape 1 : Infos personnelles
     nom: "",
@@ -312,10 +188,11 @@ export default function InscriptionTalentPage() {
     try {
       let avatarUrl = null;
       let preuveUrl = null;
+      let videoUrl  = null;
 
       // Upload photo de profil
       if (form.photoProfilUrl && form.photoProfilUrl.startsWith("blob:")) {
-        setProgress({ label: "Upload photo de profil…", pct: 20 });
+        setProgress({ label: "Upload photo de profil…", pct: 15 });
         const res = await fetch(form.photoProfilUrl);
         const blob = await res.blob();
         const fichier = new File([blob], `avatar-${Date.now()}.jpg`, { type: blob.type });
@@ -325,7 +202,7 @@ export default function InscriptionTalentPage() {
 
       // Upload photo de réalisation
       if (form.photoUrl && form.photoUrl.startsWith("blob:")) {
-        setProgress({ label: "Upload photo de réalisation…", pct: 45 });
+        setProgress({ label: "Upload photo de réalisation…", pct: 35 });
         const res = await fetch(form.photoUrl);
         const blob = await res.blob();
         const fichier = new File([blob], `preuve-${Date.now()}.jpg`, { type: blob.type });
@@ -333,7 +210,15 @@ export default function InscriptionTalentPage() {
         preuveUrl = await uploadFichier("preuves", fichier, chemin);
       }
 
-      setProgress({ label: "Sauvegarde du profil…", pct: 70 });
+      // Upload vidéo
+      if (videoFile) {
+        setProgress({ label: "Upload vidéo…", pct: 55 });
+        const ext = videoFile.name.split(".").pop() || "mp4";
+        const chemin = `${Date.now()}-video.${ext}`;
+        videoUrl = await uploadFichier("preuves", videoFile, chemin);
+      }
+
+      setProgress({ label: "Sauvegarde du profil…", pct: 80 });
 
       // Sauvegarde dans Supabase
       const { error } = await supabase.from("talents").insert({
@@ -351,8 +236,9 @@ export default function InscriptionTalentPage() {
         niveau_etude: form.niveauEtude,
         avatar_url: avatarUrl,
         preuve_url: preuveUrl,
+        video_url: videoUrl,
         has_photo: !!preuveUrl,
-        has_video: !!form.videoUrl,
+        has_video: !!videoUrl,
       });
 
       if (error) throw error;
@@ -671,17 +557,44 @@ export default function InscriptionTalentPage() {
                   🎥 Vidéo de présentation (recommandé)
                 </div>
                 {!form.videoUrl ? (
-                  <VoiceRecorder onRecorded={(url) => set("videoUrl", url)} />
+                  <div style={{position:"relative",border:"2px dashed #D1FAE5",borderRadius:"12px",padding:"1.5rem 1rem",textAlign:"center",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.borderColor="#1B6B47"} onMouseLeave={e=>e.currentTarget.style.borderColor="#D1FAE5"}>
+                    <Upload size={32} color="#9CA3AF" style={{margin:"0 auto .5rem"}}/>
+                    <div style={{color:"#666",fontSize:".82rem",fontWeight:600,marginBottom:".2rem"}}>Ajoute une vidéo de ton travail</div>
+                    <div style={{color:"#9CA3AF",fontSize:".72rem"}}>MP4, MOV, WEBM — Max 50 Mo</div>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/quicktime,video/webm,video/*"
+                      id="video-upload"
+                      style={{display:"none"}}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 50 * 1024 * 1024) {
+                          alert("La vidéo dépasse 50 Mo. Choisissez un fichier plus léger.");
+                          return;
+                        }
+                        setVideoFile(file);
+                        set("videoUrl", URL.createObjectURL(file));
+                      }}
+                    />
+                    <label htmlFor="video-upload" style={{position:"absolute",inset:0,cursor:"pointer"}}/>
+                  </div>
                 ) : (
-                  <div style={{background:"#F0FDF4",border:"1.5px solid #86EFAC",borderRadius:"12px",padding:"1rem",display:"flex",alignItems:"center",gap:".7rem"}}>
-                    <CheckCircle size={24} color="#16A34A" style={{flexShrink:0}}/>
-                    <div style={{flex:1}}>
-                      <div style={{fontWeight:700,fontSize:".85rem",color:"#065F46"}}>Vidéo enregistrée ✓</div>
-                      <div style={{fontSize:".75rem",color:"#047857"}}>Prête à être envoyée</div>
+                  <div>
+                    <video
+                      src={form.videoUrl}
+                      controls
+                      style={{width:"100%",maxHeight:220,borderRadius:"12px",background:"#000",display:"block",marginBottom:".6rem"}}
+                    />
+                    <div style={{display:"flex",alignItems:"center",gap:".6rem"}}>
+                      <CheckCircle size={18} color="#16A34A" style={{flexShrink:0}}/>
+                      <span style={{fontWeight:700,fontSize:".82rem",color:"#065F46",flex:1}}>
+                        {videoFile ? videoFile.name : "Vidéo sélectionnée ✓"}
+                      </span>
+                      <button onClick={() => { set("videoUrl", null); setVideoFile(null); }} style={{background:"transparent",border:"none",color:"#9CA3AF",cursor:"pointer",display:"flex",alignItems:"center"}}>
+                        <X size={18}/>
+                      </button>
                     </div>
-                    <button onClick={() => set("videoUrl", null)} style={{background:"transparent",border:"none",color:"#9CA3AF",cursor:"pointer",fontSize:"1.2rem"}}>
-                      <X size={20}/>
-                    </button>
                   </div>
                 )}
               </div>

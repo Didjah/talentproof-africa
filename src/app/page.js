@@ -9,6 +9,7 @@ import {
   User, Briefcase, Handshake, HelpCircle,
 } from "lucide-react";
 import { trackWhatsAppClick, initAnalytics } from "@/utils/analytics";
+import { supabase } from "@/lib/supabaseClient";
 
 const DISPO_COLOR = { immediate:"#16A34A", "1_month":"#D97706", negotiable:"#6B7280" };
 const DISPO_LABEL = { immediate:"Disponible", "1_month":"Dispo dans 1 mois", negotiable:"À négocier" };
@@ -789,6 +790,148 @@ const PV=[
   {id:"edu",lab:"🎓 Écoles",  btnCls:"btn-edu",txt:"Vos apprenants méritent d'être vus — diplôme ou attestation. Vitrine directe dans le fil des recruteurs africains et internationaux."},
   {id:"afr",lab:"🌍 Afrique", btnCls:"btn-afr",txt:"L'Afrique regorge de talents invisibles. Construisons ensemble l'infrastructure de confiance qu'ils méritent. Impact durable garanti."},
 ];
+/* ──────────────────────────────────────────────────────────────
+   SECTION "ILS PROUVENT LEUR TALENT"
+────────────────────────────────────────────────────────────── */
+function ProuventTalent() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modVideo, setModVideo] = useState(null);
+
+  useEffect(() => {
+    supabase
+      .from("talents")
+      .select("id,prenom,nom,metier,experience,ville,bio,avatar_url,preuve_url,video_url,has_photo,has_video,verified,telephone")
+      .or("has_video.eq.true,has_photo.eq.true")
+      .order("created_at", { ascending: false })
+      .limit(6)
+      .then(({ data }) => { setItems(data || []); setLoading(false); });
+  }, []);
+
+  if (loading || items.length === 0) return null;
+
+  return (
+    <div style={{background:"linear-gradient(135deg,#0B1628,#162F52)",padding:"2.8rem 1rem"}}>
+      <div style={{maxWidth:600,margin:"0 auto"}}>
+        <div style={{textAlign:"center",marginBottom:"1.8rem"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"rgba(240,192,64,.12)",border:"1px solid rgba(240,192,64,.25)",borderRadius:"99px",padding:".35rem .9rem",marginBottom:".8rem"}}>
+            <span style={{fontSize:".72rem",color:"#F0C040",fontWeight:700,letterSpacing:".06em"}}>PREUVES RÉELLES</span>
+          </div>
+          <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.45rem",color:"white",marginBottom:".4rem"}}>
+            Ils prouvent leur talent
+          </h2>
+          <p style={{color:"rgba(255,255,255,.55)",fontSize:".85rem",margin:0}}>
+            Vidéos et réalisations vérifiées par TalentProof
+          </p>
+        </div>
+
+        <div style={{display:"flex",flexDirection:"column",gap:"1.4rem"}}>
+          {items.map(t => {
+            const prenom = t.prenom || "Talent";
+            const nom = t.nom || "";
+            const waUrl = `https://wa.me/${t.telephone || WA_NUM1}?text=${encodeURIComponent(`Bonjour ${prenom}, j'ai vu votre profil sur TalentProof.`)}`;
+            const isVideo = t.has_video && t.video_url;
+            const isPhoto = t.has_photo && t.preuve_url;
+            if (!isVideo && !isPhoto) return null;
+
+            return (
+              <div key={t.id} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:"18px",overflow:"hidden"}}>
+                {/* Media */}
+                <div style={{position:"relative"}}>
+                  {isVideo ? (
+                    <video
+                      src={t.video_url}
+                      poster={t.preuve_url || undefined}
+                      controls
+                      style={{width:"100%",maxHeight:300,display:"block",background:"#000"}}
+                    />
+                  ) : (
+                    <img
+                      src={t.preuve_url}
+                      alt={`Réalisation de ${prenom}`}
+                      style={{width:"100%",maxHeight:300,objectFit:"cover",display:"block"}}
+                    />
+                  )}
+                  {/* Badge */}
+                  <div style={{position:"absolute",top:10,left:10}}>
+                    <span style={{background: isVideo ? "rgba(93,33,211,.92)" : "rgba(15,118,110,.92)",color:"white",fontSize:".68rem",fontWeight:700,padding:"4px 10px",borderRadius:"99px",backdropFilter:"blur(4px)"}}>
+                      {isVideo ? "▶ Preuve vidéo" : "📸 Réalisation"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Profil */}
+                <div style={{padding:".9rem 1rem 1rem"}}>
+                  <div style={{display:"flex",gap:".7rem",alignItems:"flex-start",marginBottom:".65rem"}}>
+                    {t.avatar_url
+                      ? <img src={t.avatar_url} alt={prenom} style={{width:44,height:44,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(255,255,255,.15)",flexShrink:0}}/>
+                      : <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.3rem",flexShrink:0}}>👤</div>
+                    }
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{display:"flex",alignItems:"center",gap:".35rem",flexWrap:"wrap"}}>
+                        <span style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".92rem",color:"white"}}>{prenom} {nom}</span>
+                        {t.verified && <span style={{background:"rgba(29,78,216,.8)",color:"white",fontSize:".58rem",fontWeight:700,padding:"1px 6px",borderRadius:"99px"}}>✔ Vérifié</span>}
+                      </div>
+                      <div style={{color:"#86EFAC",fontWeight:700,fontSize:".78rem",marginTop:"1px"}}>
+                        {t.metier || "Talent"}{t.experience ? ` · ${t.experience}` : ""}
+                      </div>
+                      {t.ville && <div style={{color:"rgba(255,255,255,.45)",fontSize:".72rem"}}>📍 {t.ville}</div>}
+                    </div>
+                  </div>
+
+                  {t.bio && (
+                    <p style={{color:"rgba(255,255,255,.6)",fontSize:".79rem",lineHeight:1.55,margin:"0 0 .8rem",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
+                      {t.bio}
+                    </p>
+                  )}
+
+                  <div style={{display:"flex",gap:".5rem"}}>
+                    {isVideo && (
+                      <button
+                        onClick={() => setModVideo(t)}
+                        style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",border:"none",cursor:"pointer"}}
+                      >
+                        ▶ Voir la vidéo
+                      </button>
+                    )}
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"#25D366",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",textDecoration:"none"}}
+                    >
+                      <WaLogo size={14}/> Contacter
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{textAlign:"center",marginTop:"1.5rem"}}>
+          <a href="/annuaire" style={{display:"inline-flex",alignItems:"center",gap:".4rem",background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.15)",color:"white",fontWeight:700,fontSize:".85rem",padding:".65rem 1.5rem",borderRadius:"99px",textDecoration:"none"}}>
+            Voir tous les talents →
+          </a>
+        </div>
+      </div>
+
+      {/* Modal vidéo */}
+      {modVideo && (
+        <div onClick={()=>setModVideo(null)} style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,.9)",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+          <div onClick={e=>e.stopPropagation()} style={{position:"relative",maxWidth:680,width:"100%",borderRadius:"16px",overflow:"hidden",background:"#111"}}>
+            <button onClick={()=>setModVideo(null)} style={{position:"absolute",top:10,right:12,background:"rgba(255,255,255,.12)",border:"none",borderRadius:"50%",width:34,height:34,color:"white",cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>✕</button>
+            <div style={{padding:".8rem 1rem .6rem",background:"linear-gradient(135deg,#0B1628,#162F52)"}}>
+              <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,color:"white",fontSize:".88rem"}}>▶ {modVideo.prenom} {modVideo.nom} — {modVideo.metier}</div>
+            </div>
+            <video controls autoPlay src={modVideo.video_url} style={{width:"100%",maxHeight:420,background:"#000",display:"block"}}/>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PartnerSection(){
   const [act,setAct]=useState("biz");const [fade,setFade]=useState(false);
   const sw=id=>{if(id===act)return;setFade(true);setTimeout(()=>{setAct(id);setFade(false);},200);};
@@ -989,6 +1132,7 @@ function PageContent(){
         )}
       </div>
 
+      <ProuventTalent/>
       <VocalSection/>
       <PartnerSection/>
       
