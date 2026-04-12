@@ -76,9 +76,9 @@ function LoginForm({ onLogin }) {
             </button>
           </div>
           <div style={{textAlign:"center",marginTop:"1.5rem",paddingTop:"1.5rem",borderTop:"1px solid rgba(255,255,255,.1)"}}>
-            <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".6rem"}}>Pas encore de compte ?</p>
+            <p style={{color:"rgba(255,255,255,.45)",fontSize:".78rem",marginBottom:".6rem"}}>Pas encore partenaire ?</p>
             <Link href="/partenaire" style={{display:"inline-block",background:"rgba(255,255,255,.1)",color:"white",fontWeight:700,fontSize:".82rem",padding:".55rem 1.2rem",borderRadius:"99px",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)"}}>
-              🤝 Devenir Partenaire
+              🤝 S'inscrire comme partenaire
             </Link>
           </div>
         </div>
@@ -377,13 +377,13 @@ export default function PartenairesDashboardPage() {
   // Restaurer session depuis localStorage
   useEffect(()=>{
     try {
-      const saved = localStorage.getItem("tp_partenaire");
+      const saved = localStorage.getItem("partenaire_session");
       if(saved) { setPartn(JSON.parse(saved)); setMode("dashboard"); }
     } catch {}
   },[]);
 
-  const handleLogin  = (data)=>{ setPartn(data); localStorage.setItem("tp_partenaire",JSON.stringify(data)); setMode("dashboard"); };
-  const handleLogout = ()=>{ setPartn(null); localStorage.removeItem("tp_partenaire"); setMode("login"); };
+  const handleLogin  = (data)=>{ setPartn(data); localStorage.setItem("partenaire_session",JSON.stringify(data)); setMode("dashboard"); };
+  const handleLogout = ()=>{ setPartn(null); localStorage.removeItem("partenaire_session"); setMode("login"); };
 
   if(mode==="dashboard" && partenaire) return <Dashboard partenaire={partenaire} onLogout={handleLogout}/>;
   return <LoginForm onLogin={handleLogin}/>;

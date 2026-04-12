@@ -113,7 +113,7 @@ function GlobalStyles() { return <style dangerouslySetInnerHTML={{__html:CSS}}/>
 const NAV_LINKS = [
   { label:"Annuaire",           href:"/annuaire" },
   { label:"Espace Recruteur",   href:"/recruteur" },
-  { label:"Devenir Partenaire", href:"/partenaire" },
+  { label:"Devenir Partenaire", href:"/partenaires-dashboard" },
 ];
 
 function Header() {
@@ -257,7 +257,7 @@ function Header() {
               </div>
             </a>
 
-            <a href="/partenaire" onClick={()=>setMenuOpen(false)} style={{
+            <a href="/partenaires-dashboard" onClick={()=>setMenuOpen(false)} style={{
               display:"flex", alignItems:"center", gap:".7rem",
               background:"rgba(236,201,75,.08)", border:"1px solid rgba(236,201,75,.2)",
               borderRadius:"12px", padding:".85rem 1rem", textDecoration:"none",
