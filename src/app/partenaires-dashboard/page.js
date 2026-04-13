@@ -427,12 +427,20 @@ export default function PartenairesDashboardPage() {
   const [partenaire, setPartn]        = useState(null);
 
   useEffect(() => {
+    // Restaure la session depuis localStorage (navigation sans re-login)
+    try {
+      const raw = localStorage.getItem("partenaire_session");
+      if (raw) setPartn(JSON.parse(raw));
+    } catch {}
     supabase.from("partenaires").select("*").order("created_at", { ascending: false })
       .then(({ data }) => { setPartenaires(data || []); setLoading(false); });
   }, []);
 
-  const handleLogin  = (data) => { setPartn(data); setShowModal(false); };
-  const handleLogout = ()     => setPartn(null);
+  const handleLogin = (data) => {
+    localStorage.setItem("partenaire_session", JSON.stringify(data));
+    setPartn(data); setShowModal(false);
+  };
+  const handleLogout = () => { localStorage.removeItem("partenaire_session"); setPartn(null); };
 
   if (partenaire) return <Dashboard partenaire={partenaire} onLogout={handleLogout}/>;
 
