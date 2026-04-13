@@ -794,6 +794,7 @@ const PV=[
    SECTION "ILS PROUVENT LEUR TALENT"
 ────────────────────────────────────────────────────────────── */
 function ProuventTalent() {
+  const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modVideo, setModVideo] = useState(null);
@@ -835,7 +836,12 @@ function ProuventTalent() {
             if (!isVideo && !isPhoto) return null;
 
             return (
-              <div key={t.id} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:"18px",overflow:"hidden"}}>
+              <div key={t.id}
+                onClick={() => router.push(`/annuaire/${t.id}`)}
+                style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:"18px",overflow:"hidden",cursor:"pointer",transition:"border-color .2s"}}
+                onMouseEnter={e => e.currentTarget.style.borderColor="rgba(240,192,64,.35)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
+              >
                 {/* Media */}
                 <div style={{position:"relative"}}>
                   {isVideo ? (
@@ -843,6 +849,7 @@ function ProuventTalent() {
                       src={t.video_url}
                       poster={t.preuve_url || undefined}
                       controls
+                      onClick={e => e.stopPropagation()}
                       style={{width:"100%",maxHeight:300,display:"block",background:"#000"}}
                     />
                   ) : (
@@ -869,7 +876,7 @@ function ProuventTalent() {
                     }
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",alignItems:"center",gap:".35rem",flexWrap:"wrap"}}>
-                        <span style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".92rem",color:"white"}}>{prenom} {nom}</span>
+                        <span style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".92rem",color:"white",textDecoration:"underline",textDecorationColor:"rgba(240,192,64,.4)",textUnderlineOffset:"3px"}}>{prenom} {nom}</span>
                         {t.verified && <span style={{background:"rgba(29,78,216,.8)",color:"white",fontSize:".58rem",fontWeight:700,padding:"1px 6px",borderRadius:"99px"}}>✔ Vérifié</span>}
                       </div>
                       <div style={{color:"#86EFAC",fontWeight:700,fontSize:".78rem",marginTop:"1px"}}>
@@ -888,7 +895,7 @@ function ProuventTalent() {
                   <div style={{display:"flex",gap:".5rem"}}>
                     {isVideo && (
                       <button
-                        onClick={() => setModVideo(t)}
+                        onClick={e => { e.stopPropagation(); setModVideo(t); }}
                         style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",border:"none",cursor:"pointer"}}
                       >
                         ▶ Voir la vidéo
@@ -898,6 +905,7 @@ function ProuventTalent() {
                       href={waUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
                       style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"#25D366",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",textDecoration:"none"}}
                     >
                       <WaLogo size={14}/> Contacter
