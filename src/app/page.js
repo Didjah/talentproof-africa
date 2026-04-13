@@ -17,13 +17,6 @@ const MAX_SEC  = 60;
 const WA_NUM1  = "2250705503089";
 const WA_NUM2  = "2250507939706";
 const EMAIL    = "contact@talentproof.africa";
-const VID_DEMO = "https://www.w3schools.com/html/mov_bbb.mp4";
-
-const PROFILS_DEMO = [
-  { id:1, nom:"Moussa Diallo",  metier:"Chauffeur",   experience:7,  ville:"Dakar",   pays:"SN", avatar:"🚗", disponible:"immediate", bio:"Chauffeur VTC professionnel, ponctuel et discret. Habitué des trajets aéroport.",           mediaType:"video", likes:23, verified:true,  fromWhatsApp:false, photoUrl:"https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=700&q=80" },
-  { id:2, nom:"Fatou Ndiaye",   metier:"Couturière",  experience:12, ville:"Abidjan", pays:"CI", avatar:"✂️", disponible:"1_month",  bio:"Tenues de cérémonie wax et bazin sur mesure. Créations uniques alliant tradition et modernité.", mediaType:"image", likes:41, verified:true,  fromWhatsApp:false, photoUrl:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80" },
-  { id:3, nom:"Kofi Mensah",    metier:"Électricien", experience:9,  ville:"Lagos",   pays:"NG", avatar:"⚡", disponible:"negotiable",bio:"Installation et dépannage électrique toutes marques. Certifié, travail soigné.",              mediaType:"video", likes:17, verified:false, fromWhatsApp:true, photoUrl:"https://images.unsplash.com/photo-1621905251189-08b45249be0b?w=700&q=80" },
-];
 
 /* ──────────────────────────────────────────────────────────────
    CSS GLOBAL
@@ -503,14 +496,20 @@ function MediaVideo({profil,onClick}){
 
   return(
     <div style={{position:"relative",aspectRatio:"16/9",cursor:"pointer",overflow:"hidden",width:"100%",borderRadius:"12px"}} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onClick}>
-      <video 
-        ref={videoRef}
-        src={VID_DEMO}
-        loop
-        muted
-        playsInline
-        style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
-      />
+      {profil?.video_url ? (
+        <video
+          ref={videoRef}
+          src={profil.video_url}
+          loop
+          muted
+          playsInline
+          style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
+        />
+      ) : (
+        <div style={{width:"100%",aspectRatio:"16/9",background:"#1a1a1a",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,.4)",fontSize:".85rem",borderRadius:"12px"}}>
+          Vidéo non disponible
+        </div>
+      )}
       {/* Overlay avec bouton play */}
       {!playing && (
         <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.3)",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -1219,10 +1218,39 @@ function PageContent(){
   const [vidMod,setVidMod]=useState(null);
   const [insMod,setInsMod]=useState(false);
   const [metier,setMetier]=useState("Tous");
+  const [profils,setProfils]=useState([]);
 
   useEffect(()=>{const q=sp.get("q");if(q)setSearch(q);},[sp]);
 
-  const PROFILS=PROFILS_DEMO;
+  useEffect(()=>{
+    supabase
+      .from("talents")
+      .select("id,nom,prenom,metier,experience,ville,pays,photo_url,video_url,description,telephone,disponibilite,verified")
+      .order("created_at",{ascending:false})
+      .limit(20)
+      .then(({data})=>{
+        setProfils((data||[]).map(t=>({
+          id:          t.id,
+          nom:         [t.prenom,t.nom].filter(Boolean).join(" "),
+          metier:      t.metier||"",
+          experience:  t.experience||null,
+          ville:       t.ville||"",
+          pays:        t.pays||"",
+          avatar:      (((t.prenom||"")[0]||"")+((t.nom||"")[0]||"")).toUpperCase()||"👤",
+          disponible:  t.disponibilite||"negotiable",
+          bio:         t.description||"",
+          mediaType:   t.video_url?"video":"image",
+          likes:       0,
+          verified:    t.verified||false,
+          fromWhatsApp:false,
+          photoUrl:    t.photo_url||null,
+          video_url:   t.video_url||null,
+          telephone:   t.telephone||null,
+        })));
+      });
+  },[]);
+
+  const PROFILS=profils;
   const METIERS=["Tous",...new Set(PROFILS.map(p=>p.metier))];
 
   const filtered=useMemo(()=>{
