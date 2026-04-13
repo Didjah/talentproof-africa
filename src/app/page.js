@@ -811,7 +811,25 @@ function ProuventTalent() {
       .then(({ data }) => { setItems(data || []); setLoading(false); });
   }, []);
 
-  if (loading || items.length === 0) return null;
+  if (loading) return null;
+
+  /* Moins de 3 résultats réels → message d'attente */
+  if (items.length < 3) return (
+    <div style={{background:"linear-gradient(135deg,#0B1628,#162F52)",padding:"2.8rem 1rem",textAlign:"center"}}>
+      <div style={{maxWidth:480,margin:"0 auto"}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"rgba(240,192,64,.12)",border:"1px solid rgba(240,192,64,.25)",borderRadius:"99px",padding:".35rem .9rem",marginBottom:"1rem"}}>
+          <span style={{fontSize:".72rem",color:"#F0C040",fontWeight:700,letterSpacing:".06em"}}>PREUVES RÉELLES</span>
+        </div>
+        <div style={{fontSize:"2rem",marginBottom:".75rem"}}>🎬</div>
+        <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.2rem",color:"white",marginBottom:".5rem"}}>
+          Ils prouvent leur talent
+        </h2>
+        <p style={{color:"rgba(255,255,255,.5)",fontSize:".87rem",lineHeight:1.6,margin:0}}>
+          Les premiers talents arrivent bientôt…
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{background:"linear-gradient(135deg,#0B1628,#162F52)",padding:"2.8rem 1rem"}}>
@@ -1350,7 +1368,10 @@ function PageContent(){
               <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,color:"white",fontSize:".9rem"}}>{vidMod.nom} — {vidMod.metier}</div>
               <div style={{color:"rgba(255,255,255,.5)",fontSize:".74rem"}}>📍 {vidMod.ville}</div>
             </div>
-            <video controls autoPlay style={{width:"100%",maxHeight:400,background:"#000",display:"block"}} src={VID_DEMO}/>
+            {vidMod.video_url
+              ? <video controls autoPlay style={{width:"100%",maxHeight:400,background:"#000",display:"block"}} src={vidMod.video_url}/>
+              : <div style={{width:"100%",height:200,background:"#111",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(255,255,255,.4)",fontSize:".85rem"}}>Vidéo non disponible</div>
+            }
             <div style={{padding:".8rem 1.1rem",background:"#1a1a1a",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:".5rem"}}>
               <span style={{color:"rgba(255,255,255,.45)",fontSize:".74rem"}}>Preuve vidéo · TalentProof</span>
               <a href={`https://wa.me/${WA_NUM1}?text=${encodeURIComponent(`Bonjour, j'ai vu la vidéo de ${vidMod.nom} sur TalentProof.`)}`} target="_blank" rel="noreferrer"
