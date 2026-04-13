@@ -100,20 +100,36 @@ export default function GlobalHeader() {
   const navSearchRef = useRef(null);
   const dropRef      = useRef(null);
 
-  /* ── lecture localStorage côté client uniquement ── */
-  useEffect(() => {
+  /* ── lecture localStorage (jamais côté serveur) ── */
+  const readSession = () => {
+    if (typeof window === "undefined") return null;
     for (const cfg of SESSION_CONFIGS) {
       try {
-        const raw = localStorage.getItem(cfg.key);
+        const raw = window.localStorage.getItem(cfg.key);
         if (raw) {
           const data = JSON.parse(raw);
           const name = resolveName(data, cfg.nameField);
-          setSession({ ...cfg, name, data });
-          break;
+          return { ...cfg, name, data };
         }
       } catch {}
     }
+    return null;
+  };
+
+  useEffect(() => {
+    /* lecture initiale après hydratation */
+    setSession(readSession());
     setHydrated(true);
+
+    /* écoute les changements depuis d'autres onglets / pages */
+    const onStorage = (e) => {
+      const keys = SESSION_CONFIGS.map(c => c.key);
+      if (keys.includes(e.key) || e.key === null) {
+        setSession(readSession());
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   /* ferme le dropdown au clic extérieur */
@@ -140,7 +156,9 @@ export default function GlobalHeader() {
   };
 
   const handleLogout = () => {
-    SESSION_CONFIGS.forEach(cfg => localStorage.removeItem(cfg.key));
+    if (typeof window !== "undefined") {
+      SESSION_CONFIGS.forEach(cfg => window.localStorage.removeItem(cfg.key));
+    }
     setSession(null); setDropOpen(false); setMenuOpen(false);
     router.refresh();
   };
