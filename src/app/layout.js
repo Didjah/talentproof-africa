@@ -1,5 +1,6 @@
 // app/layout.js
 import "./globals.css";
+import GlobalHeader from "@/components/GlobalHeader";
 
 export const metadata = {
   title: "TalentProof Afrique — Les talents prouvés en vidéo",
@@ -40,7 +41,10 @@ export default function RootLayout({ children }) {
         <meta httpEquiv="X-Frame-Options" content="SAMEORIGIN" />
         <meta httpEquiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
       </head>
-      <body>{children}</body>
+      <body>
+        <GlobalHeader />
+        {children}
+      </body>
     </html>
   );
 }

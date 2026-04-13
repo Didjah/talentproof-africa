@@ -1220,9 +1220,6 @@ function PageContent(){
       <GlobalStyles/>
       <WelcomeBanner/>
 
-      {/* ✦ HEADER PRINCIPAL */}
-      <Header/>
-
       <SearchBar value={search} onChange={v=>{setSearch(v);setMetier("Tous");}} count={filtered.length} total={PROFILS.length}/>
 
       <div className="tp-chips" style={{background:"white",borderBottom:"1px solid #E5E7EB"}}>
