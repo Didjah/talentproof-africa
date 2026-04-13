@@ -802,8 +802,10 @@ function ProuventTalent() {
   useEffect(() => {
     supabase
       .from("talents")
-      .select("id,prenom,nom,metier,experience,ville,bio,avatar_url,preuve_url,video_url,has_photo,has_video,verified,telephone")
-      .or("has_video.eq.true,has_photo.eq.true")
+      .select("id,nom,prenom,metier,ville,pays,photo_url,video_url,description,telephone,disponibilite")
+      .not("video_url", "is", null)
+      .neq("video_url", "")
+      .neq("video_url", "https://www.w3schools.com/html/mov_bbb.mp4")
       .order("created_at", { ascending: false })
       .limit(6)
       .then(({ data }) => { setItems(data || []); setLoading(false); });
@@ -822,18 +824,19 @@ function ProuventTalent() {
             Ils prouvent leur talent
           </h2>
           <p style={{color:"rgba(255,255,255,.55)",fontSize:".85rem",margin:0}}>
-            Vidéos et réalisations vérifiées par TalentProof
+            Vidéos vérifiées par TalentProof
           </p>
         </div>
 
         <div style={{display:"flex",flexDirection:"column",gap:"1.4rem"}}>
           {items.map(t => {
-            const prenom = t.prenom || "Talent";
-            const nom = t.nom || "";
-            const waUrl = `https://wa.me/${t.telephone || WA_NUM1}?text=${encodeURIComponent(`Bonjour ${prenom}, j'ai vu votre profil sur TalentProof.`)}`;
-            const isVideo = t.has_video && t.video_url;
-            const isPhoto = t.has_photo && t.preuve_url;
-            if (!isVideo && !isPhoto) return null;
+            const prenom  = t.prenom || "Talent";
+            const nom     = t.nom    || "";
+            const initiales = ((prenom[0] || "") + (nom[0] || "")).toUpperCase();
+            const lieu    = [t.ville, t.pays].filter(Boolean).join(" · ");
+            const waUrl   = `https://wa.me/${t.telephone || WA_NUM1}?text=${encodeURIComponent(`Bonjour ${prenom}, j'ai vu votre profil sur TalentProof.`)}`;
+            const dispoColor = DISPO_COLOR[t.disponibilite];
+            const dispoLabel = DISPO_LABEL[t.disponibilite];
 
             return (
               <div key={t.id}
@@ -842,27 +845,17 @@ function ProuventTalent() {
                 onMouseEnter={e => e.currentTarget.style.borderColor="rgba(240,192,64,.35)"}
                 onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
               >
-                {/* Media */}
+                {/* Vidéo */}
                 <div style={{position:"relative"}}>
-                  {isVideo ? (
-                    <video
-                      src={t.video_url}
-                      poster={t.preuve_url || undefined}
-                      controls
-                      onClick={e => e.stopPropagation()}
-                      style={{width:"100%",maxHeight:300,display:"block",background:"#000"}}
-                    />
-                  ) : (
-                    <img
-                      src={t.preuve_url}
-                      alt={`Réalisation de ${prenom}`}
-                      style={{width:"100%",maxHeight:300,objectFit:"cover",display:"block"}}
-                    />
-                  )}
-                  {/* Badge */}
+                  <video
+                    src={t.video_url}
+                    controls
+                    onClick={e => e.stopPropagation()}
+                    style={{width:"100%",maxHeight:300,display:"block",background:"#000"}}
+                  />
                   <div style={{position:"absolute",top:10,left:10}}>
-                    <span style={{background: isVideo ? "rgba(93,33,211,.92)" : "rgba(15,118,110,.92)",color:"white",fontSize:".68rem",fontWeight:700,padding:"4px 10px",borderRadius:"99px",backdropFilter:"blur(4px)"}}>
-                      {isVideo ? "▶ Preuve vidéo" : "📸 Réalisation"}
+                    <span style={{background:"rgba(93,33,211,.92)",color:"white",fontSize:".68rem",fontWeight:700,padding:"4px 10px",borderRadius:"99px",backdropFilter:"blur(4px)"}}>
+                      ▶ Preuve vidéo
                     </span>
                   </div>
                 </div>
@@ -870,37 +863,42 @@ function ProuventTalent() {
                 {/* Profil */}
                 <div style={{padding:".9rem 1rem 1rem"}}>
                   <div style={{display:"flex",gap:".7rem",alignItems:"flex-start",marginBottom:".65rem"}}>
-                    {t.avatar_url
-                      ? <img src={t.avatar_url} alt={prenom} style={{width:44,height:44,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(255,255,255,.15)",flexShrink:0}}/>
-                      : <div style={{width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.3rem",flexShrink:0}}>👤</div>
+                    {/* Avatar ou initiales */}
+                    {t.photo_url
+                      ? <img src={t.photo_url} alt={prenom} style={{width:44,height:44,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(255,255,255,.15)",flexShrink:0}}/>
+                      : <div style={{width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".9rem",color:"white",flexShrink:0}}>
+                          {initiales || "👤"}
+                        </div>
                     }
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",alignItems:"center",gap:".35rem",flexWrap:"wrap"}}>
                         <span style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".92rem",color:"white",textDecoration:"underline",textDecorationColor:"rgba(240,192,64,.4)",textUnderlineOffset:"3px"}}>{prenom} {nom}</span>
-                        {t.verified && <span style={{background:"rgba(29,78,216,.8)",color:"white",fontSize:".58rem",fontWeight:700,padding:"1px 6px",borderRadius:"99px"}}>✔ Vérifié</span>}
+                        {dispoLabel && (
+                          <span style={{background: dispoColor ? dispoColor + "22" : "rgba(255,255,255,.08)", color: dispoColor || "white", border:`1px solid ${dispoColor || "rgba(255,255,255,.2)"}`, fontSize:".6rem",fontWeight:700,padding:"1px 7px",borderRadius:"99px"}}>
+                            {dispoLabel}
+                          </span>
+                        )}
                       </div>
                       <div style={{color:"#86EFAC",fontWeight:700,fontSize:".78rem",marginTop:"1px"}}>
-                        {t.metier || "Talent"}{t.experience ? ` · ${t.experience}` : ""}
+                        {t.metier || "Talent"}
                       </div>
-                      {t.ville && <div style={{color:"rgba(255,255,255,.45)",fontSize:".72rem"}}>📍 {t.ville}</div>}
+                      {lieu && <div style={{color:"rgba(255,255,255,.45)",fontSize:".72rem"}}>📍 {lieu}</div>}
                     </div>
                   </div>
 
-                  {t.bio && (
+                  {t.description && (
                     <p style={{color:"rgba(255,255,255,.6)",fontSize:".79rem",lineHeight:1.55,margin:"0 0 .8rem",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
-                      {t.bio}
+                      {t.description}
                     </p>
                   )}
 
                   <div style={{display:"flex",gap:".5rem"}}>
-                    {isVideo && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setModVideo(t); }}
-                        style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",border:"none",cursor:"pointer"}}
-                      >
-                        ▶ Voir la vidéo
-                      </button>
-                    )}
+                    <button
+                      onClick={e => { e.stopPropagation(); setModVideo(t); }}
+                      style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",border:"none",cursor:"pointer"}}
+                    >
+                      ▶ Voir la vidéo
+                    </button>
                     <a
                       href={waUrl}
                       target="_blank"
@@ -908,7 +906,7 @@ function ProuventTalent() {
                       onClick={e => e.stopPropagation()}
                       style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",background:"#25D366",color:"white",fontWeight:700,fontSize:".8rem",padding:".55rem",borderRadius:"99px",textDecoration:"none"}}
                     >
-                      <WaLogo size={14}/> Contacter
+                      <WaLogo size={14}/> WhatsApp
                     </a>
                   </div>
                 </div>
@@ -926,9 +924,9 @@ function ProuventTalent() {
 
       {/* Modal vidéo */}
       {modVideo && (
-        <div onClick={()=>setModVideo(null)} style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,.9)",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
-          <div onClick={e=>e.stopPropagation()} style={{position:"relative",maxWidth:680,width:"100%",borderRadius:"16px",overflow:"hidden",background:"#111"}}>
-            <button onClick={()=>setModVideo(null)} style={{position:"absolute",top:10,right:12,background:"rgba(255,255,255,.12)",border:"none",borderRadius:"50%",width:34,height:34,color:"white",cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>✕</button>
+        <div onClick={() => setModVideo(null)} style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,.9)",display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+          <div onClick={e => e.stopPropagation()} style={{position:"relative",maxWidth:680,width:"100%",borderRadius:"16px",overflow:"hidden",background:"#111"}}>
+            <button onClick={() => setModVideo(null)} style={{position:"absolute",top:10,right:12,background:"rgba(255,255,255,.12)",border:"none",borderRadius:"50%",width:34,height:34,color:"white",cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>✕</button>
             <div style={{padding:".8rem 1rem .6rem",background:"linear-gradient(135deg,#0B1628,#162F52)"}}>
               <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,color:"white",fontSize:".88rem"}}>▶ {modVideo.prenom} {modVideo.nom} — {modVideo.metier}</div>
             </div>
