@@ -315,13 +315,16 @@ export default function GlobalHeader() {
             {/* Liens principaux */}
             <div style={{ display: "flex", flexDirection: "column", gap: ".5rem", marginBottom: "1rem" }}>
               {[
-                { href: "/mon-profil",            icon: "👤", label: "Mon Profil",         sub: "Gérer mon compte" },
-                { href: "/annuaire",              icon: "🔍", label: "Trouver un talent",  sub: "Annuaire complet" },
-                { href: "/recruteur",             icon: "💼", label: "Espace Recruteur",   sub: "Trouvez vos talents" },
-                { href: "/partenaires-dashboard", icon: "🤝", label: "Espace Partenaire",  sub: "Tableau de bord" },
-                { href: "/aide",                  icon: "❓", label: "Aide & Support",     sub: "FAQ et assistance" },
+                { href: "/mon-profil",            icon: "👤", label: "Mon Profil",           sub: "Gérer mon compte" },
+                { href: "/annuaire",              icon: "🔍", label: "Trouver un talent",    sub: "Annuaire complet" },
+                { href: "/recruteur",             icon: "💼", label: "Espace Recruteur",     sub: "Trouvez vos talents" },
+                { href: "/partenaires-dashboard", icon: "🤝", label: "Espace Partenaire",    sub: "Tableau de bord" },
+                { href: "/partenaire",            icon: "✦",  label: "Devenir partenaire",   sub: "Rejoindre TalentProof" },
+                { href: "/partenaires",           icon: "🌍", label: "Nos partenaires",      sub: "CFPT, Orange Afrique…" },
+                { href: `https://wa.me/${WA_NUM}`, icon: "💬", label: "Nous contacter",      sub: "WhatsApp · Réponse 24h", target: "_blank" },
+                { href: "/aide",                  icon: "❓", label: "Aide & Support",       sub: "FAQ et assistance" },
               ].map(item => (
-                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{
+                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} target={item.target||"_self"} rel={item.target=="_blank"?"noreferrer":undefined} style={{
                   display: "flex", alignItems: "center", gap: ".7rem",
                   background: "rgba(236,201,75,.08)", border: "1px solid rgba(236,201,75,.2)",
                   borderRadius: "12px", padding: ".85rem 1rem", textDecoration: "none", transition: "all .2s",
