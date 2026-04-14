@@ -216,23 +216,6 @@ function Dashboard({ recruteur, onLogout }) {
 
   return (
     <div style={{minHeight:"100vh",background:"#F0F4F0",fontFamily:"system-ui,sans-serif"}}>
-      {/* Header */}
-      <div style={{background:"linear-gradient(135deg,#0B1628,#162F52)",padding:"1rem 1.2rem"}}>
-        <div style={{maxWidth:860,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:".6rem"}}>
-          <div>
-            <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1rem",textDecoration:"none"}}>TalentProof</Link>
-            <div style={{color:"rgba(255,255,255,.55)",fontSize:".75rem",marginTop:"2px"}}>🏢 {recruteur.nom_entreprise}</div>
-          </div>
-          <div style={{display:"flex",gap:".5rem",alignItems:"center",flexWrap:"wrap"}}>
-            <Link href="/" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Accueil</Link>
-            <Link href="/annuaire" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Annuaire</Link>
-            <Link href="/recruteur" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Espace Recruteur</Link>
-            <Link href="/partenaires-dashboard" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Espace Partenaire</Link>
-            <button onClick={onLogout} style={{background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",color:"#FCA5A5",fontSize:".78rem",fontWeight:600,padding:".35rem .8rem",borderRadius:"99px",cursor:"pointer"}}>Déconnexion</button>
-          </div>
-        </div>
-      </div>
-
       {/* Onglets */}
       <div style={{background:"white",borderBottom:"1px solid #E5E7EB"}}>
         <div style={{maxWidth:860,margin:"0 auto",display:"flex",gap:0}}>

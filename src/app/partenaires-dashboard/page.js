@@ -215,23 +215,6 @@ function Dashboard({ partenaire, onLogout }) {
 
   return (
     <div style={{minHeight:"100vh",background:"#F0F4F0",fontFamily:"system-ui,sans-serif"}}>
-      {/* Header */}
-      <div style={{background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)",padding:"1rem 1.2rem"}}>
-        <div style={{maxWidth:860,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:".6rem"}}>
-          <div>
-            <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1rem",textDecoration:"none"}}>TalentProof</Link>
-            <div style={{color:"rgba(255,255,255,.55)",fontSize:".75rem",marginTop:"2px"}}>🤝 {partenaire.nom_organisation}</div>
-          </div>
-          <div style={{display:"flex",gap:".5rem",alignItems:"center",flexWrap:"wrap"}}>
-            <Link href="/" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Accueil</Link>
-            <Link href="/annuaire" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Annuaire</Link>
-            <Link href="/recruteur" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Espace Recruteur</Link>
-            <Link href="/partenaires-dashboard" style={{color:"rgba(255,255,255,.6)",fontSize:".78rem",textDecoration:"none",border:"1px solid rgba(255,255,255,.2)",padding:".35rem .8rem",borderRadius:"99px"}}>Espace Partenaire</Link>
-            <button onClick={onLogout} style={{background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",color:"#FCA5A5",fontSize:".78rem",fontWeight:600,padding:".35rem .8rem",borderRadius:"99px",cursor:"pointer"}}>Déconnexion</button>
-          </div>
-        </div>
-      </div>
-
       {/* Onglets */}
       <div style={{background:"white",borderBottom:"1px solid #E5E7EB"}}>
         <div style={{maxWidth:860,margin:"0 auto",display:"flex",gap:0}}>
@@ -448,26 +431,8 @@ export default function PartenairesDashboardPage() {
     <div style={{minHeight:"100vh",background:"#F0F4F0",fontFamily:"system-ui,sans-serif"}}>
       {showModal && <ModalLogin onLogin={handleLogin} onClose={()=>setShowModal(false)}/>}
 
-      {/* ── HEADER ── */}
+      {/* ── HERO ── */}
       <div style={{background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)"}}>
-        <div style={{maxWidth:1100,margin:"0 auto",padding:"1rem 1.2rem",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:".75rem"}}>
-          <div>
-            <Link href="/" style={{fontFamily:"'Sora',sans-serif",color:"#F0C040",fontWeight:900,fontSize:"1.1rem",textDecoration:"none"}}>TalentProof</Link>
-            <div style={{color:"rgba(255,255,255,.5)",fontSize:".74rem",marginTop:"2px"}}>🤝 Programme Partenaires</div>
-          </div>
-          <div style={{display:"flex",gap:".6rem",alignItems:"center",flexWrap:"wrap"}}>
-            <Link href="/partenaire"
-              style={{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.22)",color:"white",fontWeight:600,fontSize:".82rem",padding:".45rem 1.05rem",borderRadius:"99px",textDecoration:"none"}}>
-              ✍️ Devenir partenaire
-            </Link>
-            <button onClick={()=>setShowModal(true)}
-              style={{background:"linear-gradient(135deg,#C9960F,#F0C040)",border:"none",color:"#0D3B2E",fontWeight:800,fontSize:".82rem",padding:".48rem 1.15rem",borderRadius:"99px",cursor:"pointer",whiteSpace:"nowrap"}}>
-              🔑 Se connecter à mon espace
-            </button>
-          </div>
-        </div>
-
-        {/* ── HERO ── */}
         <div style={{maxWidth:680,margin:"0 auto",padding:"2rem 1.2rem 2.5rem",textAlign:"center"}}>
           <h1 style={{fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:"clamp(1.45rem,4vw,2.1rem)",color:"white",lineHeight:1.25,marginBottom:".7rem"}}>
             Les partenaires qui accompagnent<br/>les talents en Afrique
