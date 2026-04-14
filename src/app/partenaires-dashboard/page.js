@@ -408,8 +408,14 @@ export default function PartenairesDashboardPage() {
   const [loading, setLoading]         = useState(true);
   const [showModal, setShowModal]     = useState(false);
   const [partenaire, setPartn]        = useState(null);
+  const [ready, setReady]             = useState(false);
 
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem("partenaire_session");
+      if (raw) setPartn(JSON.parse(raw));
+    } catch {}
+    setReady(true);
     supabase.from("partenaires").select("*").order("created_at", { ascending: false })
       .then(({ data }) => { setPartenaires(data || []); setLoading(false); });
   }, []);
@@ -420,6 +426,7 @@ export default function PartenairesDashboardPage() {
   };
   const handleLogout = () => { localStorage.removeItem("partenaire_session"); setPartn(null); };
 
+  if (!ready) return null;
   if (partenaire) return <Dashboard partenaire={partenaire} onLogout={handleLogout}/>;
 
   return (

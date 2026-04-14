@@ -237,7 +237,7 @@ export default function GlobalHeader() {
                     <div style={{ padding: ".35rem 0" }}>
                       <a href={session.profileUrl} className="gh-dd-link" onClick={() => setDropOpen(false)}>
                         <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        Mon espace
+                        Mon profil
                       </a>
                       <a href="/annuaire" className="gh-dd-link" onClick={() => setDropOpen(false)}>
                         <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
