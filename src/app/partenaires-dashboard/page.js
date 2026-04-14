@@ -432,7 +432,7 @@ export default function PartenairesDashboardPage() {
       {showModal && <ModalLogin onLogin={handleLogin} onClose={()=>setShowModal(false)}/>}
 
       {/* ── HERO ── */}
-      <div style={{background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)"}}>
+      <div style={{background:"linear-gradient(135deg,#0B1628 0%,#0F2744 60%,#162F52 100%)"}}>
         <div style={{maxWidth:680,margin:"0 auto",padding:"2rem 1.2rem 2.5rem",textAlign:"center"}}>
           <h1 style={{fontFamily:"'Sora',sans-serif",fontWeight:900,fontSize:"clamp(1.45rem,4vw,2.1rem)",color:"white",lineHeight:1.25,marginBottom:".7rem"}}>
             Les partenaires qui accompagnent<br/>les talents en Afrique
