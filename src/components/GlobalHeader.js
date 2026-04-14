@@ -96,9 +96,7 @@ export default function GlobalHeader() {
   const [hydrated, setHydrated]     = useState(false);
   const [menuOpen, setMenuOpen]     = useState(false);
   const [dropOpen, setDropOpen]     = useState(false);
-  const [navSearch, setNavSearch]   = useState("");
-  const navSearchRef = useRef(null);
-  const dropRef      = useRef(null);
+  const dropRef = useRef(null);
 
   /* ── lecture localStorage (jamais côté serveur) ── */
   const readSession = () => {
@@ -148,13 +146,6 @@ export default function GlobalHeader() {
     return () => document.removeEventListener("click", close);
   }, [menuOpen]);
 
-  const handleNavSearch = (e) => {
-    if (e.key === "Enter" && navSearch.trim()) {
-      router.push(`/annuaire?q=${encodeURIComponent(navSearch.trim())}`);
-      setNavSearch(""); setMenuOpen(false);
-    }
-  };
-
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       SESSION_CONFIGS.forEach(cfg => window.localStorage.removeItem(cfg.key));
@@ -186,8 +177,7 @@ export default function GlobalHeader() {
 
           {/* Logo */}
           <a href="/" style={{ display: "flex", alignItems: "center", gap: ".45rem", textDecoration: "none", flexShrink: 0 }}>
-            <img src="/logo-talentproof.jpg" alt="TalentProof" style={{ height: 55, width: "auto", objectFit: "contain" }} className="gh-logo-img" />
-            <span className="gh-logo-text" style={{ fontFamily: "'Sora',sans-serif", fontWeight: 800, fontSize: "1.1rem", color: "#ECC94B", whiteSpace: "nowrap" }}>TalentProof</span>
+            <span className="gh-logo-text" style={{ fontFamily: "'Sora',sans-serif", fontWeight: 800, fontSize: "1.1rem", color: "#f5c842", whiteSpace: "nowrap" }}>TalentProof</span>
           </a>
 
           {/* Liens desktop */}
@@ -196,21 +186,6 @@ export default function GlobalHeader() {
               <a key={l.label} href={l.href} className="gh-nav-link">{l.label}</a>
             ))}
           </nav>
-
-          {/* Barre de recherche */}
-          <div className="gh-search-wrap" style={{ flexShrink: 0 }} onClick={() => navSearchRef.current?.focus()}>
-            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input
-              ref={navSearchRef}
-              className="gh-search-input"
-              value={navSearch}
-              onChange={e => setNavSearch(e.target.value)}
-              onKeyDown={handleNavSearch}
-              placeholder="Métier, ville, nom…"
-            />
-          </div>
 
           {/* Zone droite : avatar OU bouton créer profil (hydraté) */}
           {hydrated && (
