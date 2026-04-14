@@ -155,17 +155,6 @@ const NAV_LINKS = [
 function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [navSearch, setNavSearch] = useState("");
-  const navSearchRef = useRef(null);
-
-  const handleNavSearch = (e) => {
-    if (e.key === "Enter" && navSearch.trim()) {
-      router.push(`/annuaire?q=${encodeURIComponent(navSearch.trim())}`);
-      setNavSearch("");
-      setMenuOpen(false);
-    }
-  };
-
   useEffect(() => {
     const close = (e) => { if (!e.target.closest("[data-mob-menu]")) setMenuOpen(false); };
     if (menuOpen) document.addEventListener("click", close);
@@ -183,8 +172,7 @@ function Header() {
 
         {/* Logo */}
         <a href="/" style={{display:"flex", alignItems:"center", gap:".45rem", textDecoration:"none", flexShrink:0}}>
-          <img src="/logo-talentproof.jpg" alt="TalentProof" style={{height:"55px", width:"auto", objectFit:"contain"}} className="header-logo-img" />
-          <span className="header-logo-text" style={{fontFamily:"'Sora',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#ECC94B", whiteSpace:"nowrap"}}>TalentProof</span>
+          <span className="header-logo-text" style={{fontFamily:"'Sora',sans-serif", fontWeight:800, fontSize:"1.1rem", color:"#f5c842", whiteSpace:"nowrap"}}>TalentProof</span>
         </a>
 
         {/* Liens desktop */}
@@ -193,20 +181,6 @@ function Header() {
             <a key={l.label} href={l.href} className="nav-link">{l.label}</a>
           ))}
         </nav>
-
-        {/* Barre de recherche */}
-        <div className="nav-search-wrap" onClick={() => navSearchRef.current?.focus()}
-          style={{flexShrink:0}}>
-          <Search size={14} color="rgba(255,255,255,.5)" style={{flexShrink:0}}/>
-          <input
-            ref={navSearchRef}
-            className="nav-search-input"
-            value={navSearch}
-            onChange={e => setNavSearch(e.target.value)}
-            onKeyDown={handleNavSearch}
-            placeholder="Métier, ville, nom…"
-          />
-        </div>
 
         {/* Bouton créer profil - caché sur mobile */}
         <a href="/inscription-talent" className="header-create-btn" style={{
@@ -1271,7 +1245,7 @@ function PageContent(){
   },[]);
 
   const PROFILS=CACHED_PROFILS;
-  const METIERS=["Tous",...new Set(PROFILS.map(p=>p.metier))];
+  const METIERS=["Tous",...new Set(PROFILS.map(p=>p.metier).filter(Boolean))];
 
   const filtered=useMemo(()=>{
     const q=search.toLowerCase().trim();
