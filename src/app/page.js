@@ -11,6 +11,47 @@ import {
 import { trackWhatsAppClick, initAnalytics } from "@/utils/analytics";
 import { supabase } from "@/lib/supabaseClient";
 
+/* ── Cache module-level : survit aux démontages/remontages de PageContent ── */
+let CACHED_PROFILS = [];
+let _fetchStarted  = false;
+const _listeners   = new Set();
+
+function fetchTalentsOnce(onDone) {
+  _listeners.add(onDone);
+  if (_fetchStarted) {
+    if (CACHED_PROFILS.length > 0) onDone();
+    return;
+  }
+  _fetchStarted = true;
+  supabase
+    .from("talents")
+    .select("id,nom,prenom,metier,experience,ville,pays,avatar_url,video_url,bio,telephone,disponibilite,verified,likes,has_video,has_photo,preuve_url")
+    .order("created_at", { ascending: false })
+    .limit(20)
+    .then(({ data, error }) => {
+      console.log("[PageContent] Supabase talents →", data, error);
+      CACHED_PROFILS = (data || []).map(t => ({
+        id:          t.id,
+        nom:         [t.prenom, t.nom].filter(Boolean).join(" "),
+        metier:      t.metier      || "",
+        experience:  t.experience  || null,
+        ville:       t.ville       || "",
+        pays:        t.pays        || "",
+        avatar:      (((t.prenom||"")[0]||"") + ((t.nom||"")[0]||"")).toUpperCase() || "👤",
+        disponible:  t.disponibilite || "negotiable",
+        bio:         t.bio         || "",
+        mediaType:   t.has_video && t.video_url ? "video" : "image",
+        likes:       t.likes       || 0,
+        verified:    t.verified    || false,
+        fromWhatsApp: false,
+        photoUrl:    t.avatar_url  || null,
+        video_url:   t.video_url   || null,
+        telephone:   t.telephone   || null,
+      }));
+      _listeners.forEach(fn => fn());
+    });
+}
+
 const DISPO_COLOR = { immediate:"#16A34A", "1_month":"#D97706", negotiable:"#6B7280" };
 const DISPO_LABEL = { immediate:"Disponible", "1_month":"Dispo dans 1 mois", negotiable:"À négocier" };
 const MAX_SEC  = 60;
@@ -1218,40 +1259,16 @@ function PageContent(){
   const [vidMod,setVidMod]=useState(null);
   const [insMod,setInsMod]=useState(false);
   const [metier,setMetier]=useState("Tous");
-  const [profils,setProfils]=useState([]);
+  const [tick,setTick]=useState(0);
 
   useEffect(()=>{const q=sp.get("q");if(q)setSearch(q);},[sp]);
 
   useEffect(()=>{
-    supabase
-      .from("talents")
-      .select("id,nom,prenom,metier,experience,ville,pays,avatar_url,video_url,bio,telephone,disponibilite,verified,likes,has_video,has_photo,preuve_url")
-      .order("created_at",{ascending:false})
-      .limit(20)
-      .then(({data,error})=>{
-        console.log("[PageContent] Supabase talents →", data, error);
-        setProfils((data||[]).map(t=>({
-          id:          t.id,
-          nom:         [t.prenom,t.nom].filter(Boolean).join(" "),
-          metier:      t.metier||"",
-          experience:  t.experience||null,
-          ville:       t.ville||"",
-          pays:        t.pays||"",
-          avatar:      (((t.prenom||"")[0]||"")+((t.nom||"")[0]||"")).toUpperCase()||"👤",
-          disponible:  t.disponibilite||"negotiable",
-          bio:         t.bio||"",
-          mediaType:   t.has_video&&t.video_url?"video":"image",
-          likes:       t.likes||0,
-          verified:    t.verified||false,
-          fromWhatsApp:false,
-          photoUrl:    t.avatar_url||null,
-          video_url:   t.video_url||null,
-          telephone:   t.telephone||null,
-        })));
-      });
+    fetchTalentsOnce(()=>setTick(t=>t+1));
+    return ()=>{ _listeners.delete(()=>setTick(t=>t+1)); };
   },[]);
 
-  const PROFILS=profils;
+  const PROFILS=CACHED_PROFILS;
   const METIERS=["Tous",...new Set(PROFILS.map(p=>p.metier))];
 
   const filtered=useMemo(()=>{
@@ -1261,7 +1278,7 @@ function PageContent(){
       if(q&&!`${p.nom} ${p.metier} ${p.ville}`.toLowerCase().includes(q))return false;
       return true;
     });
-  },[metier,search,profils]);
+  },[metier,search,tick]);
 
   const isF=metier!=="Tous"||search.trim()!=="";
   const vids=PROFILS.filter(p=>p.mediaType==="video").length;
