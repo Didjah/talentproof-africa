@@ -30,7 +30,9 @@ function fetchTalentsOnce(onDone) {
     .limit(20)
     .then(({ data, error }) => {
       console.log("[PageContent] Supabase talents →", data, error);
-      CACHED_PROFILS = (data || []).map(t => ({
+      CACHED_PROFILS = (data || [])
+        .filter(t => t.has_video || t.has_photo || t.video_url || t.avatar_url || t.preuve_url)
+        .map(t => ({
         id:          t.id,
         nom:         [t.prenom, t.nom].filter(Boolean).join(" "),
         metier:      t.metier      || "",
