@@ -53,7 +53,7 @@ function ModalLogin({ onLogin, onClose }) {
     <div ref={overlayRef}
       onClick={e => e.target === overlayRef.current && onClose()}
       style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
-      <div style={{maxWidth:400,width:"100%",background:"linear-gradient(135deg,#071F15,#0D3B2E,#1B4332)",borderRadius:"20px",padding:"2rem",boxShadow:"0 24px 60px rgba(0,0,0,.5)"}}>
+      <div style={{maxWidth:400,width:"100%",background:"linear-gradient(135deg,#0B1628,#0F2744,#162F52)",borderRadius:"20px",padding:"2rem",boxShadow:"0 24px 60px rgba(0,0,0,.5)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.5rem"}}>
           <h2 style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:"1.05rem",margin:0}}>🤝 Connexion Partenaire</h2>
           <button onClick={onClose}
@@ -107,7 +107,7 @@ function CartePartenaire({ p }) {
       onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 8px 28px rgba(0,0,0,.13)";e.currentTarget.style.transform="translateY(-2px)";}}
       onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.07)";e.currentTarget.style.transform="none";}}>
       <div style={{display:"flex",alignItems:"center",gap:".75rem"}}>
-        <div style={{width:46,height:46,borderRadius:"12px",background:"linear-gradient(135deg,#071F15,#1B4332)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <div style={{width:46,height:46,borderRadius:"12px",background:"linear-gradient(135deg,#0B1628,#162F52)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <span style={{color:"#F0C040",fontWeight:900,fontSize:".95rem",fontFamily:"'Sora',sans-serif"}}>{initiales}</span>
         </div>
         <div style={{flex:1,minWidth:0}}>
@@ -473,7 +473,7 @@ export default function PartenairesDashboardPage() {
         )}
 
         {/* ── CTA BAS ── */}
-        <div style={{marginTop:"3rem",background:"linear-gradient(135deg,#071F15,#0D3B2E)",borderRadius:"20px",padding:"2rem",textAlign:"center"}}>
+        <div style={{marginTop:"3rem",background:"linear-gradient(135deg,#0B1628,#0F2744)",borderRadius:"20px",padding:"2rem",textAlign:"center"}}>
           <h2 style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"white",marginBottom:".5rem"}}>Votre organisation veut collaborer ?</h2>
           <p style={{color:"rgba(255,255,255,.6)",fontSize:".85rem",marginBottom:"1.3rem"}}>Rejoignez le réseau de partenaires TalentProof et accédez à 14 000+ talents.</p>
           <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>

@@ -286,7 +286,7 @@ function Dashboard({ recruteur, onLogout }) {
                 </div>
               </div>
             </div>
-            <div style={{background:"linear-gradient(135deg,#071F15,#1B6B47)",borderRadius:"16px",padding:"1.3rem",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"1rem"}}>
+            <div style={{background:"linear-gradient(135deg,#0B1628,#0F2744)",borderRadius:"16px",padding:"1.3rem",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"1rem"}}>
               <div>
                 <div style={{fontFamily:"'Sora',sans-serif",color:"white",fontWeight:800,fontSize:".95rem",marginBottom:".25rem"}}>Parcourir l'annuaire des talents</div>
                 <div style={{color:"rgba(255,255,255,.6)",fontSize:".78rem"}}>Trouvez le profil qu'il vous faut parmi nos talents vérifiés.</div>
