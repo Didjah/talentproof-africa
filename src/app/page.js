@@ -670,7 +670,7 @@ function HeroBanner({videos,images}){
         </p>
         <div style={{display:"flex",gap:".48rem",flexWrap:"wrap"}}>
           <a href="/inscription-talent" style={{display:"inline-flex",alignItems:"center",gap:".35rem",background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".84rem",padding:".62rem 1.2rem",borderRadius:"99px",textDecoration:"none",boxShadow:"0 4px 18px rgba(201,150,15,.42)",whiteSpace:"nowrap"}}>+ Créer mon profil</a>
-          <a href="/annuaire" style={{fontSize:".79rem",padding:".56rem .98rem",borderRadius:"99px",border:"1.5px solid rgba(210,225,245,.2)",color:"rgba(210,225,245,.78)",textDecoration:"none",fontWeight:600,whiteSpace:"nowrap"}}>📋 Annuaire →</a>
+          <a href="/annuaire" style={{fontSize:".79rem",padding:"12px 24px",borderRadius:"30px",border:"2px solid rgba(255,255,255,0.8)",color:"#ffffff",textDecoration:"none",fontWeight:600,whiteSpace:"nowrap",background:"transparent",transition:"background .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.15)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>📋 Annuaire →</a>
         </div>
         <ArtisanGrid/>
       </div>
