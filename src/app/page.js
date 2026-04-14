@@ -801,7 +801,7 @@ function ProuventTalent() {
   useEffect(() => {
     supabase
       .from("talents")
-      .select("id,nom,prenom,metier,ville,pays,photo_url,video_url,description,telephone,disponibilite")
+      .select("id,nom,prenom,metier,ville,pays,avatar_url,video_url,bio,telephone,disponibilite")
       .not("video_url", "is", null)
       .neq("video_url", "")
       .neq("video_url", "https://www.w3schools.com/html/mov_bbb.mp4")
@@ -881,8 +881,8 @@ function ProuventTalent() {
                 <div style={{padding:".9rem 1rem 1rem"}}>
                   <div style={{display:"flex",gap:".7rem",alignItems:"flex-start",marginBottom:".65rem"}}>
                     {/* Avatar ou initiales */}
-                    {t.photo_url
-                      ? <img src={t.photo_url} alt={prenom} style={{width:44,height:44,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(255,255,255,.15)",flexShrink:0}}/>
+                    {t.avatar_url
+                      ? <img src={t.avatar_url} alt={prenom} style={{width:44,height:44,borderRadius:"50%",objectFit:"cover",border:"2px solid rgba(255,255,255,.15)",flexShrink:0}}/>
                       : <div style={{width:44,height:44,borderRadius:"50%",background:"linear-gradient(135deg,#1B6B47,#2D9A68)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".9rem",color:"white",flexShrink:0}}>
                           {initiales || "👤"}
                         </div>
@@ -903,9 +903,9 @@ function ProuventTalent() {
                     </div>
                   </div>
 
-                  {t.description && (
+                  {t.bio && (
                     <p style={{color:"rgba(255,255,255,.6)",fontSize:".79rem",lineHeight:1.55,margin:"0 0 .8rem",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>
-                      {t.description}
+                      {t.bio}
                     </p>
                   )}
 
@@ -1225,7 +1225,7 @@ function PageContent(){
   useEffect(()=>{
     supabase
       .from("talents")
-      .select("id,nom,prenom,metier,experience,ville,pays,photo_url,video_url,description,telephone,disponibilite,verified")
+      .select("id,nom,prenom,metier,experience,ville,pays,avatar_url,video_url,bio,telephone,disponibilite,verified,likes,has_video,has_photo,preuve_url")
       .order("created_at",{ascending:false})
       .limit(20)
       .then(({data})=>{
@@ -1238,12 +1238,12 @@ function PageContent(){
           pays:        t.pays||"",
           avatar:      (((t.prenom||"")[0]||"")+((t.nom||"")[0]||"")).toUpperCase()||"👤",
           disponible:  t.disponibilite||"negotiable",
-          bio:         t.description||"",
-          mediaType:   t.video_url?"video":"image",
-          likes:       0,
+          bio:         t.bio||"",
+          mediaType:   t.has_video&&t.video_url?"video":"image",
+          likes:       t.likes||0,
           verified:    t.verified||false,
           fromWhatsApp:false,
-          photoUrl:    t.photo_url||null,
+          photoUrl:    t.avatar_url||null,
           video_url:   t.video_url||null,
           telephone:   t.telephone||null,
         })));
