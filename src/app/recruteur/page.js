@@ -414,6 +414,7 @@ export default function RecruteurPage() {
   const [loading, setLoading]       = useState(true);
   const [showModal, setShowModal]   = useState(false);
   const [recruteur, setRecr]        = useState(null);
+  const [ready, setReady]           = useState(false);
 
   useEffect(() => {
     // Restaure la session depuis localStorage (navigation sans re-login)
@@ -421,6 +422,7 @@ export default function RecruteurPage() {
       const raw = localStorage.getItem("recruteur_session");
       if (raw) setRecr(JSON.parse(raw));
     } catch {}
+    setReady(true);
     supabase.from("recruteurs").select("*").order("created_at", { ascending: false })
       .then(({ data }) => { setRecruteurs(data || []); setLoading(false); });
   }, []);
@@ -431,6 +433,7 @@ export default function RecruteurPage() {
   };
   const handleLogout = () => { localStorage.removeItem("recruteur_session"); setRecr(null); };
 
+  if (!ready) return null;
   if (recruteur) return <Dashboard recruteur={recruteur} onLogout={handleLogout}/>;
 
   return (
