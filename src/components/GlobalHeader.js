@@ -315,18 +315,16 @@ export default function GlobalHeader() {
             {/* Liens principaux */}
             <div style={{ display: "flex", flexDirection: "column", gap: ".5rem", marginBottom: "1rem" }}>
               {[
-                { href: "/mon-profil",              icon: "👤", label: "Mon Profil",             sub: "Gérer mon compte" },
-                { href: "/annuaire",              icon: "🔍", label: "Trouver un talent",     sub: "Annuaire complet" },
-                { href: "/annonces-recruteurs",   icon: "🏢", label: "Offres Recruteurs",     sub: "Annonces d'entreprises" },
-                { href: "/annonces-partenaires",  icon: "🤝", label: "Offres Partenaires",    sub: "Annonces de partenaires" },
-                { href: "/recruteur",             icon: "💼", label: "Espace Recruteur",      sub: "Tableau de bord recruteur" },
-                { href: "/partenaires-dashboard", icon: "📊", label: "Espace Partenaire",     sub: "Tableau de bord partenaire" },
-                { href: "/partenaire",            icon: "✦",  label: "Devenir partenaire",    sub: "Rejoindre TalentProof" },
-                { href: "/partenaires",           icon: "🌍", label: "Nos partenaires",       sub: "CFPT, Orange Afrique…" },
-                { href: `https://wa.me/${WA_NUM}`, icon: "💬", label: "Nous contacter",       sub: "WhatsApp · Réponse 24h", target: "_blank" },
-                { href: "/aide",                  icon: "❓", label: "Aide & Support",        sub: "FAQ et assistance" },
+                { href: "/mon-profil",             icon: "👤", label: "Mon Profil",          sub: "Gérer mon compte" },
+                { href: "/annuaire",               icon: "🔍", label: "Trouver un talent",   sub: "Annuaire complet" },
+                { href: "/recruteur",              icon: "🏢", label: "Recruteurs",           sub: "Offres & espace recruteur",   secondaryLink: { href: "/annonces-recruteurs", label: "Voir les offres →" } },
+                { href: "/partenaires-dashboard",  icon: "🤝", label: "Partenaires",          sub: "Offres & espace partenaire",  secondaryLink: { href: "/annonces-partenaires", label: "Voir les offres →" } },
+                { href: "/partenaire",             icon: "✦",  label: "Devenir partenaire",  sub: "Rejoindre TalentProof" },
+                { href: "/partenaires",            icon: "🌍", label: "Nos partenaires",     sub: "CFPT, Orange Afrique…" },
+                { href: `https://wa.me/${WA_NUM}`, icon: "💬", label: "Nous contacter",      sub: "WhatsApp · Réponse 24h", target: "_blank" },
+                { href: "/aide",                   icon: "❓", label: "Aide & Support",      sub: "FAQ et assistance" },
               ].map(item => (
-                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} target={item.target||"_self"} rel={item.target=="_blank"?"noreferrer":undefined} style={{
+                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} target={item.target||"_self"} rel={item.target==="_blank"?"noreferrer":undefined} style={{
                   display: "flex", alignItems: "center", gap: ".7rem",
                   background: "rgba(236,201,75,.08)", border: "1px solid rgba(236,201,75,.2)",
                   borderRadius: "12px", padding: ".85rem 1rem", textDecoration: "none", transition: "all .2s",
@@ -338,6 +336,15 @@ export default function GlobalHeader() {
                   <div style={{ flex: 1 }}>
                     <div style={{ color: "white", fontWeight: 700, fontSize: ".92rem" }}>{item.label}</div>
                     <div style={{ color: "rgba(255,255,255,.5)", fontSize: ".72rem" }}>{item.sub}</div>
+                    {item.secondaryLink && (
+                      <a
+                        href={item.secondaryLink.href}
+                        onClick={e => e.stopPropagation()}
+                        style={{ display: "inline-block", marginTop: ".28rem", color: "#F0C040", fontSize: ".72rem", fontWeight: 700, textDecoration: "none" }}
+                      >
+                        {item.secondaryLink.label}
+                      </a>
+                    )}
                   </div>
                 </a>
               ))}
