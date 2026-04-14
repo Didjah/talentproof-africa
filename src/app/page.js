@@ -1228,7 +1228,8 @@ function PageContent(){
       .select("id,nom,prenom,metier,experience,ville,pays,avatar_url,video_url,bio,telephone,disponibilite,verified,likes,has_video,has_photo,preuve_url")
       .order("created_at",{ascending:false})
       .limit(20)
-      .then(({data})=>{
+      .then(({data,error})=>{
+        console.log("[PageContent] Supabase talents →", data, error);
         setProfils((data||[]).map(t=>({
           id:          t.id,
           nom:         [t.prenom,t.nom].filter(Boolean).join(" "),
@@ -1260,7 +1261,7 @@ function PageContent(){
       if(q&&!`${p.nom} ${p.metier} ${p.ville}`.toLowerCase().includes(q))return false;
       return true;
     });
-  },[metier,search]);
+  },[metier,search,profils]);
 
   const isF=metier!=="Tous"||search.trim()!=="";
   const vids=PROFILS.filter(p=>p.mediaType==="video").length;
