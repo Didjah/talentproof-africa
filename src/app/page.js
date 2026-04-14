@@ -46,7 +46,7 @@ function fetchTalentsOnce(onDone) {
         likes:       t.likes       || 0,
         verified:    t.verified    || false,
         fromWhatsApp: false,
-        photoUrl:    t.avatar_url  || null,
+        photoUrl:    t.preuve_url  || t.avatar_url || null,
         video_url:   t.video_url   || null,
         telephone:   t.telephone   || null,
       }));
@@ -544,10 +544,14 @@ function MediaVideo({profil,onClick}){
 }
 function MediaImage({profil}){
   return(
-    <div style={{position:"relative",aspectRatio:"1/1",overflow:"hidden",width:"100%"}}>
-      <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#1A0018,#3D0038)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-        <span style={{fontSize:"clamp(4rem,13vw,8rem)",opacity:.18,userSelect:"none"}}>{profil.avatar}</span>
-      </div>
+    <div style={{position:"relative",aspectRatio:"1/1",overflow:"hidden",width:"100%",background:"#111"}}>
+      {profil.photoUrl ? (
+        <img src={profil.photoUrl} alt={profil.nom} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+      ) : (
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,#1A0018,#3D0038)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <span style={{fontSize:"clamp(4rem,13vw,8rem)",opacity:.18,userSelect:"none"}}>{profil.avatar}</span>
+        </div>
+      )}
       <div style={{position:"absolute",top:".6rem",left:".6rem"}}>
         <span style={{background:"rgba(15,118,110,.88)",color:"white",fontSize:".68rem",fontWeight:700,padding:"3px 9px",borderRadius:"99px",backdropFilter:"blur(6px)",whiteSpace:"nowrap"}}>📸 Réalisation</span>
       </div>
@@ -571,22 +575,24 @@ function LightboxPhoto({src,alt,onClose}){
    CARTE TALENT
 ────────────────────────────────────────────────────────────── */
 function TalentCard({profil,onWatch,idx}){
+  const router=useRouter();
   const isVid=profil.mediaType==="video";
   const [liked,setLiked]=useState(false);
   const [likes,setLikes]=useState(profil.likes||0);
   const [lightbox,setLightbox]=useState(false);
   const like=()=>{setLiked(l=>!l);setLikes(n=>liked?n-1:n+1);};
   const waUrl=`https://wa.me/${WA_NUM1}?text=${encodeURIComponent(`Bonjour, je souhaite contacter ${profil.nom} via TalentProof.`)}`;
+  const goProfile=()=>router.push(`/annuaire/${profil.id}`);
   return(
     <>
       {lightbox&&profil.photoUrl&&<LightboxPhoto src={profil.photoUrl} alt={profil.nom} onClose={()=>setLightbox(false)}/>}
-      <article className="tp-card" style={{animationDelay:`${idx*.06}s`}}>
-        {isVid?<MediaVideo profil={profil} onClick={onWatch}/>:<MediaImage profil={profil}/>}
+      <article className="tp-card" style={{animationDelay:`${idx*.06}s`,cursor:"pointer"}} onClick={goProfile}>
+        {isVid?<MediaVideo profil={profil} onClick={(e)=>{e.stopPropagation();onWatch();}}/>:<MediaImage profil={profil}/>}
         <div style={{padding:".88rem .92rem 1rem"}}>
           <div style={{display:"flex",gap:".58rem",alignItems:"flex-start"}}>
             {/* Photo de profil */}
             {profil.photoUrl ? (
-              <img src={profil.photoUrl} alt={profil.nom} onClick={()=>setLightbox(true)} style={{width:40,height:40,borderRadius:"50%",objectFit:"cover",flexShrink:0,border:"2px solid #E5E7EB",cursor:"pointer",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}/>
+              <img src={profil.photoUrl} alt={profil.nom} onClick={(e)=>{e.stopPropagation();setLightbox(true);}} style={{width:40,height:40,borderRadius:"50%",objectFit:"cover",flexShrink:0,border:"2px solid #E5E7EB",cursor:"pointer",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}/>
             ) : (
             <div style={{width:40,height:40,borderRadius:"50%",flexShrink:0,background:"linear-gradient(135deg,#E5E7EB,#CBD5E1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.15rem",border:"2px solid #E5E7EB"}}>{profil.avatar}</div>
           )}
@@ -610,11 +616,11 @@ function TalentCard({profil,onWatch,idx}){
         {profil.documents?.length>0&&<div style={{marginTop:".62rem",display:"flex",flexWrap:"wrap",gap:".38rem"}}>{profil.documents.map((d,i)=><DocButton key={i} label={d} nom={profil.nom}/>)}</div>}
         <div style={{display:"flex",gap:".36rem",marginTop:".75rem",paddingTop:".7rem",borderTop:"1px solid #F0F0F0",flexWrap:"wrap",alignItems:"center"}}>
           {isVid
-            ?<button onClick={onWatch} style={{flex:"1 1 98px",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",border:"none",borderRadius:"99px",padding:".6rem 1rem",fontSize:".79rem",fontWeight:700,cursor:"pointer",boxShadow:"0 2px 10px rgba(27,107,71,.3)"}}><Play size={13}/> Voir la vidéo</button>
-            :<button style={{flex:"1 1 98px",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:"linear-gradient(135deg,#0D9488,#14B8A6)",color:"white",border:"none",borderRadius:"99px",padding:".6rem 1rem",fontSize:".79rem",fontWeight:700,cursor:"pointer"}}>📸 Photos</button>
+            ?<button onClick={(e)=>{e.stopPropagation();onWatch();}} style={{flex:"1 1 98px",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:"linear-gradient(135deg,#1B6B47,#2D9A68)",color:"white",border:"none",borderRadius:"99px",padding:".6rem 1rem",fontSize:".79rem",fontWeight:700,cursor:"pointer",boxShadow:"0 2px 10px rgba(27,107,71,.3)"}}><Play size={13}/> Voir la vidéo</button>
+            :<button onClick={(e)=>{e.stopPropagation();goProfile();}} style={{flex:"1 1 98px",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:"linear-gradient(135deg,#0D9488,#14B8A6)",color:"white",border:"none",borderRadius:"99px",padding:".6rem 1rem",fontSize:".79rem",fontWeight:700,cursor:"pointer"}}>📸 Photos</button>
           }
-          <a href={waUrl} target="_blank" rel="noreferrer" style={{flex:"1 1 82px",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:"transparent",color:"#1B6B47",border:"1.5px solid #D1FAE5",borderRadius:"99px",padding:".6rem .9rem",fontSize:".79rem",fontWeight:700,textDecoration:"none",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background="#F0FDF4"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>💬 Contact</a>
-          <button onClick={like} style={{padding:".55rem .55rem",borderRadius:"99px",border:"1.5px solid",borderColor:liked?"#FDA4AF":"#E5E7EB",background:liked?"#FFF1F2":"transparent",cursor:"pointer",display:"flex",alignItems:"center",gap:".22rem",fontSize:".76rem",fontWeight:700,color:liked?"#E11D48":"#9CA3AF",transition:"all .15s",flexShrink:0}}>
+          <a href={waUrl} target="_blank" rel="noreferrer" onClick={(e)=>e.stopPropagation()} style={{flex:"1 1 82px",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:"transparent",color:"#1B6B47",border:"1.5px solid #D1FAE5",borderRadius:"99px",padding:".6rem .9rem",fontSize:".79rem",fontWeight:700,textDecoration:"none",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background="#F0FDF4"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>💬 Contact</a>
+          <button onClick={(e)=>{e.stopPropagation();like();}} style={{padding:".55rem .55rem",borderRadius:"99px",border:"1.5px solid",borderColor:liked?"#FDA4AF":"#E5E7EB",background:liked?"#FFF1F2":"transparent",cursor:"pointer",display:"flex",alignItems:"center",gap:".22rem",fontSize:".76rem",fontWeight:700,color:liked?"#E11D48":"#9CA3AF",transition:"all .15s",flexShrink:0}}>
             {liked?"❤️":"🤍"} {likes}
           </button>
         </div>
