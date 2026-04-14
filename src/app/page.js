@@ -812,8 +812,8 @@ function ProuventTalent() {
 
   if (loading) return null;
 
-  /* Moins de 3 résultats réels → message d'attente */
-  if (items.length < 3) return (
+  /* Aucun résultat réel → message d'attente */
+  if (items.length < 1) return (
     <div style={{background:"linear-gradient(135deg,#0B1628,#162F52)",padding:"2.8rem 1rem",textAlign:"center"}}>
       <div style={{maxWidth:480,margin:"0 auto"}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"rgba(240,192,64,.12)",border:"1px solid rgba(240,192,64,.25)",borderRadius:"99px",padding:".35rem .9rem",marginBottom:"1rem"}}>
