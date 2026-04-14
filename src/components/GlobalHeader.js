@@ -319,8 +319,6 @@ export default function GlobalHeader() {
                 { href: "/annuaire",               icon: "🔍", label: "Trouver un talent",   sub: "Annuaire complet" },
                 { href: "/recruteur",              icon: "🏢", label: "Recruteurs",           sub: "Offres & espace recruteur",   secondaryLink: { href: "/annonces-recruteurs", label: "Voir les offres →" } },
                 { href: "/partenaires-dashboard",  icon: "🤝", label: "Partenaires",          sub: "Offres & espace partenaire",  secondaryLink: { href: "/annonces-partenaires", label: "Voir les offres →" } },
-                { href: "/partenaire",             icon: "✦",  label: "Devenir partenaire",  sub: "Rejoindre TalentProof" },
-                { href: "/partenaires",            icon: "🌍", label: "Nos partenaires",     sub: "CFPT, Orange Afrique…" },
                 { href: `https://wa.me/${WA_NUM}`, icon: "💬", label: "Nous contacter",      sub: "WhatsApp · Réponse 24h", target: "_blank" },
                 { href: "/aide",                   icon: "❓", label: "Aide & Support",      sub: "FAQ et assistance" },
               ].map(item => (
@@ -339,7 +337,7 @@ export default function GlobalHeader() {
                     {item.secondaryLink && (
                       <a
                         href={item.secondaryLink.href}
-                        onClick={e => e.stopPropagation()}
+                        onClick={e => { e.stopPropagation(); setMenuOpen(false); }}
                         style={{ display: "inline-block", marginTop: ".28rem", color: "#F0C040", fontSize: ".72rem", fontWeight: 700, textDecoration: "none" }}
                       >
                         {item.secondaryLink.label}
