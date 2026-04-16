@@ -542,9 +542,9 @@ function MediaVideo({profil,onClick}){
     </div>
   );
 }
-function MediaImage({profil}){
+function MediaImage({profil,onClick}){
   return(
-    <div style={{position:"relative",aspectRatio:"1/1",overflow:"hidden",width:"100%",background:"#111"}}>
+    <div style={{position:"relative",aspectRatio:"1/1",overflow:"hidden",width:"100%",background:"#111",cursor:"pointer"}} onClick={onClick}>
       {profil.photoUrl ? (
         <img src={profil.photoUrl} alt={profil.nom} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
       ) : (
@@ -587,7 +587,7 @@ function TalentCard({profil,onWatch,idx}){
     <>
       {lightbox&&profil.photoUrl&&<LightboxPhoto src={profil.photoUrl} alt={profil.nom} onClose={()=>setLightbox(false)}/>}
       <article className="tp-card" style={{animationDelay:`${idx*.06}s`,cursor:"pointer"}} onClick={goProfile}>
-        {isVid?<MediaVideo profil={profil} onClick={(e)=>{e.stopPropagation();onWatch();}}/>:<MediaImage profil={profil}/>}
+        {isVid?<MediaVideo profil={profil} onClick={(e)=>{e.stopPropagation();onWatch();}}/>:<MediaImage profil={profil} onClick={(e)=>{e.stopPropagation();if(profil.photoUrl)setLightbox(true);}}/>}
         <div style={{padding:".88rem .92rem 1rem"}}>
           <div style={{display:"flex",gap:".58rem",alignItems:"flex-start"}}>
             {/* Photo de profil */}
@@ -601,6 +601,7 @@ function TalentCard({profil,onWatch,idx}){
               <span style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:".92rem",color:"#111",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"145px"}}>{profil.nom}</span>
               {profil.fromWhatsApp&&<span style={{background:"#DCFCE7",color:"#166534",fontSize:".68rem",fontWeight:700,padding:"2px 7px",borderRadius:"99px",whiteSpace:"nowrap"}}>📱 WA</span>}
               {profil.verified&&<span style={{background:"#EFF6FF",color:"#1D4ED8",fontSize:".68rem",fontWeight:700,padding:"2px 7px",borderRadius:"99px",whiteSpace:"nowrap"}}>✔ Vérifié</span>}
+              {profil.video_url&&<span style={{background:"#DCFCE7",color:"#16A34A",border:"1px solid #BBF7D0",fontSize:".68rem",fontWeight:700,padding:"2px 7px",borderRadius:"99px",whiteSpace:"nowrap"}}>✓ Vidéo</span>}
             </div>
             <div style={{color:"#1B6B47",fontWeight:700,fontSize:".79rem",marginTop:".1rem",display:"flex",alignItems:"center",gap:".26rem"}}>
               <MetierIcon metier={profil.metier}/>
