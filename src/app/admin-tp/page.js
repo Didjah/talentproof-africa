@@ -5,13 +5,15 @@ import {
   Eye, Edit, Trash2, Search, Filter, BarChart3, Settings,
   LogOut, Shield, Clock, AlertCircle, CheckCircle, UserPlus, Link as LinkIcon, Copy, UserCog, Menu
 } from "lucide-react";
-import { 
+import {
   getAllInscriptions, getStats, deleteInscription, updateInscription, saveInscription,
   generateAccessToken, getTeamMembers, saveTeamMember, deleteTeamMember, updateTeamMember
 } from "@/utils/storage";
+import { supabase } from "@/lib/supabaseClient";
 
 const ADMIN_PASSWORD = "admin2026";
 const WA_NUM1 = "2250705503089";
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
 
 // CSS pour le responsive mobile
 const RESPONSIVE_CSS = `
@@ -48,6 +50,11 @@ const RESPONSIVE_CSS = `
     display: none !important;
   }
   .mobile-overlay {
+    display: none !important;
+  }
+}
+@media (max-width: 768px) {
+  .col-secondary {
     display: none !important;
   }
 }
@@ -316,6 +323,8 @@ function TalentsTab({ talents, onRefresh }) {
   const [statusFilter, setStatusFilter] = useState("tous");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(null);
+  const [generatedResult, setGeneratedResult] = useState(null);
+  const [adding, setAdding] = useState(false);
   const [newTalent, setNewTalent] = useState({
     prenom: "", nom: "", metier: "", ville: "", pays: "Côte d'Ivoire",
     telephone: "", email: "", bio: "", experience: "Débutant (moins de 1 an)",
@@ -328,28 +337,31 @@ function TalentsTab({ talents, onRefresh }) {
     return true;
   });
 
-  const handleAddTalent = () => {
+  const handleAddTalent = async () => {
     if (!newTalent.prenom || !newTalent.nom || !newTalent.metier || !newTalent.telephone) {
       alert("Veuillez remplir les champs obligatoires (prénom, nom, métier, téléphone)");
       return;
     }
-    
-    const result = saveInscription('talents', {
-      ...newTalent,
-      status: "active", // ✅ VALIDATION AUTOMATIQUE
-      createdBy: "admin"
-    });
-    
-    if (result.success) {
-      setShowAddModal(false);
-      setNewTalent({
-        prenom: "", nom: "", metier: "", ville: "", pays: "Côte d'Ivoire",
-        telephone: "", email: "", bio: "", experience: "Débutant (moins de 1 an)",
-        disponibilite: "immediate", competences: ""
-      });
-      onRefresh();
-      alert("✅ Talent ajouté et validé automatiquement !");
-    }
+    setAdding(true);
+    const { data, error } = await supabase.from('talents').insert([{
+      prenom: newTalent.prenom,
+      nom: newTalent.nom,
+      metier: newTalent.metier,
+      ville: newTalent.ville || null,
+      pays: newTalent.pays || null,
+      telephone: newTalent.telephone,
+      bio: newTalent.bio || null,
+      experience: newTalent.experience || null,
+      disponibilite: newTalent.disponibilite,
+      verified: false,
+    }]).select().single();
+    setAdding(false);
+    if (error) { alert("Erreur Supabase : " + error.message); return; }
+    const link = `${window.location.origin}/finaliser-profil?id=${data.id}`;
+    setShowAddModal(false);
+    setGeneratedResult({ nom: `${newTalent.prenom} ${newTalent.nom}`, telephone: newTalent.telephone, url: link, id: data.id });
+    setNewTalent({ prenom: "", nom: "", metier: "", ville: "", pays: "Côte d'Ivoire", telephone: "", email: "", bio: "", experience: "Débutant (moins de 1 an)", disponibilite: "immediate", competences: "" });
+    onRefresh();
   };
 
   const handleValidate = (id) => {
@@ -463,7 +475,7 @@ function TalentsTab({ talents, onRefresh }) {
               <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "140px" }}>Métier</th>
               <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "120px" }}>Ville</th>
               <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "100px" }}>Statut</th>
-              <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "100px" }}>Date</th>
+              <th className="col-secondary" style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "100px" }}>Date</th>
               <th style={{ padding: ".9rem 1rem", textAlign: "center", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "140px" }}>Actions</th>
             </tr>
           </thead>
@@ -519,12 +531,12 @@ function TalentsTab({ talents, onRefresh }) {
                     {talent.status === "active" ? "Actif" : "Attente"}
                   </span>
                 </td>
-                <td style={{ padding: ".9rem 1rem", fontSize: ".8rem", color: "#9CA3AF", whiteSpace: "nowrap" }}>
-                  {new Date(talent.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                <td className="col-secondary" style={{ padding: ".9rem 1rem", fontSize: ".8rem", color: "#9CA3AF", whiteSpace: "nowrap" }}>
+                  {formatDate(talent.createdAt)}
                 </td>
                 <td style={{ padding: ".9rem 1rem" }}>
                   <div style={{ display: "flex", gap: ".4rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    <button 
+                    <button
                       onClick={() => setShowLinkModal(talent)}
                       title="Lien"
                       style={{
@@ -716,20 +728,55 @@ function TalentsTab({ talents, onRefresh }) {
                 }}>
                   Annuler
                 </button>
-                <button onClick={handleAddTalent} style={{
+                <button onClick={handleAddTalent} disabled={adding} style={{
                   flex: "2 1 180px",
                   padding: ".7rem",
                   borderRadius: "10px",
                   border: "none",
-                  background: "linear-gradient(135deg,#1B6B47,#2D9A68)",
+                  background: adding ? "#9CA3AF" : "linear-gradient(135deg,#1B6B47,#2D9A68)",
                   color: "white",
                   fontWeight: 800,
                   fontSize: ".85rem",
-                  cursor: "pointer"
+                  cursor: adding ? "wait" : "pointer"
                 }}>
-                  Ajouter le talent
+                  {adding ? "Enregistrement…" : "Ajouter le talent"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal résultat création talent → lien finaliser-profil */}
+      {generatedResult && (
+        <div onClick={() => setGeneratedResult(null)} style={{ position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:"1rem" }}>
+          <div onClick={e=>e.stopPropagation()} style={{ background:"white",borderRadius:"20px",padding:"2rem",maxWidth:500,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,.3)" }}>
+            <div style={{ textAlign:"center",marginBottom:"1.2rem" }}>
+              <div style={{ fontSize:"2.5rem",marginBottom:".4rem" }}>✅</div>
+              <div style={{ fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:"1.1rem",color:"#111" }}>
+                {generatedResult.nom} ajouté !
+              </div>
+              <div style={{ color:"#666",fontSize:".82rem",marginTop:".3rem" }}>
+                Envoyez ce lien au talent pour qu'il finalise son profil (photo, vidéo, PIN).
+              </div>
+            </div>
+            <div style={{ background:"#F0FDF4",border:"1.5px solid #86EFAC",borderRadius:"12px",padding:"1rem",marginBottom:"1rem" }}>
+              <div style={{ fontSize:".72rem",color:"#16A34A",fontWeight:700,marginBottom:".4rem" }}>LIEN DE FINALISATION</div>
+              <div style={{ fontSize:".8rem",color:"#111",wordBreak:"break-all",lineHeight:1.5 }}>{generatedResult.url}</div>
+            </div>
+            <div style={{ display:"flex",gap:".6rem",flexWrap:"wrap" }}>
+              <button onClick={() => { navigator.clipboard.writeText(generatedResult.url); alert("✅ Lien copié !"); }}
+                style={{ flex:"1 1 120px",display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",padding:".7rem",borderRadius:"10px",border:"none",background:"linear-gradient(135deg,#C9960F,#F0C040)",color:"#0D3B2E",fontWeight:800,fontSize:".85rem",cursor:"pointer" }}>
+                <Copy size={16}/> Copier
+              </button>
+              {generatedResult.telephone && (
+                <a href={`https://wa.me/${generatedResult.telephone.replace(/\D/g,'')}?text=${encodeURIComponent(`Bonjour ${generatedResult.nom.split(' ')[0]}, voici le lien pour finaliser ton profil TalentProof : ${generatedResult.url}`)}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ flex:"1 1 120px",display:"flex",alignItems:"center",justifyContent:"center",gap:".4rem",padding:".7rem",borderRadius:"10px",background:"#25D366",color:"white",fontWeight:700,fontSize:".85rem",textDecoration:"none" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.123 1.527 5.852L.057 23.5l5.797-1.497A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.518-5.162-1.416l-.37-.218-3.441.889.917-3.346-.24-.387A9.944 9.944 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+                  WhatsApp
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -976,55 +1023,56 @@ function PartenairesTab({ partenaires, onRefresh }) {
   );
 }
 
+const ROLE_LABELS = { moderateur:"🛡️ Modérateur", support:"🎧 Support", editeur:"✏️ Éditeur" };
+
 function TeamTab({ onRefresh }) {
   const [team, setTeam] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newMember, setNewMember] = useState({
-    nom: "", prenom: "", email: "", password: "", role: "moderator"
-  });
+  const [saving, setSaving] = useState(false);
+  const [newMember, setNewMember] = useState({ nom: "", email: "", role: "moderateur", pin: "" });
 
-  useEffect(() => {
-    loadTeam();
-  }, []);
+  useEffect(() => { loadTeam(); }, []);
 
-  const loadTeam = () => {
-    const members = getTeamMembers();
-    setTeam(members);
+  const loadTeam = async () => {
+    const { data } = await supabase.from("personnel_tp").select("*").order("created_at", { ascending: false });
+    setTeam(data || []);
   };
 
-  const handleAddMember = () => {
-    if (!newMember.nom || !newMember.prenom || !newMember.email || !newMember.password) {
-      alert("Veuillez remplir tous les champs obligatoires");
+  const handleAddMember = async () => {
+    if (!newMember.nom || !newMember.email || !newMember.pin) {
+      alert("Veuillez remplir tous les champs obligatoires (nom, email, PIN)");
       return;
     }
-    
-    const result = saveTeamMember(newMember);
-    
-    if (result.success) {
-      setShowAddModal(false);
-      setNewMember({ nom: "", prenom: "", email: "", password: "", role: "moderator" });
-      loadTeam();
-      alert("✅ Membre ajouté avec succès !");
+    if (newMember.pin.length < 4) {
+      alert("Le PIN doit contenir au moins 4 caractères");
+      return;
     }
+    setSaving(true);
+    const { error } = await supabase.from("personnel_tp").insert([{
+      nom: newMember.nom,
+      email: newMember.email,
+      role: newMember.role,
+      pin: newMember.pin,
+      status: "active",
+    }]);
+    setSaving(false);
+    if (error) { alert("Erreur : " + error.message); return; }
+    setShowAddModal(false);
+    setNewMember({ nom: "", email: "", role: "moderateur", pin: "" });
+    loadTeam();
+    alert("✅ Membre ajouté avec succès !");
   };
 
-  const handleDelete = (id, nom) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer ${nom} de l'équipe ?`)) {
-      const result = deleteTeamMember(id);
-      if (result.success) {
-        loadTeam();
-        alert("✅ Membre supprimé");
-      }
-    }
+  const handleDelete = async (id, nom) => {
+    if (!confirm(`Supprimer ${nom} de l'équipe ?`)) return;
+    await supabase.from("personnel_tp").delete().eq("id", id);
+    loadTeam();
   };
 
-  const toggleStatus = (id, currentStatus) => {
+  const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
-    const result = updateTeamMember(id, { status: newStatus });
-    if (result.success) {
-      loadTeam();
-      alert(`✅ Statut mis à jour : ${newStatus === "active" ? "Actif" : "Inactif"}`);
-    }
+    await supabase.from("personnel_tp").update({ status: newStatus }).eq("id", id);
+    loadTeam();
   };
 
   return (
@@ -1076,7 +1124,7 @@ function TeamTab({ onRefresh }) {
               <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "180px" }}>Email</th>
               <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "120px" }}>Rôle</th>
               <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "100px" }}>Statut</th>
-              <th style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "100px" }}>Date</th>
+              <th className="col-secondary" style={{ padding: ".9rem 1rem", textAlign: "left", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "100px" }}>Date</th>
               <th style={{ padding: ".9rem 1rem", textAlign: "center", fontSize: ".75rem", fontWeight: 700, color: "#666", textTransform: "uppercase", letterSpacing: ".5px", minWidth: "80px" }}>Actions</th>
             </tr>
           </thead>
@@ -1104,11 +1152,11 @@ function TeamTab({ onRefresh }) {
                       fontWeight: 700,
                       flexShrink: 0
                     }}>
-                      {member.prenom[0]}{member.nom[0]}
+                      {(member.nom||"?")[0].toUpperCase()}
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: ".85rem", color: "#111", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {member.prenom} {member.nom}
+                        {member.nom}
                       </div>
                     </div>
                   </div>
@@ -1125,7 +1173,7 @@ function TeamTab({ onRefresh }) {
                     color: "#4F46E5",
                     whiteSpace: "nowrap"
                   }}>
-                    {member.role === "moderator" ? "🛡️ Modo" : "👤 Membre"}
+                    {ROLE_LABELS[member.role] || member.role}
                   </span>
                 </td>
                 <td style={{ padding: ".9rem 1rem" }}>
@@ -1146,13 +1194,13 @@ function TeamTab({ onRefresh }) {
                     {member.status === "active" ? "✓ Actif" : "✕ Inactif"}
                   </button>
                 </td>
-                <td style={{ padding: ".9rem 1rem", fontSize: ".8rem", color: "#9CA3AF", whiteSpace: "nowrap" }}>
-                  {new Date(member.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                <td className="col-secondary" style={{ padding: ".9rem 1rem", fontSize: ".8rem", color: "#9CA3AF", whiteSpace: "nowrap" }}>
+                  {formatDate(member.created_at || member.createdAt)}
                 </td>
                 <td style={{ padding: ".9rem 1rem" }}>
                   <div style={{ display: "flex", gap: ".4rem", justifyContent: "center" }}>
                     <button 
-                      onClick={() => handleDelete(member.id, `${member.prenom} ${member.nom}`)}
+                      onClick={() => handleDelete(member.id, member.nom)}
                       title="Supprimer"
                       style={{
                         padding: ".4rem",
@@ -1194,109 +1242,51 @@ function TeamTab({ onRefresh }) {
             overflowY: "auto",
             boxShadow: "0 20px 60px rgba(0,0,0,.3)"
           }}>
-            <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.3rem", fontWeight: 800, color: "#111", marginBottom: "1.5rem" }}>
+            <h2 style={{ fontFamily:"'Sora',sans-serif",fontSize:"1.3rem",fontWeight:800,color:"#111",marginBottom:"1.5rem" }}>
               ➕ Ajouter un collaborateur
             </h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: ".8rem" }}>
-                <input 
-                  placeholder="Prénom *" 
-                  value={newMember.prenom}
-                  onChange={e => setNewMember({...newMember, prenom: e.target.value})}
-                  style={{
-                    padding: ".7rem .9rem",
-                    borderRadius: "8px",
-                    border: "1.5px solid #E5E7EB",
-                    fontSize: ".9rem",
-                    outline: "none"
-                  }} 
-                />
-                <input 
-                  placeholder="Nom *" 
-                  value={newMember.nom}
-                  onChange={e => setNewMember({...newMember, nom: e.target.value})}
-                  style={{
-                    padding: ".7rem .9rem",
-                    borderRadius: "8px",
-                    border: "1.5px solid #E5E7EB",
-                    fontSize: ".9rem",
-                    outline: "none"
-                  }} 
-                />
-              </div>
-              <input 
+            <div style={{ display:"flex",flexDirection:"column",gap:"1rem" }}>
+              <input
+                placeholder="Nom complet *"
+                value={newMember.nom}
+                onChange={e => setNewMember({...newMember, nom: e.target.value})}
+                style={{ padding:".7rem .9rem",borderRadius:"8px",border:"1.5px solid #E5E7EB",fontSize:".9rem",outline:"none" }}
+              />
+              <input
                 type="email"
-                placeholder="Email *" 
+                placeholder="Email *"
                 value={newMember.email}
                 onChange={e => setNewMember({...newMember, email: e.target.value})}
-                style={{
-                  padding: ".7rem .9rem",
-                  borderRadius: "8px",
-                  border: "1.5px solid #E5E7EB",
-                  fontSize: ".9rem",
-                  outline: "none"
-                }} 
-              />
-              <input 
-                type="password"
-                placeholder="Mot de passe *" 
-                value={newMember.password}
-                onChange={e => setNewMember({...newMember, password: e.target.value})}
-                style={{
-                  padding: ".7rem .9rem",
-                  borderRadius: "8px",
-                  border: "1.5px solid #E5E7EB",
-                  fontSize: ".9rem",
-                  outline: "none"
-                }} 
+                style={{ padding:".7rem .9rem",borderRadius:"8px",border:"1.5px solid #E5E7EB",fontSize:".9rem",outline:"none" }}
               />
               <div>
-                <label style={{ display: "block", fontSize: ".8rem", fontWeight: 700, color: "#444", marginBottom: ".5rem" }}>
-                  Rôle
-                </label>
-                <select 
+                <label style={{ display:"block",fontSize:".8rem",fontWeight:700,color:"#444",marginBottom:".5rem" }}>Rôle</label>
+                <select
                   value={newMember.role}
                   onChange={e => setNewMember({...newMember, role: e.target.value})}
-                  style={{
-                    width: "100%",
-                    padding: ".7rem .9rem",
-                    borderRadius: "8px",
-                    border: "1.5px solid #E5E7EB",
-                    fontSize: ".9rem",
-                    outline: "none",
-                    cursor: "pointer"
-                  }}>
-                  <option value="moderator">🛡️ Modérateur</option>
-                  <option value="viewer">👁️ Observateur</option>
+                  style={{ width:"100%",padding:".7rem .9rem",borderRadius:"8px",border:"1.5px solid #E5E7EB",fontSize:".9rem",outline:"none",cursor:"pointer" }}>
+                  <option value="moderateur">🛡️ Modérateur</option>
+                  <option value="support">🎧 Support</option>
+                  <option value="editeur">✏️ Éditeur</option>
                 </select>
               </div>
-
-              <div style={{ display: "flex", gap: ".6rem", marginTop: ".5rem", flexWrap: "wrap" }}>
-                <button onClick={() => setShowAddModal(false)} style={{
-                  flex: "1 1 120px",
-                  padding: ".7rem",
-                  borderRadius: "10px",
-                  border: "1.5px solid #E5E7EB",
-                  background: "white",
-                  color: "#666",
-                  fontWeight: 700,
-                  fontSize: ".85rem",
-                  cursor: "pointer"
-                }}>
+              <div>
+                <label style={{ display:"block",fontSize:".8rem",fontWeight:700,color:"#444",marginBottom:".5rem" }}>PIN d'accès *</label>
+                <input
+                  type="password"
+                  placeholder="Min. 4 caractères"
+                  value={newMember.pin}
+                  onChange={e => setNewMember({...newMember, pin: e.target.value})}
+                  style={{ width:"100%",padding:".7rem .9rem",borderRadius:"8px",border:"1.5px solid #E5E7EB",fontSize:".9rem",outline:"none" }}
+                />
+                <div style={{ color:"#9CA3AF",fontSize:".74rem",marginTop:".3rem" }}>Le personnel se connectera avec ce PIN via /admin-tp</div>
+              </div>
+              <div style={{ display:"flex",gap:".6rem",marginTop:".5rem",flexWrap:"wrap" }}>
+                <button onClick={() => setShowAddModal(false)} style={{ flex:"1 1 120px",padding:".7rem",borderRadius:"10px",border:"1.5px solid #E5E7EB",background:"white",color:"#666",fontWeight:700,fontSize:".85rem",cursor:"pointer" }}>
                   Annuler
                 </button>
-                <button onClick={handleAddMember} style={{
-                  flex: "2 1 180px",
-                  padding: ".7rem",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "linear-gradient(135deg,#7C3AED,#9333EA)",
-                  color: "white",
-                  fontWeight: 800,
-                  fontSize: ".85rem",
-                  cursor: "pointer"
-                }}>
-                  Ajouter
+                <button onClick={handleAddMember} disabled={saving} style={{ flex:"2 1 180px",padding:".7rem",borderRadius:"10px",border:"none",background:saving?"#9CA3AF":"linear-gradient(135deg,#7C3AED,#9333EA)",color:"white",fontWeight:800,fontSize:".85rem",cursor:saving?"wait":"pointer" }}>
+                  {saving ? "Enregistrement…" : "Ajouter"}
                 </button>
               </div>
             </div>
@@ -1396,7 +1386,7 @@ export default function AdminPage() {
     setStats(statsData);
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
@@ -1404,7 +1394,23 @@ export default function AdminPage() {
       sessionStorage.setItem("tp_admin_auth", "true");
       loadData();
     } else {
-      setError("Mot de passe incorrect");
+      // Vérifier le PIN du personnel dans Supabase
+      const { data: personnel } = await supabase
+        .from("personnel_tp")
+        .select("*")
+        .eq("pin", password)
+        .eq("status", "active")
+        .maybeSingle();
+      if (personnel) {
+        setIsAuthenticated(true);
+        setError("");
+        sessionStorage.setItem("tp_admin_auth", "true");
+        sessionStorage.setItem("tp_admin_role", personnel.role);
+        sessionStorage.setItem("tp_admin_name", personnel.nom);
+        loadData();
+      } else {
+        setError("Mot de passe ou PIN incorrect");
+      }
     }
   };
 
