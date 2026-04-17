@@ -286,7 +286,7 @@ function DashboardTab({ stats }) {
         supabase.from('talents').select('*', { count: 'exact', head: true }).eq('statut', 'attente'),
         supabase.from('recruteurs').select('*', { count: 'exact', head: true }),
         supabase.from('partenaires').select('*', { count: 'exact', head: true }),
-        supabase.from('talents').select('id, prenom, nom, metier, ville, statut, created_at').order('created_at', { ascending: false }).limit(5)
+        supabase.from('talents').select('id, prenom, nom, metier, ville, statut, created_at').order('id', { ascending: false }).limit(5)
       ]);
       setRealStats({ talents: totalTalents || 0, pending: pending || 0, recruteurs: recruteurs || 0, partenaires: partenaires || 0 });
       setDerniersTalents(derniers || []);
