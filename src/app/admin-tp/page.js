@@ -269,49 +269,126 @@ function Sidebar({ activeTab, setActiveTab, onLogout, mobileOpen, setMobileOpen 
 }
 
 function DashboardTab({ stats }) {
+  const [realStats, setRealStats] = useState({ talents: 0, pending: 0, recruteurs: 0, partenaires: 0 });
+  const [derniersTalents, setDerniersTalents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [linkModal, setLinkModal] = useState(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  async function fetchDashboardData() {
+    setLoading(true);
+    try {
+      const [{ count: totalTalents }, { count: pending }, { count: recruteurs }, { count: partenaires }, { data: derniers }] = await Promise.all([
+        supabase.from('talents').select('*', { count: 'exact', head: true }),
+        supabase.from('talents').select('*', { count: 'exact', head: true }).eq('statut', 'attente'),
+        supabase.from('recruteurs').select('*', { count: 'exact', head: true }),
+        supabase.from('partenaires').select('*', { count: 'exact', head: true }),
+        supabase.from('talents').select('id, prenom, nom, metier, ville, statut, created_at').order('created_at', { ascending: false }).limit(5)
+      ]);
+      setRealStats({ talents: totalTalents || 0, pending: pending || 0, recruteurs: recruteurs || 0, partenaires: partenaires || 0 });
+      setDerniersTalents(derniers || []);
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
+  }
+
+  async function validerTalent(id) {
+    await supabase.from('talents').update({ statut: 'actif' }).eq('id', id);
+    fetchDashboardData();
+  }
+
+  async function supprimerTalent(id) {
+    if (!confirm('Supprimer ce talent ?')) return;
+    await supabase.from('talents').delete().eq('id', id);
+    fetchDashboardData();
+  }
+
+  function envoyerLien(talent) {
+    const token = btoa(`${talent.id}-${Date.now()}`);
+    const lien = `${window.location.origin}/mon-profil?token=${token}&id=${talent.id}`;
+    setLinkModal({ nom: `${talent.prenom} ${talent.nom}`, lien });
+  }
+
   return (
     <div>
-      <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.8rem", fontWeight: 900, color: "#111", marginBottom: "1.5rem" }}>
-        📊 Tableau de bord
-      </h1>
+      {realStats.pending > 0 && (
+        <div style={{ background: '#fee2e2', border: '1px solid #ef4444', borderRadius: 8, padding: '12px 16px', marginBottom: 20, color: '#dc2626', fontWeight: 600 }}>
+          ⚠️ {realStats.pending} talent(s) en attente de validation
+        </div>
+      )}
 
-      {/* Stats principales */}
-      <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "1rem", marginBottom: "2rem" }}>
-        <StatCard
-          icon={Users}
-          label="Talents inscrits"
-          value={stats.talents.total}
-          subValue={stats.talents.pending > 0 ? `${stats.talents.pending} en attente` : "Tous validés"}
-          color="#1B6B47"
-        />
-        <StatCard
-          icon={Briefcase}
-          label="Recruteurs"
-          value={stats.recruteurs.total}
-          subValue={stats.recruteurs.pending > 0 ? `${stats.recruteurs.pending} en attente` : "Tous actifs"}
-          color="#7C3AED"
-        />
-        <StatCard
-          icon={Handshake}
-          label="Partenaires"
-          value={stats.partenaires.total}
-          subValue={stats.partenaires.pending > 0 ? `${stats.partenaires.pending} en attente` : "Tous actifs"}
-          color="#F0C040"
-        />
+      {/* Stats cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 32 }}>
+        {[
+          { label: 'Talents', value: realStats.talents, color: '#10b981', icon: '👥' },
+          { label: 'En attente', value: realStats.pending, color: '#f59e0b', icon: '⏳' },
+          { label: 'Recruteurs', value: realStats.recruteurs, color: '#3b82f6', icon: '🏢' },
+          { label: 'Partenaires', value: realStats.partenaires, color: '#8b5cf6', icon: '🤝' },
+        ].map(s => (
+          <div key={s.label} style={{ background: '#fff', borderRadius: 12, padding: '20px 16px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+            <div style={{ fontSize: 28 }}>{s.icon}</div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: s.color }}>{loading ? '...' : s.value}</div>
+            <div style={{ fontSize: 13, color: '#6b7280' }}>{s.label}</div>
+          </div>
+        ))}
       </div>
 
-      {/* Alertes */}
-      {stats.talents.pending > 0 && (
-        <div style={{ background: "#FEF2F2", border: "1.5px solid #FCA5A5", borderRadius: "14px", padding: "1.2rem", marginBottom: "2rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".6rem", flexWrap: "wrap" }}>
-            <AlertCircle size={20} color="#DC2626" />
-            <span style={{ fontWeight: 800, color: "#991B1B", fontSize: ".9rem" }}>
-              {stats.talents.pending} talent{stats.talents.pending > 1 ? "s" : ""} en attente de validation
-            </span>
+      {/* Derniers talents */}
+      <div style={{ background: '#fff', borderRadius: 12, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700 }}>🕐 Derniers inscrits</h3>
+        {loading ? <p style={{ color: '#9ca3af' }}>Chargement...</p> : derniersTalents.length === 0 ? <p style={{ color: '#9ca3af' }}>Aucun talent</p> : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+                {['Nom', 'Métier', 'Ville', 'Statut', 'Actions'].map(h => (
+                  <th key={h} style={{ textAlign: 'left', padding: '8px 12px', color: '#6b7280', fontWeight: 600 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {derniersTalents.map(t => (
+                <tr key={t.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '10px 12px', fontWeight: 600 }}>{t.prenom} {t.nom}</td>
+                  <td style={{ padding: '10px 12px', color: '#6b7280' }}>{t.metier}</td>
+                  <td style={{ padding: '10px 12px', color: '#6b7280' }}>{t.ville}</td>
+                  <td style={{ padding: '10px 12px' }}>
+                    <span style={{ background: t.statut === 'actif' ? '#d1fae5' : '#fee2e2', color: t.statut === 'actif' ? '#059669' : '#dc2626', padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
+                      {t.statut === 'actif' ? 'Actif' : 'Attente'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 12px' }}>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {t.statut !== 'actif' && (
+                        <button onClick={() => validerTalent(t.id)} title="Valider" style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 13 }}>✅</button>
+                      )}
+                      <button onClick={() => envoyerLien(t)} title="Envoyer lien" style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 13 }}>🔗</button>
+                      <button onClick={() => supprimerTalent(t.id)} title="Supprimer" style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 13 }}>🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Modal lien */}
+      {linkModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 32, maxWidth: 480, width: '90%' }}>
+            <h3 style={{ margin: '0 0 8px' }}>🔗 Lien d&apos;accès au profil</h3>
+            <p style={{ color: '#6b7280', margin: '0 0 16px' }}>Envoyez ce lien à <strong>{linkModal.nom}</strong> sur WhatsApp.</p>
+            <div style={{ background: '#f3f4f6', borderRadius: 8, padding: 12, fontSize: 13, wordBreak: 'break-all', marginBottom: 16 }}>{linkModal.lien}</div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={() => { navigator.clipboard.writeText(linkModal.lien); }} style={{ flex: 1, background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 0', cursor: 'pointer', fontWeight: 600 }}>📋 Copier</button>
+              <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(linkModal.lien)}`)} style={{ flex: 1, background: '#25d366', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 0', cursor: 'pointer', fontWeight: 600 }}>WhatsApp</button>
+              <button onClick={() => setLinkModal(null)} style={{ background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: 8, padding: '10px 16px', cursor: 'pointer' }}>✕</button>
+            </div>
           </div>
-          <p style={{ color: "#DC2626", fontSize: ".8rem", lineHeight: 1.6, margin: 0 }}>
-            Profils à valider sous 24h pour respecter notre engagement.
-          </p>
         </div>
       )}
     </div>
