@@ -1476,14 +1476,37 @@ export default function AdminPage() {
     });
   };
 
+  const MAX_ATTEMPTS = 3;
+  const BLOCK_DURATION = 5 * 60 * 1000; // 5 minutes
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Vérifier si bloqué
+    const blockData = JSON.parse(sessionStorage.getItem("tp_admin_block") || "{}");
+    if (blockData.blockedUntil && Date.now() < blockData.blockedUntil) {
+      const minutesLeft = Math.ceil((blockData.blockedUntil - Date.now()) / 60000);
+      setError(`Trop de tentatives. Réessayez dans ${minutesLeft} minute(s).`);
+      return;
+    }
+
     if (password === ADMIN_PASSWORD) {
+      sessionStorage.removeItem("tp_admin_block");
       setIsAuthenticated(true);
       setError("");
       sessionStorage.setItem("tp_admin_auth", "true");
       loadData();
     } else {
+      // Incrémenter tentatives
+      const attempts = (blockData.attempts || 0) + 1;
+      if (attempts >= MAX_ATTEMPTS) {
+        sessionStorage.setItem("tp_admin_block", JSON.stringify({ attempts, blockedUntil: Date.now() + BLOCK_DURATION }));
+        setError("3 tentatives échouées. Accès bloqué 5 minutes.");
+      } else {
+        sessionStorage.setItem("tp_admin_block", JSON.stringify({ attempts }));
+        setError(`Mot de passe incorrect. ${MAX_ATTEMPTS - attempts} tentative(s) restante(s).`);
+      }
+
       // Vérifier le PIN du personnel dans Supabase
       const { data: personnel } = await supabase
         .from("personnel_tp")
@@ -1492,14 +1515,13 @@ export default function AdminPage() {
         .eq("status", "active")
         .maybeSingle();
       if (personnel) {
+        sessionStorage.removeItem("tp_admin_block");
         setIsAuthenticated(true);
         setError("");
         sessionStorage.setItem("tp_admin_auth", "true");
         sessionStorage.setItem("tp_admin_role", personnel.role);
         sessionStorage.setItem("tp_admin_name", personnel.nom);
         loadData();
-      } else {
-        setError("Mot de passe ou PIN incorrect");
       }
     }
   };
