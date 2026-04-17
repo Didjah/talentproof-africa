@@ -1477,12 +1477,11 @@ export default function AdminPage() {
   };
 
   const MAX_ATTEMPTS = 3;
-  const BLOCK_DURATION = 5 * 60 * 1000; // 5 minutes
+  const BLOCK_DURATION = 5 * 60 * 1000;
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Vérifier si bloqué
     const blockData = JSON.parse(sessionStorage.getItem("tp_admin_block") || "{}");
     if (blockData.blockedUntil && Date.now() < blockData.blockedUntil) {
       const minutesLeft = Math.ceil((blockData.blockedUntil - Date.now()) / 60000);
@@ -1497,7 +1496,6 @@ export default function AdminPage() {
       sessionStorage.setItem("tp_admin_auth", "true");
       loadData();
     } else {
-      // Incrémenter tentatives
       const attempts = (blockData.attempts || 0) + 1;
       if (attempts >= MAX_ATTEMPTS) {
         sessionStorage.setItem("tp_admin_block", JSON.stringify({ attempts, blockedUntil: Date.now() + BLOCK_DURATION }));
