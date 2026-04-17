@@ -409,7 +409,7 @@ function TalentsTab({ talents, onRefresh }) {
   });
 
   const filtered = talents.filter(t => {
-    if (statusFilter !== "tous" && t.status !== statusFilter) return false;
+    if (statusFilter !== "tous" && t.statut !== statusFilter) return false;
     if (search && !`${t.prenom} ${t.nom} ${t.metier} ${t.ville}`.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
