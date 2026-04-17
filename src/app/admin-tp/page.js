@@ -1450,17 +1450,29 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [data, setData] = useState({ talents: [], recruteurs: [], partenaires: [] });
+  const [talents, setTalents] = useState([]);
+  const [recruteurs, setRecruteurs] = useState([]);
+  const [partenaires, setPartenaires] = useState([]);
   const [stats, setStats] = useState({ talents: {}, recruteurs: {}, partenaires: {} });
 
-  const loadData = () => {
-    const talents = getAllInscriptions('talents');
-    const recruteurs = getAllInscriptions('recruteurs');
-    const partenaires = getAllInscriptions('partenaires');
-    const statsData = getStats();
-    
-    setData({ talents, recruteurs, partenaires });
-    setStats(statsData);
+  const loadData = async () => {
+    const [
+      { data: talentsData },
+      { data: recruteursData },
+      { data: partenairesData }
+    ] = await Promise.all([
+      supabase.from('talents').select('*').order('created_at', { ascending: false }),
+      supabase.from('recruteurs').select('*').order('created_at', { ascending: false }),
+      supabase.from('partenaires').select('*').order('created_at', { ascending: false })
+    ]);
+    setTalents(talentsData || []);
+    setRecruteurs(recruteursData || []);
+    setPartenaires(partenairesData || []);
+    setStats({
+      talents:    { total: talentsData?.length || 0,    pending: talentsData?.filter(t => t.statut === 'attente').length || 0 },
+      recruteurs: { total: recruteursData?.length || 0, pending: 0 },
+      partenaires:{ total: partenairesData?.length || 0,pending: 0 },
+    });
   };
 
   const handleLogin = async (e) => {
@@ -1721,9 +1733,9 @@ export default function AdminPage() {
 
             {/* Contenu selon l'onglet */}
             {activeTab === "dashboard" && <DashboardTab stats={stats} />}
-            {activeTab === "talents" && <TalentsTab talents={data.talents} onRefresh={loadData} />}
-            {activeTab === "recruteurs" && <RecruteursTab recruteurs={data.recruteurs} onRefresh={loadData} />}
-            {activeTab === "partenaires" && <PartenairesTab partenaires={data.partenaires} onRefresh={loadData} />}
+            {activeTab === "talents" && <TalentsTab talents={talents} onRefresh={loadData} />}
+            {activeTab === "recruteurs" && <RecruteursTab recruteurs={recruteurs} onRefresh={loadData} />}
+            {activeTab === "partenaires" && <PartenairesTab partenaires={partenaires} onRefresh={loadData} />}
             {activeTab === "team" && <TeamTab onRefresh={loadData} />}
             {activeTab === "settings" && <SettingsTab />}
           </div>
