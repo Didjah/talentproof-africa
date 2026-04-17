@@ -11,7 +11,7 @@ import {
 } from "@/utils/storage";
 import { supabase } from "@/lib/supabaseClient";
 
-const ADMIN_PASSWORD = "admin2026";
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 const WA_NUM1 = "2250705503089";
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
 
