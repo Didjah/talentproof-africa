@@ -176,6 +176,7 @@ export default function InscriptionPage() {
         disponible: form.disponible,
         avatar_url: avatarUrl,
         preuve_url: preuveUrl,
+        statut: 'actif',
       }]);
 
       if(error) throw error;

@@ -432,6 +432,7 @@ function TalentsTab({ talents, onRefresh }) {
       experience: newTalent.experience || null,
       disponibilite: newTalent.disponibilite,
       verified: false,
+      statut: 'actif',
     }]).select().single();
     setAdding(false);
     if (error) { alert("Erreur Supabase : " + error.message); return; }
@@ -614,6 +615,16 @@ function TalentsTab({ talents, onRefresh }) {
                 </td>
                 <td style={{ padding: ".9rem 1rem" }}>
                   <div style={{ display: "flex", gap: ".4rem", justifyContent: "center", flexWrap: "wrap" }}>
+                    {talent.statut !== 'actif' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('talents').update({ statut: 'actif' }).eq('id', talent.id);
+                          onRefresh();
+                        }}
+                        title="Valider"
+                        style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: 13, marginRight: 6 }}
+                      >✅</button>
+                    )}
                     <button
                       onClick={() => setShowLinkModal(talent)}
                       title="Lien"

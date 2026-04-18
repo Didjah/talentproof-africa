@@ -245,6 +245,7 @@ export default function InscriptionTalentPage() {
         avatar_url: avatarUrl,
         preuve_url: preuveUrl,
         video_url: videoUrl,
+        statut: 'actif',
         has_photo: !!preuveUrl,
         has_video: !!videoUrl,
         pin_code: (form.pinCode && form.pinCode === form.pinConfirm) ? form.pinCode : null,
