@@ -356,18 +356,21 @@ export default function FinaliserProfilPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: ".9rem" }}>
             <div>
               <label style={{ fontSize: ".85rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: ".4rem" }}>
-                Numéro de téléphone / WhatsApp
+                Numéro de téléphone / WhatsApp (avec indicatif pays)
               </label>
               <input
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && rechercher()}
-                placeholder="+225 07 05 50 30 89"
+                placeholder="Ex: 2250798470653"
                 type="tel"
                 style={{ ...inputSt, borderColor: searchErr ? "#EF4444" : "#D1FAE5" }}
                 onFocus={focusGreen}
                 onBlur={blurGreen}
               />
+              <p style={{ color: "#6B7280", fontSize: ".75rem", margin: ".35rem 0 0", lineHeight: 1.5 }}>
+                💡 Commence par l&apos;indicatif de ton pays (sans le +) : 225 = Côte d&apos;Ivoire, 226 = Burkina Faso, 221 = Sénégal, 237 = Cameroun, etc.
+              </p>
               {searchErr && (
                 <p style={{ color: "#EF4444", fontSize: ".78rem", margin: ".4rem 0 0", lineHeight: 1.5 }}>{searchErr}</p>
               )}
@@ -492,10 +495,13 @@ export default function FinaliserProfilPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: ".35rem" }}>Téléphone / WhatsApp</label>
+              <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: ".35rem" }}>Téléphone / WhatsApp (avec indicatif pays)</label>
               <input type="tel" value={form.telephone || ""} onChange={e => f("telephone", e.target.value)}
-                placeholder="+225 07 05 50 30 89"
+                placeholder="Ex: 2250798470653"
                 style={inputSt} onFocus={focusGreen} onBlur={blurGreen} />
+              <p style={{ color: "#6B7280", fontSize: ".75rem", margin: ".35rem 0 0", lineHeight: 1.5 }}>
+                💡 Commence par l&apos;indicatif de ton pays (sans le +) : 225 = Côte d&apos;Ivoire, 226 = Burkina Faso, 221 = Sénégal, 237 = Cameroun, etc.
+              </p>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".7rem" }}>
