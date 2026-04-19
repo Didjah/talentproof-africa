@@ -8,7 +8,7 @@ import { uploadFichier } from "@/services/api";
 /* ── Constantes ── */
 const METIERS = [
   "Chauffeur VTC", "Chauffeur camion", "Chauffeur particulier",
-  "Mécanicien", "Électricien", "Plombier", "Maçon", "Peintre en bâtiment", "Carreleur",
+  "Mécanicien", "Soudeur", "Électricien", "Plombier", "Maçon", "Peintre en bâtiment", "Carreleur",
   "Couturier / Tailleur", "Coiffeur / Coiffeuse", "Esthéticienne",
   "Cuisinier / Chef", "Aide ménagère", "Gardien / Vigile",
   "Informaticien", "Comptable", "Secrétaire", "Commercial",
@@ -526,6 +526,9 @@ export default function FinaliserProfilPage() {
                 style={{ ...inputSt, cursor: "pointer", background: "white" }}
                 onFocus={focusGreen} onBlur={blurGreen}>
                 <option value="">-- Sélectionner --</option>
+                {form.metier && !METIERS.includes(form.metier) && (
+                  <option key={form.metier} value={form.metier}>{form.metier}</option>
+                )}
                 {METIERS.map(m => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
