@@ -308,8 +308,7 @@ function DashboardTab({ stats }) {
   }
 
   function envoyerLien(talent) {
-    const token = btoa(`${talent.id}-${Date.now()}`);
-    const lien = `${window.location.origin}/mon-profil?token=${token}&id=${talent.id}`;
+    const lien = `${window.location.origin}/finaliser-profil?tel=${talent.telephone}`;
     setLinkModal({ nom: `${talent.prenom} ${talent.nom}`, lien });
   }
 
