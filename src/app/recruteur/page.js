@@ -419,7 +419,15 @@ export default function RecruteurPage() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem("recruteur_session");
-      if (raw) setRecr(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const vingtQuatreH = 24 * 60 * 60 * 1000;
+        if (Date.now() - parsed.loginAt > vingtQuatreH) {
+          localStorage.removeItem("recruteur_session");
+        } else {
+          setRecr(parsed);
+        }
+      }
     } catch {}
     setReady(true);
     supabase.from("recruteurs").select("*").order("created_at", { ascending: false })
@@ -427,7 +435,7 @@ export default function RecruteurPage() {
   }, []);
 
   const handleLogin = (data) => {
-    localStorage.setItem("recruteur_session", JSON.stringify(data));
+    localStorage.setItem("recruteur_session", JSON.stringify({ ...data, loginAt: Date.now() }));
     setRecr(data); setShowModal(false);
   };
   const handleLogout = () => { localStorage.removeItem("recruteur_session"); setRecr(null); };

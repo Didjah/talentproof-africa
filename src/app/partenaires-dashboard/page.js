@@ -413,7 +413,15 @@ export default function PartenairesDashboardPage() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem("partenaire_session");
-      if (raw) setPartn(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const vingtQuatreH = 24 * 60 * 60 * 1000;
+        if (Date.now() - parsed.loginAt > vingtQuatreH) {
+          localStorage.removeItem("partenaire_session");
+        } else {
+          setPartn(parsed);
+        }
+      }
     } catch {}
     setReady(true);
     supabase.from("partenaires").select("*").order("created_at", { ascending: false })
@@ -421,7 +429,7 @@ export default function PartenairesDashboardPage() {
   }, []);
 
   const handleLogin = (data) => {
-    localStorage.setItem("partenaire_session", JSON.stringify(data));
+    localStorage.setItem("partenaire_session", JSON.stringify({ ...data, loginAt: Date.now() }));
     setPartn(data); setShowModal(false);
   };
   const handleLogout = () => { localStorage.removeItem("partenaire_session"); setPartn(null); };
