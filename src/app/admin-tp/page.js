@@ -462,9 +462,7 @@ function TalentsTab({ talents, onRefresh }) {
   };
 
   const generateAccessLink = (talent) => {
-    const token = btoa(`${talent.id}-${talent.telephone}-${Date.now()}`);
-    const link = `${window.location.origin}/mon-profil?token=${token}&id=${talent.id}`;
-    return link;
+    return `${window.location.origin}/finaliser-profil?tel=${talent.telephone}`;
   };
 
   const copyLink = (link) => {
