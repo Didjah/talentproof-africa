@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 /* ── constantes ── */
-const WA_NUM = "2250705503089";
+const WA_NUM = "2250507939706";
 const EMAIL  = "contact@talentproof.africa";
 
 const NAV_LINKS = [

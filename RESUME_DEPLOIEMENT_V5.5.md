@@ -91,7 +91,7 @@ Record CNAME :
 
 ```
 NEXT_PUBLIC_SITE_URL=https://talentproof.africa
-NEXT_PUBLIC_WA_NUM1=2250705503089
+NEXT_PUBLIC_WA_NUM1=2250507939706
 NEXT_PUBLIC_WA_NUM2=2250507939706
 NEXT_PUBLIC_EMAIL=contact@talentproof.africa
 NODE_ENV=production
@@ -159,7 +159,7 @@ NODE_ENV=production
 
 ## 📞 SUPPORT
 
-**WhatsApp** : +225 07 05 50 30 89
+**WhatsApp** : +225 05 07 93 97 06
 **Email** : contact@talentproof.africa
 
 ---

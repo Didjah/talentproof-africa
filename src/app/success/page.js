@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Home, MessageCircle } from "lucide-react";
 
-const WA_NUM = "2250705503089";
+const WA_NUM = "2250507939706";
 
 function SuccessContent() {
   const searchParams = useSearchParams();

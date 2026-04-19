@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getTalent } from "@/services/api";
 import { CheckCircle, MapPin, Calendar, Briefcase, Phone, Mail, ArrowLeft } from "lucide-react";
 
-const WA_NUM1 = "2250705503089";
+const WA_NUM1 = "2250507939706";
 const EMAIL = "contact@talentproof.africa";
 const VID_DEMO = "https://www.w3schools.com/html/mov_bbb.mp4";
 

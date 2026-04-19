@@ -6,7 +6,7 @@ import { Upload, CheckCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { uploadFichier } from "@/services/api";
 
-const WA_NUM1 = "2250705503089";
+const WA_NUM1 = "2250507939706";
 
 const METIERS = [
   "Chauffeur", "Livreur", "Coursier",
@@ -389,12 +389,12 @@ export default function InscriptionTalentPage() {
                 </Champ>
               </div>
 
-              <Champ label="Téléphone / WhatsApp" required error={errors.telephone} hint="Format: +225 07 05 50 30 89">
+              <Champ label="Téléphone / WhatsApp" required error={errors.telephone} hint="Format: +225 05 07 93 97 06">
                 <input 
                   type="tel"
                   value={form.telephone} 
                   onChange={e => set("telephone", e.target.value)} 
-                  placeholder="+225 07 05 50 30 89" 
+                  placeholder="+225 05 07 93 97 06" 
                   style={{...inputSt, borderColor: errors.telephone ? "#EF4444" : "#D1FAE5"}} 
                   onFocus={e => e.target.style.borderColor = "#1B6B47"} 
                   onBlur={e => e.target.style.borderColor = errors.telephone ? "#EF4444" : "#D1FAE5"}

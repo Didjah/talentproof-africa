@@ -12,7 +12,7 @@ import {
 import { supabase } from "@/lib/supabaseClient";
 
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-const WA_NUM1 = "2250705503089";
+const WA_NUM1 = "2250507939706";
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
 
 // CSS pour le responsive mobile

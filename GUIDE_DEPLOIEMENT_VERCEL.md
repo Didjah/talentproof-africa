@@ -105,7 +105,7 @@ NEXT_PUBLIC_API_URL=https://talentproof.africa/api
 NEXT_PUBLIC_ADMIN_PASSWORD=admin2026
 
 # Contact
-NEXT_PUBLIC_WA_NUM1=2250705503089
+NEXT_PUBLIC_WA_NUM1=2250507939706
 NEXT_PUBLIC_WA_NUM2=2250507939706
 NEXT_PUBLIC_EMAIL=contact@talentproof.africa
 ```
@@ -468,7 +468,7 @@ Mot de passe : admin2026
 ## 📞 Contact
 
 **Support technique** :
-- WhatsApp : +225 07 05 50 30 89
+- WhatsApp : +225 05 07 93 97 06
 - Email : contact@talentproof.africa
 
 **Vercel Support** :

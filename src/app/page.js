@@ -57,7 +57,7 @@ function fetchTalentsOnce(onDone) {
 const DISPO_COLOR = { immediate:"#16A34A", "1_month":"#D97706", negotiable:"#6B7280" };
 const DISPO_LABEL = { immediate:"Disponible", "1_month":"Dispo dans 1 mois", negotiable:"À négocier" };
 const MAX_SEC  = 60;
-const WA_NUM1  = "2250705503089";
+const WA_NUM1  = "2250507939706";
 const WA_NUM2  = "2250507939706";
 const EMAIL    = "contact@talentproof.africa";
 
@@ -696,7 +696,7 @@ function Footer(){
         <div style={{color:"rgba(255,255,255,.55)",fontSize:".75rem",fontWeight:700,textTransform:"uppercase",letterSpacing:".5px",marginBottom:".5rem"}}>Nous contacter</div>
         <a href={`mailto:${EMAIL}`} style={{display:"inline-block",color:"rgba(210,225,245,.7)",fontSize:".78rem",textDecoration:"none",marginBottom:".75rem"}}>✉️ {EMAIL}</a>
         <div style={{display:"flex",gap:".5rem",justifyContent:"center",alignItems:"center",flexWrap:"wrap",marginBottom:"1rem"}}>
-          <span style={{color:"rgba(210,225,245,.7)",fontSize:".77rem",fontWeight:600}}>+225 07 05 50 30 89</span>
+          <span style={{color:"rgba(210,225,245,.7)",fontSize:".77rem",fontWeight:600}}>+225 05 07 93 97 06</span>
           <span style={{color:"rgba(255,255,255,.3)",fontSize:".77rem"}}>·</span>
           <span style={{color:"rgba(210,225,245,.7)",fontSize:".77rem",fontWeight:600}}>+225 05 07 93 97 06</span>
           <a href={`https://wa.me/${WA_NUM1}`} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:32,height:32,background:"#25D366",borderRadius:"8px",textDecoration:"none",marginLeft:".25rem",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}><WaLogo size={16}/></a>

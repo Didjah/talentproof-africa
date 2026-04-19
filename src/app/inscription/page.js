@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 
-const WA_NUM1 = "2250705503089";
+const WA_NUM1 = "2250507939706";
 
 const METIERS = [
   "Chauffeur","Couturière/Couturier","Aide ménagère","Gardien/Vigile",
@@ -242,7 +242,7 @@ export default function InscriptionPage() {
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".65rem"}}>
                 <Champ label="Âge" required error={errors.age}><input type="number" value={form.age} onChange={e=>set("age",e.target.value)} placeholder="28" min="16" max="80" style={{...inputSt,borderColor:errors.age?"#EF4444":"#D1FAE5"}} onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor=errors.age?"#EF4444":"#D1FAE5"}/></Champ>
-                <Champ label="WhatsApp"><input type="tel" value={form.phone} onChange={e=>set("phone",e.target.value)} placeholder="+225 07 05 50 30 89" style={inputSt} onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}/></Champ>
+                <Champ label="WhatsApp"><input type="tel" value={form.phone} onChange={e=>set("phone",e.target.value)} placeholder="+225 05 07 93 97 06" style={inputSt} onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}/></Champ>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:".65rem"}}>
                 <Champ label="Ville" required error={errors.ville}><input value={form.ville} onChange={e=>set("ville",clean(e.target.value))} placeholder="Dakar" style={{...inputSt,borderColor:errors.ville?"#EF4444":"#D1FAE5"}} onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor=errors.ville?"#EF4444":"#D1FAE5"}/></Champ>

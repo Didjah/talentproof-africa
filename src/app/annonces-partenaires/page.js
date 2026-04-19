@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import GlobalHeader from "@/components/GlobalHeader";
 
-const WA_NUM = "2250705503089";
+const WA_NUM = "2250507939706";
 
 function WaLogo({ size = 16 }) {
   return (

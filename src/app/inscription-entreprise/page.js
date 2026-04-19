@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-const WA_NUM1 = "2250705503089";
+const WA_NUM1 = "2250507939706";
 
 const SECTEURS = [
   "BTP & Construction", "Hôtellerie & Restauration",
@@ -265,7 +265,7 @@ export default function InscriptionEntreprisePage() {
                   onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor=errors.email?"#EF4444":"#D1FAE5"}/>
               </Champ>
               <Champ label="Téléphone/WhatsApp" required error={errors.telephone}>
-                <input type="tel" value={form.telephone} onChange={e=>set("telephone",e.target.value)} placeholder="+225 07 05 50 30 89"
+                <input type="tel" value={form.telephone} onChange={e=>set("telephone",e.target.value)} placeholder="+225 05 07 93 97 06"
                   style={{...inputSt,borderColor:errors.telephone?"#EF4444":"#D1FAE5"}}
                   onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor=errors.telephone?"#EF4444":"#D1FAE5"}/>
               </Champ>
@@ -386,7 +386,7 @@ export default function InscriptionEntreprisePage() {
               <div style={{padding:".9rem",background:"#F9FAFB",borderRadius:"12px",border:"1px solid #E5E7EB"}}>
                 <div style={{fontSize:".82rem",fontWeight:700,color:"#374151",marginBottom:".6rem"}}>📱 WhatsApp de récupération</div>
                 <input type="tel" value={form.recoveryWhatsapp||form.telephone}
-                  onChange={e=>set("recoveryWhatsapp",e.target.value)} placeholder="+225 07 05 50 30 89"
+                  onChange={e=>set("recoveryWhatsapp",e.target.value)} placeholder="+225 05 07 93 97 06"
                   style={inputSt} onFocus={e=>e.target.style.borderColor="#1B6B47"} onBlur={e=>e.target.style.borderColor="#D1FAE5"}/>
               </div>
             </div>

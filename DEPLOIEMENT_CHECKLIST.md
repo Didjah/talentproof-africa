@@ -4,9 +4,9 @@
 
 ### 1. **Numéros WhatsApp** ✓
 - **Format international correct** :
-  - `+225 07 05 50 30 89` → `2250705503089` ✓
   - `+225 05 07 93 97 06` → `2250507939706` ✓
-- **Liens WhatsApp** : `https://wa.me/2250705503089` ✓
+  - `+225 05 07 93 97 06` → `2250507939706` ✓
+- **Liens WhatsApp** : `https://wa.me/2250507939706` ✓
 
 ### 2. **Sécurité Dashboard** ✓
 - **Route protégée** : `/dashboard-tp` avec authentification
@@ -48,7 +48,7 @@ npm run build
 ### Étape 3 : Variables d'Environnement
 Créer `.env.production` :
 ```env
-NEXT_PUBLIC_WA_NUM1=2250705503089
+NEXT_PUBLIC_WA_NUM1=2250507939706
 NEXT_PUBLIC_WA_NUM2=2250507939706
 NEXT_PUBLIC_EMAIL=contact@talentproof.africa
 NEXT_PUBLIC_ADMIN_PASSWORD=VOTRE_MOT_DE_PASSE_SECURISE
@@ -203,7 +203,7 @@ Avant de déployer en production :
 
 **Domaine de production** : À configurer sur Vercel
 **Email contact** : contact@talentproof.africa
-**WhatsApp** : +225 07 05 50 30 89
+**WhatsApp** : +225 05 07 93 97 06
 
 ---
 

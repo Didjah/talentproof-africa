@@ -38,8 +38,8 @@ export default function MentionsLegalesPage() {
                 La plateforme <strong>TalentProof Afrique</strong> est éditée par TalentProof Afrique.
               </p>
               <p style={{marginBottom:".3rem"}}><strong>Adresse email :</strong> contact@talentproof.africa</p>
-              <p style={{marginBottom:".3rem"}}><strong>Téléphone :</strong> +225 07 05 50 30 89</p>
-              <p style={{marginBottom:".3rem"}}><strong>WhatsApp Business :</strong> +225 07 05 50 30 89</p>
+              <p style={{marginBottom:".3rem"}}><strong>Téléphone :</strong> +225 05 07 93 97 06</p>
+              <p style={{marginBottom:".3rem"}}><strong>WhatsApp Business :</strong> +225 05 07 93 97 06</p>
             </section>
 
             {/* Section 2 */}
@@ -154,7 +154,7 @@ export default function MentionsLegalesPage() {
                 Pour toute question concernant ces mentions légales, vous pouvez nous contacter :
               </p>
               <p style={{marginBottom:".3rem"}}>📧 Email : <a href="mailto:contact@talentproof.africa" style={{color:"#1B6B47",textDecoration:"underline"}}>contact@talentproof.africa</a></p>
-              <p style={{marginBottom:".3rem"}}>📱 WhatsApp : <a href="https://wa.me/2250705503089" target="_blank" rel="noopener noreferrer" style={{color:"#1B6B47",textDecoration:"underline"}}>+225 07 05 50 30 89</a></p>
+              <p style={{marginBottom:".3rem"}}>📱 WhatsApp : <a href="https://wa.me/2250507939706" target="_blank" rel="noopener noreferrer" style={{color:"#1B6B47",textDecoration:"underline"}}>+225 05 07 93 97 06</a></p>
             </section>
 
             {/* Date de mise à jour */}

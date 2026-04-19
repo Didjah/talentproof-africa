@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
-const WA_NUM1  = "2250705503089";
+const WA_NUM1  = "2250507939706";
 const WA_NUM2  = "2250507939706";
 const EMAIL    = "contact@talentproof.africa";
 const VID_DEMO = "https://www.w3schools.com/html/mov_bbb.mp4";
@@ -499,7 +499,7 @@ export default function AnnuairePage(){
             <a href={`mailto:${EMAIL}`} style={{color:"#1B6B47",textDecoration:"none",fontWeight:700,fontSize:".8rem"}}>✉️ {EMAIL}</a>
           </div>
           <div style={{display:"flex",gap:".4rem",justifyContent:"center",alignItems:"center",flexWrap:"wrap",marginBottom:".65rem"}}>
-            <span style={{color:"#888",fontSize:".72rem",fontWeight:600}}>+225 07 05 50 30 89</span>
+            <span style={{color:"#888",fontSize:".72rem",fontWeight:600}}>+225 05 07 93 97 06</span>
             <span style={{color:"#CCC",fontSize:".72rem"}}>·</span>
             <span style={{color:"#888",fontSize:".72rem",fontWeight:600}}>+225 05 07 93 97 06</span>
             <a href={`https://wa.me/${WA_NUM1}`} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:28,height:28,background:"#25D366",borderRadius:"7px",textDecoration:"none",marginLeft:".2rem",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}><WaLogo size={14}/></a>

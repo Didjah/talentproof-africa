@@ -1,7 +1,7 @@
 "use client";
 
 export default function AidePage() {
-  const WA_NUM = "2250705503089";
+  const WA_NUM = "2250507939706";
   const EMAIL = "contact@talentproof.africa";
 
   const faqs = [
@@ -96,7 +96,7 @@ export default function AidePage() {
               <div style={{textAlign:"center"}}>
                 <div style={{fontWeight:800,fontSize:"1.1rem",marginBottom:".3rem"}}>WhatsApp Business</div>
                 <div style={{fontSize:".85rem",opacity:.9}}>Réponse rapide garantie</div>
-                <div style={{fontSize:".9rem",fontWeight:700,marginTop:".5rem"}}>+225 07 05 50 30 89</div>
+                <div style={{fontSize:".9rem",fontWeight:700,marginTop:".5rem"}}>+225 05 07 93 97 06</div>
               </div>
             </a>
 

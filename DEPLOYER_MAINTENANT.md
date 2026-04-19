@@ -94,7 +94,7 @@ Key: NEXT_PUBLIC_SITE_URL
 Value: https://talentproof.africa
 
 Key: NEXT_PUBLIC_WA_NUM1
-Value: 2250705503089
+Value: 2250507939706
 
 Key: NEXT_PUBLIC_WA_NUM2
 Value: 2250507939706
@@ -200,7 +200,7 @@ npm install -g vercel
 
 ## 📞 SUPPORT
 
-**WhatsApp** : +225 07 05 50 30 89
+**WhatsApp** : +225 05 07 93 97 06
 **Email** : contact@talentproof.africa
 
 ---

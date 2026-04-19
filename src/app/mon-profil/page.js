@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { uploadFichier } from "@/services/api";
 import { Save, Upload, X } from "lucide-react";
 
-const WA_NUM = "2250705503089";
+const WA_NUM = "2250507939706";
 
 const inputSt = {
   width:"100%", padding:".65rem .9rem", borderRadius:"8px",
@@ -415,7 +415,7 @@ function MonProfilContent() {
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && rechercher()}
-                placeholder="+225 07 05 50 30 89"
+                placeholder="+225 05 07 93 97 06"
                 type="tel"
                 style={{...inputSt, borderColor: searchError ? "#EF4444" : "#E5E7EB"}}
               />

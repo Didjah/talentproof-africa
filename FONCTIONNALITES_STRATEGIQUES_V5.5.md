@@ -488,7 +488,7 @@ tp_inscriptions_talents: [...]
 tp_access_tokens: {
   "ABC123XYZ": {
     talentId: 1234567890,
-    telephone: "+2250705503089",
+    telephone: "+2250507939706",
     createdAt: "2026-03-31T13:00:00.000Z",
     expiresAt: "2027-03-31T13:00:00.000Z"
   }
@@ -570,7 +570,7 @@ Quand le backend sera prêt :
 ## 📞 Support
 
 Pour toute question sur ces fonctionnalités :
-- WhatsApp : +225 07 05 50 30 89
+- WhatsApp : +225 05 07 93 97 06
 - Email : contact@talentproof.africa
 
 ---

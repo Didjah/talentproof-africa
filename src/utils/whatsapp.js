@@ -1,5 +1,5 @@
 /** Numéro officiel TalentProof (sans le +) */
-export const TP_PHONE = "2250705503089";
+export const TP_PHONE = "2250507939706";
 
 /**
  * Génère un lien WhatsApp pour contacter un talent (message personnalisé).

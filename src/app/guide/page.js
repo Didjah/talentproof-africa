@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 
-const WA_NUM1 = "2250705503089";
+const WA_NUM1 = "2250507939706";
 const EMAIL = "contact@talentproof.africa";
 
 function WaLogo({size=18}) {
@@ -63,7 +63,7 @@ export default function GuidePage() {
             <div style={{background:"#FFF7ED",border:"1.5px solid #FCD34D",borderRadius:"14px",padding:"1.2rem",marginBottom:"1.5rem"}}>
               <h3 style={{color:"#92400E",fontWeight:700,fontSize:"1rem",marginBottom:".8rem"}}>📱 Option 2 : Via WhatsApp</h3>
               <ol style={{color:"#555",fontSize:".9rem",lineHeight:1.75,paddingLeft:"1.2rem",margin:0}}>
-                <li>Envoie un message WhatsApp au <strong>+225 07 05 50 30 89</strong></li>
+                <li>Envoie un message WhatsApp au <strong>+225 05 07 93 97 06</strong></li>
                 <li>Présente-toi : nom, métier, expérience, ville</li>
                 <li>Envoie une photo de ton travail ou un vocal</li>
                 <li>On crée ton profil et tu es visible en 24h</li>
@@ -168,7 +168,7 @@ export default function GuidePage() {
             <div style={{display:"flex",flexDirection:"column",gap:".8rem"}}>
               <a href={`https://wa.me/${WA_NUM1}?text=${encodeURIComponent("Bonjour, j'ai besoin d'aide pour créer mon profil TalentProof.")}`} target="_blank" rel="noreferrer"
                 style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"#25D366",color:"white",fontWeight:700,fontSize:".9rem",padding:".7rem 1.2rem",borderRadius:"99px",textDecoration:"none",justifyContent:"center",boxShadow:"0 2px 12px rgba(37,211,102,.3)"}}>
-                <WaLogo size={18}/> WhatsApp : +225 07 05 50 30 89
+                <WaLogo size={18}/> WhatsApp : +225 05 07 93 97 06
               </a>
               <a href={`mailto:${EMAIL}`}
                 style={{display:"inline-flex",alignItems:"center",gap:".5rem",background:"#F0FDF4",color:"#1B6B47",fontWeight:700,fontSize:".9rem",padding:".7rem 1.2rem",borderRadius:"99px",textDecoration:"none",justifyContent:"center",border:"1.5px solid #D1FAE5"}}>
