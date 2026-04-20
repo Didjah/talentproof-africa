@@ -273,17 +273,39 @@ export default function FinaliserProfilPage() {
       }
 
       /* Uploads */
+      const uploadWarnings = [];
+
       if (newAvatar) {
-        updates.avatar_url = await uploadFichier("avatars", newAvatar, `${Date.now()}-avatar.jpg`);
+        if (newAvatar.size > 5 * 1024 * 1024) {
+          setSaveErr("Photo de profil trop lourde (max 5 Mo)"); setSaving(false); return;
+        }
+        const extAvatar = newAvatar.name.split(".").pop() || "jpg";
+        try {
+          updates.avatar_url = await uploadFichier("avatars", newAvatar, `${Date.now()}-avatar.${extAvatar}`);
+        } catch (e) {
+          uploadWarnings.push("Photo de profil non uploadée : " + e.message);
+        }
       }
       if (newPreuve) {
-        updates.preuve_url = await uploadFichier("preuves", newPreuve, `${Date.now()}-preuve.jpg`);
-        updates.has_photo  = true;
+        if (newPreuve.size > 5 * 1024 * 1024) {
+          setSaveErr("Photo de réalisation trop lourde (max 5 Mo)"); setSaving(false); return;
+        }
+        const extPreuve = newPreuve.name.split(".").pop() || "jpg";
+        try {
+          updates.preuve_url = await uploadFichier("preuves", newPreuve, `${Date.now()}-preuve.${extPreuve}`);
+          updates.has_photo  = true;
+        } catch (e) {
+          uploadWarnings.push("Photo de réalisation non uploadée : " + e.message);
+        }
       }
       if (newVideo) {
         const ext = newVideo.name.split(".").pop() || "mp4";
-        updates.video_url = await uploadFichier("preuves", newVideo, `${Date.now()}-video.${ext}`);
-        updates.has_video  = true;
+        try {
+          updates.video_url = await uploadFichier("preuves", newVideo, `${Date.now()}-video.${ext}`);
+          updates.has_video  = true;
+        } catch (e) {
+          uploadWarnings.push("Vidéo non uploadée : " + e.message);
+        }
       }
 
       /* has_photo / has_video cohérence */
@@ -307,8 +329,12 @@ export default function FinaliserProfilPage() {
       removeAvatar();
       removePreuve();
       removeVideo();
-      setSaveOk(true);
-      setTimeout(() => setSaveOk(false), 4000);
+      if (uploadWarnings.length > 0) {
+        setSaveErr("Profil sauvegardé, mais : " + uploadWarnings.join(" | "));
+      } else {
+        setSaveOk(true);
+        setTimeout(() => setSaveOk(false), 4000);
+      }
     } catch (err) {
       setSaveErr("Erreur lors de la sauvegarde : " + err.message);
     } finally {
