@@ -232,7 +232,7 @@ export default function InscriptionTalentPage() {
       const { error } = await supabase.from("talents").insert({
         prenom: form.prenom,
         nom: form.nom,
-        email: form.email,
+        email: form.email || null,
         telephone: form.telephone,
         pays: form.pays,
         ville: form.ville,
