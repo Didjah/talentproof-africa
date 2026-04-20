@@ -427,6 +427,7 @@ function TalentsTab({ talents, onRefresh }) {
       ville: newTalent.ville || null,
       pays: newTalent.pays || null,
       telephone: newTalent.telephone,
+      email: newTalent.email || null,
       bio: newTalent.bio || null,
       experience: newTalent.experience || null,
       disponibilite: newTalent.disponibilite,
