@@ -291,13 +291,12 @@ function MonProfilContent() {
         .from("talents")
         .update(updates)
         .eq("telephone", phone.trim())
-        .select()
-        .single();
+        .select();
       if (error) throw error;
 
-      setTalent(data);
-      setForm(data);
-      try { localStorage.setItem("tp_talent", JSON.stringify({ id: data.id, telephone: data.telephone })); } catch {}
+      setTalent(data[0]);
+      setForm(data[0]);
+      try { localStorage.setItem("tp_talent", JSON.stringify({ id: data[0].id, telephone: data[0].telephone })); } catch {}
       setEditing(false);
       retirerAvatar();
       retirerPreuve();
