@@ -37,11 +37,14 @@ const DISPONIBILITES = [
 ];
 
 const NIVEAUX_ETUDE = [
-  "Aucun",
-  "Primaire",
-  "Collège",
-  "Lycée",
-  "Université"
+  "Sans niveau d'étude",
+  "Niveau CM2",
+  "Niveau 3ème",
+  "Brevet",
+  "Bac",
+  "Bac+2",
+  "Bac+3",
+  "Bac+5 et plus",
 ];
 
 const inputSt = {
@@ -129,7 +132,7 @@ export default function InscriptionTalentPage() {
     photoProfilUrl: null, // Photo de profil séparée
     cvUrl: null,
     diplomeUrl: null,
-    niveauEtude: "",
+    niveau_etude: "",
     bio: "",
 
     // Sécurité (optionnel)
@@ -241,7 +244,7 @@ export default function InscriptionTalentPage() {
         competences: form.competences,
         disponibilite: form.disponibilite,
         bio: form.bio,
-        niveau_etude: form.niveauEtude,
+        niveau_etude: form.niveau_etude,
         avatar_url: avatarUrl,
         preuve_url: preuveUrl,
         video_url: videoUrl,
@@ -699,8 +702,8 @@ export default function InscriptionTalentPage() {
                 {/* Niveau d'étude */}
                 <Champ label="Niveau d'étude" hint="Sélectionne ton niveau de scolarité">
                   <select 
-                    value={form.niveauEtude} 
-                    onChange={e => set("niveauEtude", e.target.value)} 
+                    value={form.niveau_etude}
+                    onChange={e => set("niveau_etude", e.target.value)}
                     style={{...inputSt, cursor:"pointer"}}
                   >
                     <option value="">-- Sélectionne ton niveau --</option>

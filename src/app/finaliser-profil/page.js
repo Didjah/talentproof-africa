@@ -629,6 +629,9 @@ export default function FinaliserProfilPage() {
                 style={{ ...inputSt, cursor: "pointer", background: "white" }}
                 onFocus={focusGreen} onBlur={blurGreen}>
                 <option value="">-- Non renseigné --</option>
+                {form.niveau_etude && !NIVEAUX_ETUDE.includes(form.niveau_etude) && (
+                  <option value={form.niveau_etude}>{form.niveau_etude}</option>
+                )}
                 {NIVEAUX_ETUDE.map(n => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
