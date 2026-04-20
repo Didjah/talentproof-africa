@@ -320,12 +320,11 @@ export default function FinaliserProfilPage() {
         .from("talents")
         .update(updates)
         .eq("id", talent.id)
-        .select()
-        .single();
+        .select();
       if (error) throw error;
 
-      setTalent(data);
-      setForm({ ...data });
+      setTalent(data[0]);
+      setForm({ ...data[0] });
       removeAvatar();
       removePreuve();
       removeVideo();
