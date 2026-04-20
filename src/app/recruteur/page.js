@@ -42,10 +42,9 @@ function ModalLogin({ onLogin, onClose }) {
         .from("recruteurs")
         .select("*")
         .eq(isEmail ? "contact_email" : "contact_telephone", identifiant.trim())
-        .eq("pin_code", pin)
-        .single();
-      if (error || !data) setErr("Identifiants incorrects. Vérifiez votre email/téléphone et PIN.");
-      else onLogin(data);
+        .eq("pin_code", pin);
+      if (error || !data?.[0]) setErr("Identifiants incorrects. Vérifiez votre email/téléphone et PIN.");
+      else onLogin(data[0]);
     } catch { setErr("Erreur de connexion. Réessayez."); }
     finally { setLoading(false); }
   };
