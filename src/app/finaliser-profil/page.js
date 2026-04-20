@@ -126,12 +126,20 @@ export default function FinaliserProfilPage() {
   const [searchErr, setSearchErr] = useState("");
   const [searching, setSearching] = useState(false);
 
+  /* PIN auth */
+  const [pin, setPin]           = useState("");
+  const [pinErr, setPinErr]     = useState("");
+
   /* Étape 2 */
   const [talent, setTalent]   = useState(null);
   const [form, setForm]       = useState({});
   const [saving, setSaving]   = useState(false);
   const [saveOk, setSaveOk]   = useState(false);
   const [saveErr, setSaveErr] = useState("");
+
+  /* PIN modification */
+  const [newPin, setNewPin]         = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
 
   /* Fichiers nouveaux */
   const [newAvatar, setNewAvatar]       = useState(null);
@@ -161,8 +169,10 @@ export default function FinaliserProfilPage() {
   /* ── ÉTAPE 1 : recherche ── */
   const rechercher = async () => {
     if (!phone.trim()) { setSearchErr("Entrez votre numéro de téléphone."); return; }
+    if (!pin.trim())   { setPinErr("Entrez votre code PIN."); return; }
     setSearching(true);
     setSearchErr("");
+    setPinErr("");
     try {
       const variantes = variantesTel(phone.trim());
       const orClause  = variantes.map(v => `telephone.eq.${v}`).join(",");
@@ -176,6 +186,13 @@ export default function FinaliserProfilPage() {
       if (!profil) {
         setSearchErr("Numéro non reconnu. Vérifiez le numéro utilisé lors de votre inscription.");
       } else {
+        if (profil.pin_code === null) {
+          if (pin !== "1234") { setPinErr("Code PIN incorrect"); setSearching(false); return; }
+          await supabase.from("talents").update({ pin_code: "1234" }).eq("id", profil.id);
+          profil.pin_code = "1234";
+        } else if (profil.pin_code !== pin) {
+          setPinErr("Code PIN incorrect"); setSearching(false); return;
+        }
         setTalent(profil);
         setForm({ ...profil });
       }
@@ -247,6 +264,13 @@ export default function FinaliserProfilPage() {
         competences:   form.competences  || "",
         bio:           form.bio          || "",
       };
+
+      /* Mise à jour PIN */
+      if (newPin) {
+        if (newPin.length < 4) { setSaveErr("Le PIN doit contenir exactement 4 chiffres."); setSaving(false); return; }
+        if (newPin !== confirmPin) { setSaveErr("Les deux PIN ne correspondent pas."); setSaving(false); return; }
+        updates.pin_code = newPin;
+      }
 
       /* Uploads */
       if (newAvatar) {
@@ -374,6 +398,30 @@ export default function FinaliserProfilPage() {
               {searchErr && (
                 <p style={{ color: "#EF4444", fontSize: ".78rem", margin: ".4rem 0 0", lineHeight: 1.5 }}>{searchErr}</p>
               )}
+            </div>
+
+            <div>
+              <label style={{ fontSize: ".85rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: ".4rem" }}>
+                Code PIN (4 chiffres)
+              </label>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={pin}
+                onChange={e => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                onKeyDown={e => e.key === "Enter" && rechercher()}
+                placeholder="••••"
+                style={{ ...inputSt, borderColor: pinErr ? "#EF4444" : "#D1FAE5" }}
+                onFocus={focusGreen}
+                onBlur={blurGreen}
+              />
+              {pinErr && (
+                <p style={{ color: "#EF4444", fontSize: ".78rem", margin: ".4rem 0 0" }}>{pinErr}</p>
+              )}
+              <p style={{ color: "#6B7280", fontSize: ".75rem", margin: ".35rem 0 0", lineHeight: 1.5 }}>
+                💡 Première connexion ? Utilisez le PIN par défaut : <strong>1234</strong>
+              </p>
             </div>
 
             <button
@@ -665,6 +713,49 @@ export default function FinaliserProfilPage() {
                 onFile={pickVideo}
                 onRemove={removeVideo}
               />
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION : Sécurité ── */}
+        <div style={{ background: "white", borderRadius: "18px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,.07)", marginBottom: "1.5rem" }}>
+          <h2 style={{ fontFamily: "'Sora',sans-serif", fontWeight: 800, fontSize: ".95rem", color: "#111", marginBottom: ".6rem" }}>
+            🔒 Sécurité
+          </h2>
+          <p style={{ fontSize: ".78rem", color: "#9CA3AF", margin: "0 0 .85rem", lineHeight: 1.5 }}>
+            Laissez vide pour conserver votre PIN actuel.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: ".85rem" }}>
+            <div>
+              <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: ".35rem" }}>
+                Nouveau PIN (4 chiffres)
+              </label>
+              <input
+                type="password" inputMode="numeric" maxLength={4}
+                value={newPin}
+                onChange={e => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="••••"
+                style={inputSt} onFocus={focusGreen} onBlur={blurGreen}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: ".82rem", fontWeight: 700, color: "#374151", display: "block", marginBottom: ".35rem" }}>
+                Confirmer PIN
+              </label>
+              <input
+                type="password" inputMode="numeric" maxLength={4}
+                value={confirmPin}
+                onChange={e => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="••••"
+                style={{ ...inputSt, borderColor: confirmPin && newPin !== confirmPin ? "#EF4444" : "#D1FAE5" }}
+                onFocus={confirmPin && newPin !== confirmPin ? focusRed : focusGreen}
+                onBlur={blurGreen}
+              />
+              {confirmPin && newPin !== confirmPin && (
+                <p style={{ color: "#EF4444", fontSize: ".75rem", margin: ".3rem 0 0" }}>
+                  Les PIN ne correspondent pas
+                </p>
+              )}
             </div>
           </div>
         </div>
